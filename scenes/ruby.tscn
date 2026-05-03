@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://ruby1000nw8x3j1k8"]
+
+[ext_resource type="Script" path="res://scripts/ruby.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ruby.png" id="2_sheet"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ruby"]
+radius = 40.0
+
+[node name="Ruby" type="Area2D" groups=["rubies"]]
+collision_layer = 16
+collision_mask = 1
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ruby")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.04, 0.04)
+texture = ExtResource("2_sheet")

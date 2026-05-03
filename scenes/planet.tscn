@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3 uid="uid://c7v8w8x3j1k8"]
+
+[ext_resource type="Script" path="res://scripts/planet.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/custom_planet.png" id="2_types"]
+
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_surface"]
+radius = 100.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gravity"]
+radius = 400.0
+
+[sub_resource type="Gradient" id="Gradient_glow"]
+offsets = PackedFloat32Array(0, 0.9, 0.96, 0.99, 1)
+colors = PackedColorArray(0.2, 0.6, 1, 0, 0.2, 0.6, 1, 0.1, 0.3, 0.8, 1, 0.6, 0.9, 0.95, 1, 0.9, 0.2, 0.6, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_glow"]
+gradient = SubResource("Gradient_glow")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[node name="Planet" type="StaticBody2D"]
+collision_layer = 2
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_surface")
+
+[node name="GravityArea" type="Area2D" parent="."]
+collision_layer = 4
+gravity_space_override = 1
+gravity_point = true
+gravity_point_unit_distance = 100.0
+gravity = 980.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GravityArea"]
+shape = SubResource("CircleShape2D_gravity")
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+scale = Vector2(0.36, 0.36)
+texture = ExtResource("2_types")

@@ -1,0 +1,112 @@
+extends Control
+
+@onready var grid = $ScrollContainer/MarginContainer/GridContainer
+
+var total_levels = 30
+
+func _ready():
+	# Add Blur Background
+	var blur = ColorRect.new()
+	blur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var mat = ShaderMaterial.new()
+	mat.shader = load("res://shaders/blur.gdshader")
+	blur.material = mat
+	add_child(blur)
+	move_child(blur, 1) # Move it behind the scroll container
+	
+	# Generate buttons
+	for i in range(1, total_levels + 1):
+		var btn = Button.new()
+		btn.custom_minimum_size = Vector2(130, 130)
+		btn.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		btn.add_theme_font_size_override("font_size", 60)
+		
+		var is_unlocked = SaveSystem.is_level_unlocked(i)
+		
+		if is_unlocked:
+			btn.text = str(i)
+			btn.add_theme_stylebox_override("normal", load_style("unlocked"))
+			btn.add_theme_stylebox_override("hover", load_style("unlocked_hover"))
+			btn.add_theme_stylebox_override("pressed", load_style("unlocked"))
+			
+			var stars_earned = SaveSystem.get_stars(i)
+			if stars_earned > 0:
+				add_stars(btn, stars_earned)
+				
+			btn.pressed.connect(_on_level_selected.bind(i))
+		else:
+			btn.text = ""
+			var lock_tex = load("res://assets/lock_icon.png")
+			if lock_tex:
+				var lock_icon = TextureRect.new()
+				lock_icon.texture = lock_tex
+				lock_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+				lock_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				lock_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				lock_icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+				lock_icon.offset_left = 30
+				lock_icon.offset_top = 30
+				lock_icon.offset_right = -30
+				lock_icon.offset_bottom = -30
+				btn.add_child(lock_icon)
+				
+			btn.add_theme_stylebox_override("normal", load_style("locked"))
+			btn.add_theme_stylebox_override("hover", load_style("locked"))
+			btn.add_theme_stylebox_override("pressed", load_style("locked"))
+			# Don't connect pressed signal, so it's disabled effectively
+			
+		grid.add_child(btn)
+
+func load_style(type: String) -> StyleBoxFlat:
+	var style = StyleBoxFlat.new()
+	style.corner_radius_top_left = 25
+	style.corner_radius_top_right = 25
+	style.corner_radius_bottom_right = 25
+	style.corner_radius_bottom_left = 25
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	
+	if type == "unlocked":
+		style.bg_color = Color(0.8, 0.4, 0.1, 0.8) # Orange
+		style.border_color = Color(1.0, 0.6, 0.2, 0.8)
+		style.shadow_color = Color(1.0, 0.5, 0.0, 0.4)
+		style.shadow_size = 15
+	elif type == "unlocked_hover":
+		style.bg_color = Color(0.9, 0.5, 0.1, 1.0)
+		style.border_color = Color(1.0, 0.8, 0.3, 1.0)
+		style.shadow_color = Color(1.0, 0.6, 0.0, 0.6)
+		style.shadow_size = 25
+	else:
+		style.bg_color = Color(0.1, 0.1, 0.1, 0.8)
+		style.border_color = Color(0.3, 0.3, 0.3, 0.5)
+		
+	return style
+
+func add_stars(parent: Control, star_count: int):
+	var hbox = HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	hbox.offset_bottom = 20
+	hbox.offset_top = 0
+	hbox.add_theme_constant_override("separation", 5)
+	
+	for i in range(star_count):
+		var star = TextureRect.new()
+		star.texture = load("res://assets/star.png")
+		star.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		star.custom_minimum_size = Vector2(25, 25)
+		hbox.add_child(star)
+		
+	parent.add_child(hbox)
+
+func _on_level_selected(level: int):
+	GameManager.current_level = level
+	GameManager.reset_score()
+	get_tree().change_scene_to_file("res://scenes/level_" + str(level) + ".tscn")
+
+func _on_back_pressed():
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")

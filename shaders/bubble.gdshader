@@ -1,0 +1,24 @@
+shader_type canvas_item;
+
+void fragment() {
+	vec2 uv = UV * 2.0 - 1.0;
+	float dist = length(uv);
+	
+	if (dist > 1.0) {
+		COLOR.a = 0.0;
+	} else {
+		// Faint blue inner center
+		vec4 color = vec4(0.2, 0.6, 1.0, 0.05);
+		
+		// Inner glowing falloff increasing as it approaches the edge
+		float glow = pow(dist, 4.0) * 0.2;
+		
+		// Very thin, softer glossy outer edge
+		float outline = smoothstep(0.985, 0.995, dist) - smoothstep(0.995, 1.0, dist);
+		
+		color.rgb = mix(color.rgb, vec3(0.8, 0.95, 1.0), outline + glow);
+		color.a += outline * 0.4 + glow;
+		
+		COLOR = color;
+	}
+}

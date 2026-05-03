@@ -1,0 +1,34 @@
+# Godot 4 .gitignore
+
+# Godot cache & import data (re-generated on each machine)
+.godot/
+*.import
+*.translation
+
+# Android
+/android/
+
+# Exported binaries (not source code)
+exports/
+
+# Mono/C#
+.mono/
+data_*/
+mono_crash.*.json
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
