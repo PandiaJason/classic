@@ -117,8 +117,10 @@ func _ready():
 func _on_retry_pressed():
 	get_tree().paused = false
 	GameManager.reset_score()
+	queue_free()
 	get_tree().reload_current_scene()
 
 func _on_menu_pressed():
 	get_tree().paused = false
+	queue_free()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
