@@ -14,7 +14,6 @@ config/name="ranotot"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://assets/planet_3.png"
-boot_splash/image="res://assets/planet_3.png"
 boot_splash/fullsize=false
 boot_splash/use_filter=true
 boot_splash/bg_color=Color(0.05, 0.05, 0.2, 1)
