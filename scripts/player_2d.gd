@@ -148,6 +148,10 @@ func _physics_process(delta: float) -> void:
 
 		# Handle lost in deep space (independent of camera zoom/Map mode)
 		if not is_menu_demo and not is_game_over:
+			# Safety: re-fetch if list is empty
+			if _planets_list.is_empty():
+				_planets_list = get_tree().get_nodes_in_group("planets")
+				
 			var nearest_dist = INF
 			for planet in _planets_list:
 				if is_instance_valid(planet):
@@ -155,8 +159,8 @@ func _physics_process(delta: float) -> void:
 					if d < nearest_dist:
 						nearest_dist = d
 			
-			# If you are more than 2000 pixels away from ANY planet, you are lost
-			if nearest_dist > 1800.0:
+			# If you are more than 1000 pixels away from ANY planet, you are lost
+			if nearest_dist > 900.0:
 				is_game_over = true
 				GameManager.game_over("You drifted away into deep space!")
 				return
