@@ -134,4 +134,5 @@ func _ready():
 
 func _on_menu_pressed():
 	get_tree().paused = false
+	queue_free()
 	GameManager.load_next_level()
