@@ -146,21 +146,12 @@ func _physics_process(delta: float) -> void:
 			GameManager.game_over("Your bike stopped!")
 			return
 
-		# Handle lost in deep space (independent of camera zoom/Map mode)
+		# Handle off-screen death
 		if not is_menu_demo and not is_game_over:
-			# Safety: re-fetch if list is empty
-			if _planets_list.is_empty():
-				_planets_list = get_tree().get_nodes_in_group("planets")
-				
-			var nearest_dist = INF
-			for planet in _planets_list:
-				if is_instance_valid(planet):
-					var d = global_position.distance_to(planet.global_position)
-					if d < nearest_dist:
-						nearest_dist = d
-			
-			# If you are more than 1000 pixels away from ANY planet, you are lost
-			if nearest_dist > 900.0:
+			var screen_pos = get_global_transform_with_canvas().origin
+			var viewport_rect = get_viewport().get_visible_rect()
+			# If off screen by more than 50px, game over
+			if not viewport_rect.grow(50).has_point(screen_pos):
 				is_game_over = true
 				GameManager.game_over("You drifted away into deep space!")
 				return
