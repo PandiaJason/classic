@@ -14,6 +14,7 @@ config/name="ranotot"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://assets/planet_3.png"
+boot_splash/show_image=false
 
 
 [autoload]
