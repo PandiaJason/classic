@@ -4,7 +4,6 @@ var current_score: int = 0
 var has_box: bool = true
 var box_health: float = 100.0
 var current_level: int = 1
-var last_game_over_reason: String = ""
 
 signal health_changed(new_health)
 
@@ -15,20 +14,18 @@ func take_jump_damage() -> void:
 		health_changed.emit(box_health)
 
 func game_over(reason: String) -> void:
-	print("!!! GAME OVER TRIGGERED: ", reason, " !!!")
-	last_game_over_reason = reason
-	
-	var ui_scene = ResourceManager.get_scene("res://scenes/game_over_ui.tscn")
+	print("GAME OVER: ", reason)
+	var ui_scene = load("res://scenes/game_over_ui.tscn")
 	if ui_scene:
 		var ui = ui_scene.instantiate()
-		get_tree().root.add_child(ui)
+		get_tree().current_scene.call_deferred("add_child", ui)
 
 func level_complete() -> void:
 	print("LEVEL COMPLETE!")
-	var ui_scene = ResourceManager.get_scene("res://scenes/level_complete_ui.tscn")
+	var ui_scene = load("res://scenes/level_complete_ui.tscn")
 	if ui_scene:
 		var ui = ui_scene.instantiate()
-		get_tree().root.add_child(ui)
+		get_tree().current_scene.call_deferred("add_child", ui)
 
 func add_score(points: int) -> void:
 	current_score += points
