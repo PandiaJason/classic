@@ -88,12 +88,10 @@ func _ready():
 	vbox.add_child(skeleton_icon)
 	
 	var subtitle = Label.new()
-	subtitle.text = GameManager.last_game_over_reason if GameManager.last_game_over_reason != "" else "you were destroyed!"
+	subtitle.text = "you were destroyed!"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	subtitle.add_theme_font_size_override("font_size", 24)
-	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	subtitle.custom_minimum_size = Vector2(500, 0)
+	subtitle.add_theme_font_size_override("font_size", 30)
 	vbox.add_child(subtitle)
 	
 	var hbox = HBoxContainer.new()
@@ -119,12 +117,8 @@ func _ready():
 func _on_retry_pressed():
 	get_tree().paused = false
 	GameManager.reset_score()
-	# Clean up UI before reloading
-	queue_free()
 	get_tree().reload_current_scene()
 
 func _on_menu_pressed():
 	get_tree().paused = false
-	# Clean up UI before changing scene
-	queue_free()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
