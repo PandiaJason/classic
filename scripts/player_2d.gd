@@ -145,6 +145,17 @@ func _physics_process(delta: float) -> void:
 			is_game_over = true
 			GameManager.game_over("Your bike stopped!")
 			return
+
+		# Handle off-screen death
+		if not is_menu_demo and not is_game_over:
+			var screen_pos = get_global_transform_with_canvas().origin
+			var viewport_rect = get_viewport().get_visible_rect()
+			# Add a generous 600px margin so it doesn't kill immediately at the edge
+			var expanded_rect = viewport_rect.grow(600)
+			if not expanded_rect.has_point(screen_pos):
+				is_game_over = true
+				GameManager.game_over("You drifted away into deep space!")
+				return
 		
 		# Create a falling-gravity well: gravity is much stronger when falling towards the planet
 		# This guarantees we get captured by the planet instead of slingshotting past it,
