@@ -14,18 +14,22 @@ func take_jump_damage() -> void:
 		health_changed.emit(box_health)
 
 func game_over(reason: String) -> void:
-	print("GAME OVER: ", reason)
-	var ui_scene = load("res://scenes/game_over_ui.tscn")
+	print("!!! GAME OVER TRIGGERED: ", reason, " !!!")
+	# Wait for end of frame to avoid physics-thread modification issues
+	await get_tree().process_frame
+	
+	var ui_scene = ResourceManager.get_scene("res://scenes/game_over_ui.tscn")
 	if ui_scene:
 		var ui = ui_scene.instantiate()
-		get_tree().current_scene.call_deferred("add_child", ui)
+		get_tree().root.add_child(ui)
 
 func level_complete() -> void:
 	print("LEVEL COMPLETE!")
-	var ui_scene = load("res://scenes/level_complete_ui.tscn")
+	await get_tree().process_frame
+	var ui_scene = ResourceManager.get_scene("res://scenes/level_complete_ui.tscn")
 	if ui_scene:
 		var ui = ui_scene.instantiate()
-		get_tree().current_scene.call_deferred("add_child", ui)
+		get_tree().root.add_child(ui)
 
 func add_score(points: int) -> void:
 	current_score += points
