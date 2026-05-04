@@ -15,7 +15,9 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if body is Player2D:
 		# Spawn explosion at player
-		var explosion = load("res://scenes/explosion.tscn").instantiate()
+		var explosion_scene = ResourceManager.get_scene("res://scenes/explosion.tscn")
+		if not explosion_scene: return
+		var explosion = explosion_scene.instantiate()
 		explosion.global_position = body.global_position
 		# Make it a bigger "BOOM" for player deaths
 		explosion.scale = Vector2(1.5, 1.5)

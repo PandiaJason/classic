@@ -32,3 +32,6 @@ func pre_cache():
 	get_texture("res://assets/delivery_box.png")
 	get_texture("res://assets/flag.png")
 	get_scene("res://scenes/ruby.tscn")
+	get_scene("res://scenes/game_over_ui.tscn")
+	get_scene("res://scenes/level_complete_ui.tscn")
+	get_scene("res://scenes/explosion.tscn")

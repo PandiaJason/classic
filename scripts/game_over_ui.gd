@@ -88,10 +88,12 @@ func _ready():
 	vbox.add_child(skeleton_icon)
 	
 	var subtitle = Label.new()
-	subtitle.text = "you were destroyed!"
+	subtitle.text = GameManager.last_game_over_reason if GameManager.last_game_over_reason != "" else "you were destroyed!"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	subtitle.add_theme_font_size_override("font_size", 30)
+	subtitle.add_theme_font_size_override("font_size", 24)
+	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	subtitle.custom_minimum_size = Vector2(500, 0)
 	vbox.add_child(subtitle)
 	
 	var hbox = HBoxContainer.new()
