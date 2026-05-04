@@ -17,10 +17,13 @@ func take_jump_damage() -> void:
 func game_over(reason: String) -> void:
 	print("!!! GAME OVER TRIGGERED: ", reason, " !!!")
 	last_game_over_reason = reason
+	
+	# Wait a split second for the "BOOM" explosion to be seen
+	await get_tree().create_timer(0.5, true, false, true).timeout
+	
 	var ui_scene = ResourceManager.get_scene("res://scenes/game_over_ui.tscn")
 	if ui_scene:
 		var ui = ui_scene.instantiate()
-		# Add to the root to ensure it stays on top and survives scene changes
 		get_tree().root.add_child(ui)
 
 func level_complete() -> void:

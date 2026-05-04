@@ -3,6 +3,7 @@ extends Sprite2D
 var target_scale: Vector2 = Vector2(0.8, 0.8)
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	material = CanvasItemMaterial.new()
 	material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	
