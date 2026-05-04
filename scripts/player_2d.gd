@@ -1,4 +1,5 @@
 extends CharacterBody2D
+class_name Player2D
 
 @export var max_speed = 250.0
 @export var brake_force = 300.0
@@ -39,6 +40,11 @@ func _ready() -> void:
 	
 	detector.area_entered.connect(_on_gravity_area_entered)
 	detector.area_exited.connect(_on_gravity_area_exited)
+	
+	# Pre-fetch planets list once to avoid repeated scene tree lookups
+	_planets_list = get_tree().get_nodes_in_group("planets")
+
+var _planets_list: Array = []
 
 func _on_gravity_area_entered(area: Area2D) -> void:
 	if area.name == "GravityArea" and not overlapping_gravity_areas.has(area):
@@ -254,51 +260,56 @@ func calculate_trajectory():
 	
 	var sim_pos = global_position
 	var diff = current_planet.global_position - global_position
-	var surface_up = -diff.normalized()
+	var gravity_dir = diff.normalized()
+	var surface_up = -gravity_dir
 	
-	# Calculate target rotation exactly like in physics process to get correct surface_right
-	var target_rotation = diff.normalized().angle() - PI/2
-	var sim_rot = lerp_angle(rotation, target_rotation, 25 * get_physics_process_delta_time())
-	var surface_right = Vector2.RIGHT.rotated(sim_rot)
+	# Use the actual current rotation for accurate surface_right
+	var target_rotation = gravity_dir.angle() - PI/2
+	var surface_right = Vector2.RIGHT.rotated(target_rotation)
 	
+	# Simulate a jump: tangential speed + upward launch
 	var sim_vel = (surface_right * current_speed * forward_direction) + (surface_up * -jump_force)
 	
-	var all_planets = get_tree().get_nodes_in_group("planets")
 	var sim_delta = 0.05
 	trajectory_points.append(sim_pos)
 	
 	for i in range(120): # Simulate 6 seconds
-		var nearest_dist = INF
 		var nearest_planet = null
+		var nearest_surface_dist = INF
 		
-		for p in all_planets:
-			var surface_radius = 100.0 * p.scale.x
-			var dist = sim_pos.distance_to(p.global_position) - surface_radius
+		for p in _planets_list:
+			var dist_to_center = sim_pos.distance_to(p.global_position)
 			
-			var gravity_radius = 500.0
-			var gravity_area = p.get_node_or_null("GravityArea/CollisionShape2D")
-			if gravity_area and gravity_area.shape is CircleShape2D:
-				gravity_radius = gravity_area.shape.radius * p.scale.x
-				
-			if dist < nearest_dist and sim_pos.distance_to(p.global_position) < gravity_radius:
-				nearest_dist = dist
-				nearest_planet = p
+			# Check if we are within this planet's gravity field
+			var grav_radius = 500.0
+			var grav_shape = p.get_node_or_null("GravityArea/CollisionShape2D")
+			if grav_shape and grav_shape.shape is CircleShape2D:
+				grav_radius = grav_shape.shape.radius * p.scale.x
+			
+			if dist_to_center < grav_radius:
+				var surface_radius = 100.0 * p.scale.x
+				var surface_dist = dist_to_center - surface_radius
+				if surface_dist < nearest_surface_dist:
+					nearest_surface_dist = surface_dist
+					nearest_planet = p
 		
 		if nearest_planet:
 			var p_diff = nearest_planet.global_position - sim_pos
-			var gravity_dir = p_diff.normalized()
-			
+			var g_dir = p_diff.normalized()
 			var sim_gravity = gravity_strength
 			if "gravity_area" in nearest_planet and nearest_planet.gravity_area:
 				sim_gravity = nearest_planet.gravity_area.gravity
-				
-			var applied_gravity = sim_gravity
-			if sim_vel.dot(gravity_dir) > 0:
-				applied_gravity = sim_gravity * 3.0
-				
-			sim_vel += gravity_dir * applied_gravity * sim_delta
-			sim_pos += sim_vel * sim_delta
-		else:
-			sim_pos += sim_vel * sim_delta
-			
+			# Apply stronger gravity when falling toward planet (matches physics_process)
+			var multiplier = 3.0 if sim_vel.dot(g_dir) > 0 else 1.0
+			sim_vel += g_dir * sim_gravity * multiplier * sim_delta
+		
+		sim_pos += sim_vel * sim_delta
+		
+		# Stop if we hit a planet surface
+		if nearest_planet:
+			var surface_radius = 100.0 * nearest_planet.scale.x
+			if sim_pos.distance_to(nearest_planet.global_position) <= surface_radius:
+				trajectory_points.append(sim_pos)
+				break
+		
 		trajectory_points.append(sim_pos)

@@ -9,6 +9,8 @@ var level_stars = {}
 var unlocked_levels = 1
 # Global score system
 var global_score = 0
+# Music preference
+var music_on = true
 
 func _ready():
 	load_data()
@@ -18,6 +20,7 @@ func load_data():
 	if err == OK:
 		unlocked_levels = config.get_value("Progress", "unlocked_levels", 1)
 		global_score = config.get_value("Progress", "global_score", 0)
+		music_on = config.get_value("Progress", "music_on", true)
 		# Load stars for all 30 possible levels
 		for i in range(1, 31):
 			level_stars[i] = config.get_value("Stars", str(i), 0)
@@ -25,6 +28,7 @@ func load_data():
 		# Initialize default
 		unlocked_levels = 1
 		global_score = 0
+		music_on = true
 		for i in range(1, 31):
 			level_stars[i] = 0
 		save_data()
@@ -32,6 +36,7 @@ func load_data():
 func save_data():
 	config.set_value("Progress", "unlocked_levels", unlocked_levels)
 	config.set_value("Progress", "global_score", global_score)
+	config.set_value("Progress", "music_on", music_on)
 	for i in level_stars.keys():
 		config.set_value("Stars", str(i), level_stars[i])
 	config.save(SAVE_PATH)

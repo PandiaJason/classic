@@ -13,17 +13,21 @@ func _physics_process(delta: float) -> void:
 		rotation += rotation_speed * delta
 
 func _on_body_entered(body: Node2D) -> void:
-	if body.name == "Player2D":
+	if body is Player2D:
 		# Spawn explosion at player
 		var explosion = load("res://scenes/explosion.tscn").instantiate()
 		explosion.global_position = body.global_position
+		# Make it a bigger "BOOM" for player deaths
+		explosion.scale = Vector2(1.5, 1.5)
 		get_tree().current_scene.call_deferred("add_child", explosion)
 		
 		# Hide and disable player
 		body.hide()
 		body.set_physics_process(false)
 		
-		body.is_game_over = true
+		if "is_game_over" in body:
+			body.is_game_over = true
+		
 		GameManager.game_over("An asteroid destroyed your scooter!")
 		queue_free()
 		

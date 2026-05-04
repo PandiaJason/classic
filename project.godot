@@ -20,6 +20,8 @@ config/icon="res://assets/planet_1.png"
 GameManager="*res://scripts/game_manager.gd"
 SaveSystem="*res://scripts/save_system.gd"
 AsteroidManager="*res://scripts/asteroid_manager.gd"
+UIFactory="*res://scripts/ui_factory.gd"
+ResourceManager="*res://scripts/resource_manager.gd"
 
 [display]
 
@@ -40,5 +42,4 @@ window/stretch/aspect="expand"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
-textures/canvas_textures/default_texture_filter=1
 environment/defaults/default_clear_color=Color(0.05, 0.05, 0.2, 1)

@@ -62,7 +62,7 @@ func setup_planet():
 	var grav_radius = required_world_radius / size_scale
 			
 	if has_node("Visuals/Sprite2D"):
-		var tex = load(tex_path)
+		var tex = ResourceManager.get_texture(tex_path)
 		if tex:
 			var sprite_node = $Visuals/Sprite2D
 			sprite_node.texture = tex
@@ -73,16 +73,15 @@ func setup_planet():
 				
 	# Add the flag to the finish planet
 	if type == PlanetType.CHALLENGE:
-		var flag_tex = load("res://assets/flag.png")
+		var flag_tex = ResourceManager.get_texture("res://assets/flag.png")
 		if flag_tex:
 			var flag_sprite = Sprite2D.new()
 			flag_sprite.texture = flag_tex
-			# Offset it so the bottom of the flag rests exactly on the surface
+			# Anchor the flag at its bottom so it sits on the surface
 			flag_sprite.offset = Vector2(0, -flag_tex.get_size().y / 2.0)
-			# Position it on the top surface of the planet
-			flag_sprite.position = Vector2(0, -100.0) 
-			# Scale it down so it looks small on the planet
-			flag_sprite.scale = Vector2(0.08, 0.08)
+			# Position it on the surface of the planet (radius = 100)
+			flag_sprite.position = Vector2(0, -85.0)
+			flag_sprite.scale = Vector2(0.12, 0.12)
 			if has_node("Visuals"):
 				$Visuals.add_child(flag_sprite)
 			
@@ -119,7 +118,7 @@ func setup_planet():
 		rng.seed = int(global_position.x * 1000 + global_position.y)
 		
 		if rng.randf() < 0.4:
-			var ruby_scene = load("res://scenes/ruby.tscn")
+			var ruby_scene = ResourceManager.get_scene("res://scenes/ruby.tscn")
 			if ruby_scene:
 				var num_rubies = rng.randi_range(1, 3)
 				for i in range(num_rubies):
