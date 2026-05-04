@@ -218,10 +218,10 @@ func _physics_process(delta: float) -> void:
 				var screen_size = get_viewport_rect().size / cam.zoom
 				var cam_pos = cam.global_position
 				# Allow a 300px buffer outside the screen before killing them
-				var min_x = cam_pos.x - (screen_size.x / 2.0) - 300
-				var max_x = cam_pos.x + (screen_size.x / 2.0) + 300
-				var min_y = cam_pos.y - (screen_size.y / 2.0) - 300
-				var max_y = cam_pos.y + (screen_size.y / 2.0) + 300
+				var min_x = cam_pos.x - (screen_size.x / 2.0) - 100
+				var max_x = cam_pos.x + (screen_size.x / 2.0) + 100
+				var min_y = cam_pos.y - (screen_size.y / 2.0) - 100
+				var max_y = cam_pos.y + (screen_size.y / 2.0) + 100
 				
 				if global_position.x < min_x or global_position.x > max_x or global_position.y < min_y or global_position.y > max_y:
 					is_game_over = true
