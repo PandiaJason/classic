@@ -17,10 +17,10 @@ func game_over(reason: String) -> void:
 	print("GAME OVER: ", reason)
 	await get_tree().process_frame
 
-	var ui_scene = load("res://scenes/game_over_ui.tscn")
+	var ui_scene = ResourceManager.get_scene("res://scenes/game_over_ui.tscn")
 	if ui_scene:
 		var ui = ui_scene.instantiate()
-		get_tree().current_scene.call_deferred("add_child", ui)
+		get_tree().root.add_child(ui)
 
 func level_complete() -> void:
 	print("LEVEL COMPLETE!")
