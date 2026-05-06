@@ -21,7 +21,7 @@ func _on_body_entered(body: Node2D) -> void:
 		explosion.global_position = body.global_position
 		# Make it a bigger "BOOM" for player deaths
 		explosion.scale = Vector2(1.5, 1.5)
-		get_tree().current_scene.call_deferred("add_child", explosion)
+		get_tree().root.call_deferred("add_child", explosion)
 		
 		# Hide and disable player
 		body.hide()
@@ -37,7 +37,7 @@ func _on_body_entered(body: Node2D) -> void:
 	elif body.name.begins_with("Planet"):
 		var explosion = load("res://scenes/explosion.tscn").instantiate()
 		explosion.global_position = global_position
-		get_tree().current_scene.call_deferred("add_child", explosion)
+		get_tree().root.call_deferred("add_child", explosion)
 		queue_free()
 
 func _on_visible_on_screen_notifier_2d_screen_exited() -> void:

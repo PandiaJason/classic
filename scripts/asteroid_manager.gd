@@ -12,7 +12,8 @@ func _ready() -> void:
 
 func _on_spawn_timer_timeout() -> void:
 	# Do not spawn in menus
-	if get_tree().current_scene.name in ["Menu", "LevelSelect"]:
+	var scene = get_tree().current_scene
+	if not is_instance_valid(scene) or scene.name in ["Menu", "LevelSelect", "SplashScreen"]:
 		return
 		
 	# Only spawn in Level 4 and above
@@ -56,4 +57,8 @@ func spawn_asteroid(player_pos: Vector2) -> void:
 	asteroid.rotation_speed = randf_range(-5.0, 5.0)
 	
 	# Add to current scene
-	get_tree().current_scene.add_child(asteroid)
+	var scene = get_tree().current_scene
+	if is_instance_valid(scene):
+		scene.add_child(asteroid)
+	else:
+		asteroid.queue_free()
