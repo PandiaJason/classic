@@ -181,6 +181,9 @@ func _process(delta: float):
 func _on_hint_pressed():
 	if hint_used:
 		return
+	# Only allow hint while riding a planet
+	if not is_instance_valid(player) or player.current_planet == null:
+		return
 	hint_used = true
 	if is_instance_valid(player):
 		player.show_trajectory = true
@@ -192,4 +195,14 @@ func _on_hint_released():
 	pass # Trajectory stays visible until player lands
 
 func _on_view_map_pressed():
-	is_viewing_map = !is_viewing_map
+	if is_viewing_map:
+		return # Already viewing, ignore
+	is_viewing_map = true
+	view_map_btn.disabled = true
+	# Auto-return after 3 seconds
+	var timer = get_tree().create_timer(3.0)
+	timer.timeout.connect(func():
+		is_viewing_map = false
+		view_map_btn.disabled = false
+	)
+
