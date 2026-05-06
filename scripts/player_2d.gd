@@ -161,6 +161,8 @@ func _physics_process(delta: float) -> void:
 			# Player just landed on a planet
 			if not is_menu_demo and has_jumped:
 				has_jumped = false
+				# Auto-hide trajectory hint after landing
+				show_trajectory = false
 				if current_planet != null and "type" in current_planet and current_planet.type != 3:
 					GameManager.take_jump_damage()
 		was_on_ground = on_ground

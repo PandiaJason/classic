@@ -198,18 +198,15 @@ func _process(delta: float):
 func _on_hint_pressed():
 	if hint_used:
 		return
+	hint_used = true
 	if is_instance_valid(player):
 		player.show_trajectory = true
+	# Fade out the button after activation
+	var tween = create_tween()
+	tween.tween_property(hint_button, "modulate:a", 0.3, 0.5)
 
 func _on_hint_released():
-	if is_instance_valid(player):
-		player.show_trajectory = false
-	if not hint_used:
-		hint_used = true
-		# Fade out and hide the button
-		var tween = create_tween()
-		tween.tween_property(hint_button, "modulate:a", 0.0, 0.5)
-		tween.tween_callback(func(): hint_button.visible = false)
+	pass # Trajectory stays visible until player lands
 
 func _on_view_map_pressed():
 	is_viewing_map = !is_viewing_map
