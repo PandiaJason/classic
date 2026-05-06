@@ -37,11 +37,12 @@ func _ready():
 				min_y = min(min_y, p.global_position.y)
 				max_y = max(max_y, p.global_position.y)
 			
-			# Fit the vertical height perfectly
+			# Fit the vertical height, but don't zoom out too far
+			# Min 0.38 keeps planets/player clearly visible even on small screens
 			var required_height = (max_y - min_y) + 1200.0
 			var target_zoom = 720.0 / required_height
 			
-			var final_zoom = clamp(target_zoom, 0.2, 0.5)
+			var final_zoom = clamp(target_zoom, 0.38, 0.5)
 			default_zoom = Vector2(final_zoom, final_zoom)
 			level_camera.zoom = default_zoom
 			level_center_pos = level_camera.global_position
@@ -50,7 +51,7 @@ func _ready():
 			var screen_w = 1280.0 / final_zoom
 			var half_w = screen_w / 2.0
 			var planet_padding = 500.0 
-			pan_step = screen_w * 0.8
+			pan_step = screen_w * 0.6
 			
 			min_cam_x = min_x - planet_padding + half_w
 			max_cam_x = max_x + planet_padding - half_w
@@ -58,8 +59,10 @@ func _ready():
 				min_cam_x = level_center_pos.x
 				max_cam_x = level_center_pos.x
 			
-			camera_target_pos.x = min_cam_x
-			level_camera.global_position.x = min_cam_x
+			# Start camera at the first planet (where the player spawns)
+			var first_planet_x = planets[0].global_position.x
+			camera_target_pos.x = clamp(first_planet_x, min_cam_x, max_cam_x)
+			level_camera.global_position.x = camera_target_pos.x
 		
 	# Setup Score Panel
 	var score_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
