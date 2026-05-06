@@ -169,10 +169,14 @@ func _process(delta: float):
 			level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
 			level_camera.global_position = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
 		else:
-			# Follow the player with smooth lerp
 			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 5.0 * delta)
 			if is_instance_valid(player):
-				level_camera.global_position = level_camera.global_position.lerp(player.global_position, 6.0 * delta)
+				if player.current_planet != null and is_instance_valid(player.current_planet):
+					# On a planet: lock camera to the planet center
+					level_camera.global_position = level_camera.global_position.lerp(player.current_planet.global_position, 8.0 * delta)
+				else:
+					# In zero gravity: follow the player
+					level_camera.global_position = level_camera.global_position.lerp(player.global_position, 6.0 * delta)
 
 func _on_hint_pressed():
 	if hint_used:
