@@ -163,6 +163,15 @@ func _process(delta: float):
 	if is_instance_valid(score_label):
 		score_label.text = "score: %d" % GameManager.current_score
 	
+	# Disable hint button when in zero gravity
+	if is_instance_valid(hint_button) and not hint_used:
+		if is_instance_valid(player) and player.current_planet != null:
+			hint_button.disabled = false
+			hint_button.modulate.a = 1.0
+		else:
+			hint_button.disabled = true
+			hint_button.modulate.a = 0.3
+	
 	if is_instance_valid(level_camera):
 		if is_viewing_map:
 			# Zoom out to show full level
