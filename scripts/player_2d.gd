@@ -204,22 +204,23 @@ func _physics_process(delta: float) -> void:
 		last_planet = null
 		move_and_slide()
 		
-		# Out of bounds check: if we leave the camera's visible area, we are lost
+		# Out of bounds check: if player leaves the level map area, they're lost
 		if not is_menu_demo and not is_game_over:
-			var cam = get_viewport().get_camera_2d()
-			if cam:
-				var screen_size = get_viewport_rect().size / cam.zoom
-				var cam_pos = cam.global_position
-				# Allow a 300px buffer outside the screen before killing them
-				var min_x = cam_pos.x - (screen_size.x / 2.0) - 300
-				var max_x = cam_pos.x + (screen_size.x / 2.0) + 300
-				var min_y = cam_pos.y - (screen_size.y / 2.0) - 300
-				var max_y = cam_pos.y + (screen_size.y / 2.0) + 300
-				
-				if global_position.x < min_x or global_position.x > max_x or global_position.y < min_y or global_position.y > max_y:
-					is_game_over = true
-					GameManager.game_over("You drifted into deep space!")
-					return
+			var buffer = 1500.0
+			var min_x = INF
+			var max_x = -INF
+			var min_y = INF
+			var max_y = -INF
+			for p in _planets_list:
+				if is_instance_valid(p):
+					min_x = min(min_x, p.global_position.x)
+					max_x = max(max_x, p.global_position.x)
+					min_y = min(min_y, p.global_position.y)
+					max_y = max(max_y, p.global_position.y)
+			if global_position.x < min_x - buffer or global_position.x > max_x + buffer or global_position.y < min_y - buffer or global_position.y > max_y + buffer:
+				is_game_over = true
+				GameManager.game_over("You drifted into deep space!")
+				return
 			
 	if show_trajectory and not is_menu_demo and current_planet != null and on_ground:
 		calculate_trajectory()

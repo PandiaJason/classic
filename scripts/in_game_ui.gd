@@ -5,26 +5,24 @@ extends CanvasLayer
 
 var is_viewing_map: bool = false
 @onready var level_camera = $"../Camera2D"
-var default_zoom = Vector2.ZERO
+# Fixed zoom - same size for ALL levels (matches level 1 look)
+var default_zoom = Vector2(0.5, 0.5)
 var level_center_pos = Vector2.ZERO
-var camera_target_pos = Vector2.ZERO
+var map_zoom = Vector2(0.25, 0.25)
 
-var min_cam_x: float = 0.0
-var max_cam_x: float = 0.0
-var pan_step: float = 2000.0
-var left_btn: Button
-var right_btn: Button
+# Level bounds for map view and asteroid spawning
+var level_min = Vector2.ZERO
+var level_max = Vector2.ZERO
 
 var score_label: Label
 var health_label: Label
 var view_map_btn: Button
 var hint_button: Button
 var hint_used: bool = false
-var slider: HSlider
 
 func _ready():
 	if is_instance_valid(level_camera):
-		# Calculate bounds to determine exact vertical zoom needed
+		# Calculate level bounds from planet positions
 		var planets = get_tree().get_nodes_in_group("planets")
 		if planets.size() > 0:
 			var min_x = INF
@@ -37,33 +35,25 @@ func _ready():
 				min_y = min(min_y, p.global_position.y)
 				max_y = max(max_y, p.global_position.y)
 			
-			# Fit the vertical height, but don't zoom out too far
-			# Min 0.38 keeps planets/player clearly visible even on small screens
-			var required_height = (max_y - min_y) + 1200.0
-			var target_zoom = 720.0 / required_height
+			level_min = Vector2(min_x - 500, min_y - 500)
+			level_max = Vector2(max_x + 500, max_y + 500)
+			level_center_pos = (level_min + level_max) / 2.0
 			
-			var final_zoom = clamp(target_zoom, 0.38, 0.5)
-			default_zoom = Vector2(final_zoom, final_zoom)
-			level_camera.zoom = default_zoom
-			level_center_pos = level_camera.global_position
-			camera_target_pos = level_center_pos
-			
-			var screen_w = 1280.0 / final_zoom
-			var half_w = screen_w / 2.0
-			var planet_padding = 500.0 
-			pan_step = screen_w * 0.6
-			
-			min_cam_x = min_x - planet_padding + half_w
-			max_cam_x = max_x + planet_padding - half_w
-			if min_cam_x > max_cam_x:
-				min_cam_x = level_center_pos.x
-				max_cam_x = level_center_pos.x
-			
-			# Start camera at the first planet (where the player spawns)
-			var first_planet_x = planets[0].global_position.x
-			camera_target_pos.x = clamp(first_planet_x, min_cam_x, max_cam_x)
-			level_camera.global_position.x = camera_target_pos.x
+			# Calculate map zoom to fit entire level
+			var level_width = level_max.x - level_min.x
+			var level_height = level_max.y - level_min.y
+			var zoom_x = 1280.0 / level_width
+			var zoom_y = 720.0 / level_height
+			map_zoom = Vector2(min(zoom_x, zoom_y) * 0.85, min(zoom_x, zoom_y) * 0.85)
+			map_zoom = Vector2(clamp(map_zoom.x, 0.1, 0.4), clamp(map_zoom.y, 0.1, 0.4))
 		
+		# Fixed zoom for all levels - same as level 1
+		level_camera.zoom = default_zoom
+		
+		# Start camera on the player
+		if is_instance_valid(player):
+			level_camera.global_position = player.global_position
+	
 	# Setup Score Panel
 	var score_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
 	var score_hbox = HBoxContainer.new()
@@ -166,25 +156,6 @@ func _ready():
 	if has_node("HealthMargin"): $HealthMargin.queue_free()
 	if has_node("ViewMapMargin"): $ViewMapMargin.queue_free()
 	if has_node("HintMargin"): $HintMargin.queue_free()
-	
-	# Setup Camera Panning Buttons
-	if max_cam_x > min_cam_x + 100:
-		left_btn = UIFactory.create_glass_button("<", Color(0.8, 0.8, 0.8))
-		left_btn.pressed.connect(func(): camera_target_pos.x = clamp(camera_target_pos.x - pan_step, min_cam_x, max_cam_x))
-		var left_margin = MarginContainer.new()
-		left_margin.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
-		left_margin.add_theme_constant_override("margin_left", 30)
-		left_margin.add_child(left_btn)
-		add_child(left_margin)
-		
-		right_btn = UIFactory.create_glass_button(">", Color(0.8, 0.8, 0.8))
-		right_btn.pressed.connect(func(): camera_target_pos.x = clamp(camera_target_pos.x + pan_step, min_cam_x, max_cam_x))
-		var right_margin = MarginContainer.new()
-		right_margin.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
-		right_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-		right_margin.add_theme_constant_override("margin_right", 30)
-		right_margin.add_child(right_btn)
-		add_child(right_margin)
 
 func _process(delta: float):
 	if is_instance_valid(health_label):
@@ -193,10 +164,15 @@ func _process(delta: float):
 		score_label.text = "score: %d" % GameManager.current_score
 	
 	if is_instance_valid(level_camera):
-		var target_zoom = Vector2(0.25, 0.25) if is_viewing_map else default_zoom
-		level_camera.zoom = level_camera.zoom.lerp(target_zoom, 5.0 * delta)
-		var target_pos = level_center_pos if is_viewing_map else camera_target_pos
-		level_camera.global_position = level_camera.global_position.lerp(target_pos, 8.0 * delta)
+		if is_viewing_map:
+			# Zoom out to show full level
+			level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
+			level_camera.global_position = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
+		else:
+			# Follow the player with smooth lerp
+			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 5.0 * delta)
+			if is_instance_valid(player):
+				level_camera.global_position = level_camera.global_position.lerp(player.global_position, 6.0 * delta)
 
 func _on_hint_pressed():
 	if hint_used:
