@@ -20,10 +20,10 @@
 
         :root {
             --white: #ffffff;
-            --black: #0a0a0a;
-            --yellow: #f5c842;
-            --red: #e03a3a;
-            --space: #0d1b2a;
+            --black: #000000;
+            --yellow: #ffffff;
+            --red: #ffffff;
+            --space: #000000;
         }
 
         html {
@@ -37,6 +37,11 @@
             color: var(--white);
             overflow-x: hidden;
             cursor: none
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* CURSOR */
@@ -86,7 +91,7 @@
         }
 
         nav.scrolled {
-            background: rgba(13, 27, 42, .85);
+            background: rgba(0, 0, 0, .85);
             backdrop-filter: blur(16px);
             border-bottom-color: rgba(255, 255, 255, .06)
         }
@@ -189,7 +194,7 @@
         .hero-vignette {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom, rgba(13, 27, 42, .2) 0%, transparent 40%, rgba(13, 27, 42, .7) 80%, var(--space) 100%);
+            background: linear-gradient(to bottom, rgba(0, 0, 0, .2) 0%, transparent 40%, rgba(0, 0, 0, .7) 80%, var(--space) 100%);
         }
 
         .hero-content {
@@ -197,6 +202,7 @@
             z-index: 2;
             padding: 0 64px 72px;
             max-width: 700px;
+            animation: fadeInUp 1s ease forwards;
         }
 
         .hero-eyebrow {
@@ -347,7 +353,7 @@
         .slide-vignette {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom, rgba(13, 27, 42, .1) 0%, rgba(13, 27, 42, .65) 70%, var(--space) 100%)
+            background: linear-gradient(to bottom, rgba(0, 0, 0, .1) 0%, rgba(0, 0, 0, .65) 70%, var(--space) 100%)
         }
 
         .slide-content {
@@ -777,10 +783,49 @@
                 display: none
             }
         }
+
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #ffffff;
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #splash-screen img {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: brightness(0);
+        }
+        
+        #splash-screen h2 {
+            color: #000000;
+            font-size: 24px;
+            letter-spacing: 4px;
+            font-weight: 300;
+            margin: 0;
+        }
+        
+        #splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 
 <body>
+    <div id="splash-screen">
+        <img src="hikki_logo.png" alt="Hikki Studios Logo">
+        <h2>H I K K I STUDIOS</h2>
+    </div>
 
     <div class="cur" id="cur"></div>
     <div class="cur-r" id="curR"></div>
@@ -1004,11 +1049,17 @@
             const e = document.getElementById('betaEmail').value.trim();
             const m = document.getElementById('betaMsg');
             if (!e || !e.includes('@')) { m.textContent = 'Please enter a valid email.'; return; }
-            m.textContent = 'You're on the list.See you in space. 🚀';
-            m.style.color = 'rgba(245,200,66,.8)';
+            m.textContent = "You're on the list. See you in space. 🚀";
+            m.style.color = '#ffffff';
             document.getElementById('betaEmail').value = '';
         }
         document.getElementById('betaEmail').addEventListener('keydown', e => { if (e.key === 'Enter') joinBeta(); });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+            }, 2000);
+        });
     </script>
 </body>
 
