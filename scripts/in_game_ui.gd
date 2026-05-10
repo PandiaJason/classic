@@ -111,7 +111,7 @@ func _ready():
 	add_child(health_margin)
 	
 	# Setup View Map Button
-	view_map_btn = UIFactory.create_glass_button("map", UIFactory.BLUE_COLOR, "res://assets/map_icon.jpg")
+	view_map_btn = UIFactory.create_glass_button("map", UIFactory.BLUE_COLOR)
 	view_map_btn.pressed.connect(_on_view_map_pressed)
 	
 	var map_margin = MarginContainer.new()
@@ -123,7 +123,7 @@ func _ready():
 	add_child(map_margin)
 	
 	# Setup Hint Button
-	hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR, "res://assets/hint_icon.jpg")
+	hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
 	hint_button.button_down.connect(_on_hint_pressed)
 	hint_button.button_up.connect(_on_hint_released)
 	

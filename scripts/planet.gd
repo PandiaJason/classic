@@ -20,7 +20,7 @@ func setup_planet():
 	var region = Rect2()
 	var size_scale = 1.0
 	var grav = 980.0
-	var tex_path = "res://assets/custom_planet.png"
+	var tex_path = "res://assets/planet_1.png"
 	
 	var mod_color = Color(1, 1, 1, 1)
 	match type:
