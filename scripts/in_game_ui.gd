@@ -50,9 +50,8 @@ func _ready():
 		# Fixed zoom for all levels - same as level 1
 		level_camera.zoom = default_zoom
 		
-		# Start camera on the player
-		if is_instance_valid(player):
-			level_camera.global_position = player.global_position
+		# Start camera centered on all planets so level fills the screen
+		level_camera.global_position = level_center_pos
 	
 	# Setup Score Panel
 	var score_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
