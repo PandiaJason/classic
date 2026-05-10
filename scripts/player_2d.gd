@@ -19,6 +19,11 @@ var show_trajectory: bool = false
 var overlapping_gravity_areas: Array = []
 var was_on_ground: bool = true
 
+# Cinematic death state
+var _doomed: bool = false
+var _doom_timer: float = 0.0
+const DOOM_DELAY: float = 2.5
+
 var trajectory_points: Array[Vector2] = []
 @onready var floor_ray = $RayCast2D
 
@@ -204,8 +209,22 @@ func _physics_process(delta: float) -> void:
 		last_planet = null
 		move_and_slide()
 		
-		# Out of bounds check: if player leaves the level map area, they're lost
 		if not is_menu_demo and not is_game_over:
+			# --- CINEMATIC DEATH: detect doomed trajectory ---
+			if not _doomed and not is_heading_towards_any_planet():
+				_doomed = true
+				_doom_timer = 0.0
+			
+			if _doomed:
+				_doom_timer += delta
+				# Spin the scooter to sell the tumbling feeling
+				rotation += delta * (_doom_timer * 3.0 + 2.0)
+				if _doom_timer >= DOOM_DELAY:
+					is_game_over = true
+					GameManager.game_over("lost in space")
+					return
+		
+			# --- EXISTING safety net: hard out-of-bounds fallback ---
 			var buffer = 1500.0
 			var min_x = INF
 			var max_x = -INF
@@ -258,6 +277,35 @@ func find_gravity_source(on_ground: bool) -> void:
 				closest = planet
 	
 	current_planet = closest
+	# If we just re-entered gravity, cancel the doomed state
+	if current_planet != null and _doomed:
+		_doomed = false
+		_doom_timer = 0.0
+
+func is_heading_towards_any_planet() -> bool:
+	if velocity.length_squared() < 1.0:
+		return true # Too slow to judge — give benefit of the doubt
+	var v_dir = velocity.normalized()
+	var p_pos = global_position
+	for p in _planets_list:
+		if not is_instance_valid(p):
+			continue
+		var to_planet = p.global_position - p_pos
+		# Only check planets in front of us
+		if to_planet.dot(v_dir) <= 0:
+			continue
+		# Distance from planet center to straight-line trajectory
+		var proj_len = to_planet.dot(v_dir)
+		var closest_pt = p_pos + v_dir * proj_len
+		var dist_to_line = p.global_position.distance_to(closest_pt)
+		var grav_radius = 500.0
+		var grav_shape = p.get_node_or_null("GravityArea/CollisionShape2D")
+		if grav_shape and grav_shape.shape is CircleShape2D:
+			grav_radius = grav_shape.shape.radius * p.scale.x
+		# 100px generous buffer so we don't trigger too early on near-misses
+		if dist_to_line < grav_radius + 100.0:
+			return true
+	return false
 
 func calculate_trajectory():
 	trajectory_points.clear()

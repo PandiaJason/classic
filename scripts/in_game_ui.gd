@@ -3,7 +3,7 @@ extends CanvasLayer
 @onready var bgm = $"../BGM"
 @onready var player = $"../Player2D"
 
-var is_viewing_map: bool = false
+var is_viewing_map: bool = true
 @onready var level_camera = $"../Camera2D"
 # Fixed zoom - same size for ALL levels (matches level 1 look)
 var default_zoom = Vector2(0.5, 0.5)
@@ -48,10 +48,8 @@ func _ready():
 			map_zoom = Vector2(min(zoom_x, zoom_y) * 0.85, min(zoom_x, zoom_y) * 0.85)
 			map_zoom = Vector2(clamp(map_zoom.x, 0.1, 0.4), clamp(map_zoom.y, 0.1, 0.4))
 		
-		# Fixed zoom for all levels - same as level 1
-		level_camera.zoom = default_zoom
-		
-		# Start camera centered on all planets so level fills the screen
+		# Start in MAP view (zoomed out)
+		level_camera.zoom = map_zoom
 		level_camera.global_position = level_center_pos
 	
 	# Setup Score Panel
@@ -178,27 +176,26 @@ func _process(delta: float):
 			level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
 			level_camera.global_position = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
 		else:
+			# Zoom in to follow player
 			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 5.0 * delta)
 			if is_instance_valid(player):
-				# DEADZONE camera for ALL states — only moves when player nears screen edge
 				var screen_size = get_viewport().get_visible_rect().size / level_camera.zoom
 				var half_w = screen_size.x / 2.0
-				var half_h = screen_size.y / 2.0
-				# Deadzone = 65% of half-screen (camera moves when player is in outer 35%)
-				var deadzone_w = half_w * 0.65
-				var deadzone_h = half_h * 0.65
-				var cam_pos = level_camera.global_position
-				var player_pos = player.global_position
-				var diff = player_pos - cam_pos
-				var target = cam_pos
-				if diff.x > deadzone_w:
-					target.x = player_pos.x - deadzone_w
-				elif diff.x < -deadzone_w:
-					target.x = player_pos.x + deadzone_w
-				if diff.y > deadzone_h:
-					target.y = player_pos.y - deadzone_h
-				elif diff.y < -deadzone_h:
-					target.y = player_pos.y + deadzone_h
+				
+				var target_x: float
+				var target_y: float
+				
+				if is_instance_valid(player.current_planet):
+					# While riding a planet, lock the camera to the planet so the screen doesn't spin.
+					# Add horizontal offset so the planet is on the left side of the screen.
+					target_x = player.current_planet.global_position.x + (half_w * 0.5)
+					target_y = player.current_planet.global_position.y
+				else:
+					# While jumping, follow the player through space with the same offset.
+					target_x = player.global_position.x + (half_w * 0.5)
+					target_y = player.global_position.y
+					
+				var target = Vector2(target_x, target_y)
 				level_camera.global_position = level_camera.global_position.lerp(target, 6.0 * delta)
 
 func _on_hint_pressed():

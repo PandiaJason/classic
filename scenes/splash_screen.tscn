@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://cb3ln8hy7e7f1"]
 
-[ext_resource type="Script" path="res://scripts/splash_screen.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/hikki_studios.png" id="2_logo"]
+[ext_resource type="Script" uid="uid://wupjehgvwlqj" path="res://scripts/splash_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://clr5reb8gixpi" path="res://assets/hikki_studios.png" id="2_logo"]
 
-[node name="SplashScreen" type="Control"]
+[node name="SplashScreen" type="Control" unique_id=1639563170]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,16 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(1, 1, 1, 1)
-
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=2117328392]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,9 +20,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Logo" type="TextureRect" parent="CenterContainer"]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=31968638]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Logo" type="TextureRect" parent="CenterContainer" unique_id=1218419509]
+custom_minimum_size = Vector2(400, 400)
 layout_mode = 2
 texture = ExtResource("2_logo")
 expand_mode = 3
 stretch_mode = 5
-custom_minimum_size = Vector2(400, 400)

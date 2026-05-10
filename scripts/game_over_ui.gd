@@ -110,9 +110,22 @@ func _ready():
 	panel.add_child(vbox)
 	
 	var center = CenterContainer.new()
+	center.name = "CenterContainer"
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	center.add_child(panel)
 	add_child(center)
+	
+	get_tree().get_root().size_changed.connect(_on_size_changed)
+	call_deferred("_on_size_changed")
+
+func _on_size_changed():
+	var vp_size = get_viewport().get_visible_rect().size
+	var center = get_node_or_null("CenterContainer")
+	if center:
+		# Base resolution is roughly 1280x720. We scale down if smaller, or up if larger.
+		var scale_factor = min(vp_size.x / 1280.0, vp_size.y / 720.0)
+		center.pivot_offset = vp_size / 2.0
+		center.scale = Vector2(scale_factor, scale_factor)
 
 func _on_retry_pressed():
 	get_tree().paused = false
