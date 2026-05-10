@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://c7v8w8x3j1k8"]
 
 [ext_resource type="Script" path="res://scripts/planet.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/custom_planet.png" id="2_types"]
+[ext_resource type="Texture2D" path="res://assets/planet_1.png" id="2_types"]
 
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_surface"]
