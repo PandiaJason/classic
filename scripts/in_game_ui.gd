@@ -181,11 +181,30 @@ func _process(delta: float):
 			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 5.0 * delta)
 			if is_instance_valid(player):
 				if player.current_planet != null and is_instance_valid(player.current_planet):
-					# On a planet: lock camera to the planet center
+					# On a planet: smoothly center camera on the planet
 					level_camera.global_position = level_camera.global_position.lerp(player.current_planet.global_position, 8.0 * delta)
 				else:
-					# In zero gravity: follow the player
-					level_camera.global_position = level_camera.global_position.lerp(player.global_position, 6.0 * delta)
+					# In zero gravity: DEADZONE camera
+					# Only move if player is near the edge of the visible screen
+					var screen_size = get_viewport().get_visible_rect().size / level_camera.zoom
+					var half_w = screen_size.x / 2.0
+					var half_h = screen_size.y / 2.0
+					# Deadzone = 70% of half-screen (camera moves when player is in outer 30%)
+					var deadzone_w = half_w * 0.70
+					var deadzone_h = half_h * 0.70
+					var cam_pos = level_camera.global_position
+					var player_pos = player.global_position
+					var diff = player_pos - cam_pos
+					var target = cam_pos
+					if diff.x > deadzone_w:
+						target.x = player_pos.x - deadzone_w
+					elif diff.x < -deadzone_w:
+						target.x = player_pos.x + deadzone_w
+					if diff.y > deadzone_h:
+						target.y = player_pos.y - deadzone_h
+					elif diff.y < -deadzone_h:
+						target.y = player_pos.y + deadzone_h
+					level_camera.global_position = level_camera.global_position.lerp(target, 6.0 * delta)
 
 func _on_hint_pressed():
 	if hint_used:
