@@ -218,19 +218,4 @@ func _on_hint_released():
 	pass # Trajectory stays visible until player lands
 
 func _on_view_map_pressed():
-	if is_viewing_map:
-		# Tap again to close map early
-		is_viewing_map = false
-		if map_timer and map_timer.time_left > 0:
-			map_timer.timeout.disconnect(_map_auto_close)
-			map_timer = null
-		return
-	# Open map
-	is_viewing_map = true
-	# Auto-return after 3 seconds if not tapped again
-	map_timer = get_tree().create_timer(3.0)
-	map_timer.timeout.connect(_map_auto_close)
-
-func _map_auto_close():
-	is_viewing_map = false
-	map_timer = null
+	is_viewing_map = !is_viewing_map
