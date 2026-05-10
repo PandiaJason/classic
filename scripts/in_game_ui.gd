@@ -19,6 +19,7 @@ var health_label: Label
 var view_map_btn: Button
 var hint_button: Button
 var hint_used: bool = false
+var map_timer = null
 
 func _ready():
 	if is_instance_valid(level_camera):
@@ -218,13 +219,18 @@ func _on_hint_released():
 
 func _on_view_map_pressed():
 	if is_viewing_map:
-		return # Already viewing, ignore
-	is_viewing_map = true
-	view_map_btn.disabled = true
-	# Auto-return after 3 seconds
-	var timer = get_tree().create_timer(3.0)
-	timer.timeout.connect(func():
+		# Tap again to close map early
 		is_viewing_map = false
-		view_map_btn.disabled = false
-	)
+		if map_timer and map_timer.time_left > 0:
+			map_timer.timeout.disconnect(_map_auto_close)
+			map_timer = null
+		return
+	# Open map
+	is_viewing_map = true
+	# Auto-return after 3 seconds if not tapped again
+	map_timer = get_tree().create_timer(3.0)
+	map_timer.timeout.connect(_map_auto_close)
 
+func _map_auto_close():
+	is_viewing_map = false
+	map_timer = null
