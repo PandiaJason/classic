@@ -63,7 +63,7 @@ func _on_gravity_area_exited(area: Area2D) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_menu_demo and event.is_action_pressed("ui_cancel"):
-		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+		get_tree().change_scene_to_file("res://scenes/level_select.tscn")
 		
 	# Touch / Left Click to Jump
 	if event is InputEventScreenTouch and event.pressed:

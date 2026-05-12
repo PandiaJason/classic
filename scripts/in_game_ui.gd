@@ -20,6 +20,7 @@ var view_map_btn: Button
 var hint_button: Button
 var hint_used: bool = false
 var map_timer = null
+var back_button: Button
 
 func _ready():
 	if is_instance_valid(level_camera):
@@ -149,6 +150,18 @@ func _ready():
 	level_margin.add_child(level_panel)
 	add_child(level_margin)
 	
+	# Setup Back Button
+	back_button = UIFactory.create_glass_button("back", UIFactory.RED_COLOR)
+	back_button.pressed.connect(_on_back_pressed)
+	
+	var back_margin = MarginContainer.new()
+	back_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	back_margin.grow_horizontal = Control.GROW_DIRECTION_END
+	back_margin.add_theme_constant_override("margin_top", 20)
+	back_margin.add_theme_constant_override("margin_left", 40)
+	back_margin.add_child(back_button)
+	add_child(back_margin)
+	
 	# Remove old UI
 	if has_node("MarginContainer"): $MarginContainer.queue_free()
 	if has_node("HealthMargin"): $HealthMargin.queue_free()
@@ -216,6 +229,10 @@ func _on_hint_released():
 
 func _on_view_map_pressed():
 	is_viewing_map = !is_viewing_map
+
+func _on_back_pressed():
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/level_select.tscn")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
