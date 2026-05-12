@@ -119,9 +119,13 @@ func _ready():
 	hbox.add_theme_constant_override("separation", 30)
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
+	var menu_btn = create_glass_button("menu", Color(0.5, 0.5, 0.5))
+	menu_btn.pressed.connect(_on_menu_pressed)
+	hbox.add_child(menu_btn)
+	
 	var btn_text = "finish" if GameManager.current_level >= 30 else "next level"
 	var next_btn = create_glass_button(btn_text, Color(0.2, 1.0, 0.2))
-	next_btn.pressed.connect(_on_menu_pressed)
+	next_btn.pressed.connect(_on_next_pressed)
 	hbox.add_child(next_btn)
 	
 	vbox.add_child(hbox)
@@ -133,7 +137,12 @@ func _ready():
 	center.add_child(panel)
 	add_child(center)
 
-func _on_menu_pressed():
+func _on_next_pressed():
 	get_tree().paused = false
 	queue_free()
 	GameManager.load_next_level()
+
+func _on_menu_pressed():
+	get_tree().paused = false
+	queue_free()
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
