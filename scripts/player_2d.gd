@@ -24,6 +24,8 @@ var _doomed: bool = false
 var _doom_timer: float = 0.0
 const DOOM_DELAY: float = 2.5
 
+var _wants_to_jump: bool = false
+
 var trajectory_points: Array[Vector2] = []
 @onready var floor_ray = $RayCast2D
 
@@ -62,6 +64,12 @@ func _on_gravity_area_exited(area: Area2D) -> void:
 func _input(event: InputEvent) -> void:
 	if not is_menu_demo and event.is_action_pressed("ui_cancel"):
 		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+		
+	# Touch / Left Click to Jump
+	if event is InputEventScreenTouch and event.pressed:
+		_wants_to_jump = true
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_wants_to_jump = true
 
 func _physics_process(delta: float) -> void:
 	if is_game_over:
@@ -182,7 +190,8 @@ func _physics_process(delta: float) -> void:
 				
 			velocity = (surface_right * current_speed * forward_direction) + (surface_up * current_vertical)
 				
-			if not is_menu_demo and (Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up")):
+			var jump_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or _wants_to_jump
+			if not is_menu_demo and jump_pressed:
 				# Real Jump!
 				print("JUMP!")
 				has_jumped = true
@@ -248,6 +257,8 @@ func _physics_process(delta: float) -> void:
 			
 	update_sprite_region()
 	queue_redraw()
+	
+	_wants_to_jump = false # clear the input queue at the end of the frame
 
 func _draw():
 	if show_trajectory and trajectory_points.size() > 0:

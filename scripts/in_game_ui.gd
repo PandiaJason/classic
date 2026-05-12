@@ -216,3 +216,10 @@ func _on_hint_released():
 
 func _on_view_map_pressed():
 	is_viewing_map = !is_viewing_map
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_M:
+			_on_view_map_pressed()
+		elif event.keycode == KEY_H:
+			_on_hint_pressed()
