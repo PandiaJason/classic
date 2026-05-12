@@ -24,6 +24,7 @@ SaveSystem="*res://scripts/save_system.gd"
 AsteroidManager="*res://scripts/asteroid_manager.gd"
 UIFactory="*res://scripts/ui_factory.gd"
 ResourceManager="*res://scripts/resource_manager.gd"
+BgmManager="*res://scripts/bgm_manager.gd"
 
 [display]
 

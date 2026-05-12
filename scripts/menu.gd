@@ -1,6 +1,7 @@
 extends Control
 
 func _ready():
+	BgmManager.play_menu_music()
 	$VBoxContainer/StartButton.pressed.connect(_on_start_pressed)
 	
 	# Use UIFactory for central panels

@@ -5,6 +5,7 @@ extends Control
 var total_levels = 30
 
 func _ready():
+	BgmManager.play_menu_music()
 	# Add Blur Background
 	var blur = ColorRect.new()
 	blur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -118,7 +119,12 @@ func add_stars(parent: Control, star_count: int):
 func _on_level_selected(level: int):
 	GameManager.current_level = level
 	GameManager.reset_score()
+	BgmManager.stop_menu_music()
 	get_tree().change_scene_to_file("res://scenes/level_" + str(level) + ".tscn")
 
 func _on_back_pressed():
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_on_back_pressed()
