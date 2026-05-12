@@ -155,9 +155,9 @@ func _ready():
 	back_button.pressed.connect(_on_back_pressed)
 	
 	var back_margin = MarginContainer.new()
-	back_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	back_margin.grow_horizontal = Control.GROW_DIRECTION_END
-	back_margin.add_theme_constant_override("margin_top", 20)
+	back_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	back_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	back_margin.add_theme_constant_override("margin_bottom", 20)
 	back_margin.add_theme_constant_override("margin_left", 40)
 	back_margin.add_child(back_button)
 	add_child(back_margin)
