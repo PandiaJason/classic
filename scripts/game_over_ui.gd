@@ -57,23 +57,23 @@ func _ready():
 	style.border_width_right = 4
 	style.border_width_bottom = 4
 	style.border_color = Color(1.0, 0.2, 0.2, 1.0)
-	style.content_margin_left = 50
-	style.content_margin_right = 50
-	style.content_margin_top = 50
-	style.content_margin_bottom = 50
+	style.content_margin_left = 40
+	style.content_margin_right = 40
+	style.content_margin_top = 30
+	style.content_margin_bottom = 30
 	style.shadow_color = Color(1.0, 0.0, 0.0, 0.4)
-	style.shadow_size = 30
+	style.shadow_size = 20
 	panel.add_theme_stylebox_override("panel", style)
 	
 	var vbox = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 40)
+	vbox.add_theme_constant_override("separation", 20)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
 	var title = Label.new()
 	title.text = "game over"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	title.add_theme_font_size_override("font_size", 80)
+	title.add_theme_font_size_override("font_size", 60)
 	title.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 	title.add_theme_color_override("font_outline_color", Color.BLACK)
 	title.add_theme_constant_override("outline_size", 10)
@@ -83,7 +83,7 @@ func _ready():
 	skeleton_icon.texture = load("res://assets/game_over_skeleton.png")
 	skeleton_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	skeleton_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	skeleton_icon.custom_minimum_size = Vector2(400, 350)
+	skeleton_icon.custom_minimum_size = Vector2(250, 220)
 	skeleton_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	vbox.add_child(skeleton_icon)
 	
@@ -95,7 +95,7 @@ func _ready():
 	vbox.add_child(subtitle)
 	
 	var hbox = HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 30)
+	hbox.add_theme_constant_override("separation", 20)
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
 	var menu_btn = create_glass_button("menu", Color(0.5, 0.5, 0.5))
@@ -114,18 +114,6 @@ func _ready():
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	center.add_child(panel)
 	add_child(center)
-	
-	get_tree().get_root().size_changed.connect(_on_size_changed)
-	call_deferred("_on_size_changed")
-
-func _on_size_changed():
-	var vp_size = get_viewport().get_visible_rect().size
-	var center = get_node_or_null("CenterContainer")
-	if center:
-		# Base resolution is roughly 1280x720. We scale down if smaller, or up if larger.
-		var scale_factor = min(vp_size.x / 1280.0, vp_size.y / 720.0)
-		center.pivot_offset = vp_size / 2.0
-		center.scale = Vector2(scale_factor, scale_factor)
 
 func _on_retry_pressed():
 	get_tree().paused = false
