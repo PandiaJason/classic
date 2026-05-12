@@ -61,7 +61,7 @@ func _on_gravity_area_exited(area: Area2D) -> void:
 	if overlapping_gravity_areas.has(area):
 		overlapping_gravity_areas.erase(area)
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if not is_menu_demo and event.is_action_pressed("ui_cancel"):
 		get_tree().change_scene_to_file("res://scenes/menu.tscn")
 		
