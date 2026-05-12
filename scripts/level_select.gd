@@ -57,6 +57,18 @@ func _ready():
 			
 		grid.add_child(btn)
 
+	# Setup Back Button (using UIFactory to match in-game style)
+	var back_button = UIFactory.create_glass_button("back", UIFactory.RED_COLOR)
+	back_button.pressed.connect(_on_back_pressed)
+	
+	var back_margin = MarginContainer.new()
+	back_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	back_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	back_margin.add_theme_constant_override("margin_bottom", 20)
+	back_margin.add_theme_constant_override("margin_left", 40)
+	back_margin.add_child(back_button)
+	add_child(back_margin)
+
 func load_style(type: String) -> StyleBoxFlat:
 	var style = StyleBoxFlat.new()
 	style.corner_radius_top_left = 25

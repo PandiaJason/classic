@@ -102,23 +102,3 @@ theme_override_constants/h_separation = 75
 theme_override_constants/v_separation = 40
 columns = 5
 
-[node name="BackBtn" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = 50.0
-offset_top = 50.0
-offset_right = 200.0
-offset_bottom = 100.0
-grow_vertical = 1
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 32
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn")
-text = "back"
-
-[connection signal="pressed" from="BackBtn" to="." method="_on_back_pressed"]
