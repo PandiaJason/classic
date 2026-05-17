@@ -30,23 +30,23 @@ position = Vector2(150, 700)
 type = 0
 
 [node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(550, 200)
+position = Vector2(500, 450)
+type = 0
+
+[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(900, 200)
 scale = Vector2(0.9, 0.9)
 type = 1
 
-[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1050, 650)
-type = 0
-
 [node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1500, 200)
+position = Vector2(1350, 400)
 type = 3
 
 [node name="Player2D" parent="." instance=ExtResource("2_player")]
 position = Vector2(150, 480)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(825, 450)
+position = Vector2(750, 450)
 zoom = Vector2(0.58, 0.58)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
