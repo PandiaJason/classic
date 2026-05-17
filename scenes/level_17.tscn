@@ -25,48 +25,48 @@ stretch_mode = 6
 [node name="Planets" type="Node2D" parent="."]
 
 [node name="Planet1" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(150, 500)
+position = Vector2(150, 300)
 type = 0
 
 [node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(500, 50)
-type = 1
-
-[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(900, 550)
+position = Vector2(550, 0)
 type = 0
 
+[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1050, 0)
+type = 1
+
 [node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(650, -300)
-type = 2
+position = Vector2(1550, 0)
+type = 0
 
 [node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1300, 150)
+position = Vector2(550, 600)
 type = 1
 
 [node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1050, -350)
+position = Vector2(1050, 600)
 type = 0
 
 [node name="Planet7" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1700, 500)
-type = 2
-
-[node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1500, -150)
+position = Vector2(1550, 600)
 type = 1
 
+[node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(2000, 300)
+type = 0
+
 [node name="Planet9" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2100, 200)
+position = Vector2(2450, 300)
 type = 3
 
 
 [node name="Player2D" parent="." instance=ExtResource("2_player")]
-position = Vector2(150, 300)
+position = Vector2(150, 100)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(1125, 200)
-zoom = Vector2(0.33, 0.33)
+position = Vector2(1300, 300)
+zoom = Vector2(0.3, 0.3)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")

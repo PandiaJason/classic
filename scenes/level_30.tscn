@@ -29,55 +29,43 @@ position = Vector2(150, 400)
 type = 0
 
 [node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(500, -200)
-type = 1
+position = Vector2(600, 100)
+type = 2
 
 [node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(400, 750)
+position = Vector2(1050, 500)
 type = 0
 
 [node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(950, 400)
+position = Vector2(1500, 50)
 type = 2
 
 [node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(800, -350)
+position = Vector2(1950, 450)
 type = 1
 
 [node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1350, 100)
+position = Vector2(1950, -100)
 type = 0
 
 [node name="Planet7" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1150, 700)
+position = Vector2(2400, 200)
 type = 2
 
 [node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1700, -250)
-type = 1
+position = Vector2(2850, 500)
+type = 0
 
 [node name="Planet9" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1500, 450)
-type = 0
+position = Vector2(3300, 100)
+type = 2
 
 [node name="Planet10" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2000, -400)
-type = 2
-
-[node name="Planet11" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1850, 200)
+position = Vector2(3750, 400)
 type = 1
 
-[node name="Planet12" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2350, -100)
-type = 0
-
-[node name="Planet13" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2150, 550)
-type = 2
-
-[node name="Planet14" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2750, 100)
+[node name="Planet11" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(4200, 200)
 type = 3
 
 
@@ -85,8 +73,8 @@ type = 3
 position = Vector2(150, 200)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(1450, 175)
-zoom = Vector2(0.25, 0.25)
+position = Vector2(2175, 200)
+zoom = Vector2(0.2, 0.2)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")

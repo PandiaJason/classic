@@ -25,52 +25,48 @@ stretch_mode = 6
 [node name="Planets" type="Node2D" parent="."]
 
 [node name="Planet1" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(150, 500)
+position = Vector2(150, 400)
 type = 0
 
 [node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(600, 100)
-type = 1
-
-[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(350, -250)
+position = Vector2(550, 400)
 type = 0
 
+[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1000, 400)
+type = 1
+
 [node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1000, 600)
-type = 2
+position = Vector2(1000, 0)
+type = 0
 
 [node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(800, -200)
+position = Vector2(1000, 800)
 type = 1
 
 [node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1400, 200)
+position = Vector2(1450, 400)
 type = 0
 
 [node name="Planet7" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1200, -350)
-type = 2
-
-[node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1750, 500)
+position = Vector2(1900, 400)
 type = 1
 
-[node name="Planet9" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1600, -100)
-type = 0
+[node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(2350, 400)
+type = 2
 
-[node name="Planet10" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2150, 200)
+[node name="Planet9" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(2750, 400)
 type = 3
 
 
 [node name="Player2D" parent="." instance=ExtResource("2_player")]
-position = Vector2(150, 300)
+position = Vector2(150, 200)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(1150, 225)
-zoom = Vector2(0.32, 0.32)
+position = Vector2(1450, 400)
+zoom = Vector2(0.28, 0.28)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")

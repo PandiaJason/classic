@@ -25,55 +25,43 @@ stretch_mode = 6
 [node name="Planets" type="Node2D" parent="."]
 
 [node name="Planet1" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(150, 500)
+position = Vector2(150, 400)
 type = 0
 
 [node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(500, 50)
-type = 1
+position = Vector2(550, 100)
+type = 2
 
 [node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(850, 600)
+position = Vector2(950, 400)
 type = 0
 
 [node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(600, -300)
+position = Vector2(1350, 100)
 type = 2
 
 [node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1250, 200)
+position = Vector2(1750, 400)
 type = 1
 
 [node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1000, -250)
-type = 0
+position = Vector2(2150, 100)
+type = 2
 
 [node name="Planet7" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1600, 550)
-type = 2
-
-[node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1400, -150)
-type = 1
-
-[node name="Planet9" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1950, 250)
+position = Vector2(2550, 400)
 type = 0
 
-[node name="Planet10" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1750, -350)
-type = 2
-
-[node name="Planet11" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2350, 100)
+[node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(2950, 250)
 type = 3
 
 
 [node name="Player2D" parent="." instance=ExtResource("2_player")]
-position = Vector2(150, 300)
+position = Vector2(150, 200)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(1250, 200)
+position = Vector2(1550, 250)
 zoom = Vector2(0.3, 0.3)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
