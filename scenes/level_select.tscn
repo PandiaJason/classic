@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" path="res://assets/game_bg.png" id="2_bg"]
 [ext_resource type="FontFile" path="res://assets/game_font.ttf" id="3_font"]
 [ext_resource type="Texture2D" path="res://assets/star.png" id="4_star"]
-[ext_resource type="Texture2D" uid="uid://dxe" path="res://assets/title.png" id="7_title"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
 bg_color = Color(0.9, 0.6, 0.1, 1)

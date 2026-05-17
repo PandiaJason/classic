@@ -2,8 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/game_over_ui.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/game_font.ttf" id="2_font"]
-[ext_resource type="Texture2D" path="res://assets/failed.png" id="3_failed"]
-[ext_resource type="Texture2D" path="res://assets/retry.png" id="4_retry"]
+[ext_resource type="Texture2D" path="res://assets/game_over_skeleton.png" id="3_failed"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
 bg_color = Color(0.9, 0.6, 0.1, 1)
@@ -17,6 +16,19 @@ expand_margin_top = 10.0
 expand_margin_bottom = 10.0
 border_width_bottom = 5
 border_color = Color(0.7, 0.4, 0.0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_retry"]
+bg_color = Color(0.8, 0.2, 0.2, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+expand_margin_left = 20.0
+expand_margin_right = 20.0
+expand_margin_top = 10.0
+expand_margin_bottom = 10.0
+border_width_bottom = 5
+border_color = Color(0.6, 0.1, 0.1, 1)
 
 [node name="GameOverUI" type="CanvasLayer"]
 process_mode = 3
@@ -75,12 +87,15 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_btn")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn")
 text = "MENU"
 
-[node name="RetryBtn" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(100, 100)
+[node name="RetryBtn" type="Button" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(120, 60)
 layout_mode = 2
-texture_normal = ExtResource("4_retry")
-ignore_texture_size = true
-stretch_mode = 5
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxFlat_retry")
+theme_override_styles/hover = SubResource("StyleBoxFlat_retry")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_retry")
+text = "RETRY"
 
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/MenuBtn" to="." method="_on_menu_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RetryBtn" to="." method="_on_retry_pressed"]

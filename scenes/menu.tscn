@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="4_planet"]
 [ext_resource type="PackedScene" path="res://scenes/player_2d.tscn" id="5_player"]
 [ext_resource type="AudioStream" path="res://Petal_Path_Dash.mp3" id="6_bgm"]
-[ext_resource type="Texture2D" uid="uid://dxe" path="res://assets/title.png" id="7_title"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
 bg_color = Color(0.9, 0.7, 0.1, 1.0)
