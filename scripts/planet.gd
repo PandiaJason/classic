@@ -30,28 +30,24 @@ func setup_planet():
 			planet_speed = 350.0
 			planet_jump_force = -700.0
 			tex_path = "res://assets/planet_1.png"
-			mod_color = Color(1, 1, 1, 1) # Start planet is naturally green
 		PlanetType.MEDIUM:
 			size_scale = 1.2
 			grav = 980.0
 			planet_speed = 280.0
 			planet_jump_force = -550.0
 			tex_path = "res://assets/planet_2.png"
-			mod_color = Color(0.2, 0.4, 1.0, 1) # Blueish
 		PlanetType.SMALL:
 			size_scale = 0.9
 			grav = 700.0
 			planet_speed = 220.0
 			planet_jump_force = -450.0
 			tex_path = "res://assets/planet_3.png"
-			mod_color = Color(1.0, 1.0, 0.2, 1) # Yellow
 		PlanetType.CHALLENGE:
 			size_scale = 0.7
 			grav = 400.0
 			planet_speed = 150.0
 			planet_jump_force = -350.0
 			tex_path = "res://assets/planet_4.png"
-			mod_color = Color(1.0, 0.2, 0.2, 1) # RED for final planet
 			
 	# Dynamically calculate the required gravity radius.
 	# We want the player to be able to ESCAPE the gravity field if they jump,

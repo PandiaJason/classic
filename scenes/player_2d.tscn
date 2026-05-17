@@ -19,7 +19,7 @@ shape = SubResource("CircleShape2D_player")
 
 [node name="Sprite2D" type="Sprite2D" parent="Visuals"]
 position = Vector2(0, -18)
-scale = Vector2(0.3, 0.3)
+scale = Vector2(0.1, 0.1)
 texture = ExtResource("2_sheet")
 
 [node name="TrajectoryLine" type="Line2D" parent="."]

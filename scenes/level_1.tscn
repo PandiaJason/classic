@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="1_planet"]
 [ext_resource type="PackedScene" path="res://scenes/player_2d.tscn" id="2_player"]
-[ext_resource type="Texture2D" path="res://assets/bg_ref.jpg" id="3_bg"]
+[ext_resource type="Texture2D" path="res://assets/game_bg.png" id="3_bg"]
 [ext_resource type="PackedScene" path="res://scenes/delivery_box.tscn" id="4_box"]
 [ext_resource type="AudioStream" path="res://Slow_Clockwork_Sun.mp3" id="5_bgm"]
 [ext_resource type="Script" path="res://scripts/in_game_ui.gd" id="6_ui"]
