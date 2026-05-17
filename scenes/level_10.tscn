@@ -1,9 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://level_10_uid_5730"]
+[gd_scene load_steps=3 format=3 uid="uid://level_10_uid_4847"]
 
 [ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="1_planet"]
 [ext_resource type="PackedScene" path="res://scenes/player_2d.tscn" id="2_player"]
 [ext_resource type="Texture2D" path="res://assets/game_bg.png" id="3_bg"]
-[ext_resource type="PackedScene" path="res://scenes/delivery_box.tscn" id="4_box"]
 [ext_resource type="AudioStream" path="res://Slow_Clockwork_Sun.mp3" id="5_bgm"]
 [ext_resource type="Script" path="res://scripts/in_game_ui.gd" id="6_ui"]
 
@@ -26,33 +25,40 @@ stretch_mode = 6
 [node name="Planets" type="Node2D" parent="."]
 
 [node name="Planet1" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(150, 600)
+position = Vector2(150, 500)
 type = 0
 
 [node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(500, 300)
-scale = Vector2(0.8, 0.8)
-type = 1
+position = Vector2(590, -3)
+type = 2
 
 [node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(900, 150)
+position = Vector2(1374, 508)
 type = 0
 
 [node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1300, 300)
-scale = Vector2(0.9, 0.9)
-type = 1
+position = Vector2(1481, -185)
+type = 0
 
 [node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1650, 600)
+position = Vector2(2032, 193)
+type = 0
+
+[node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(2629, -339)
+type = 0
+
+[node name="Planet7" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(3052, 561)
 type = 3
 
+
 [node name="Player2D" parent="." instance=ExtResource("2_player")]
-position = Vector2(150, 380)
+position = Vector2(150, 300)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(900, 375)
-zoom = Vector2(0.48, 0.48)
+position = Vector2(1845, 110)
+zoom = Vector2(0.32, 0.32)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")
@@ -61,81 +67,5 @@ autoplay = true
 [node name="InGameUI" type="CanvasLayer" parent="."]
 layer = 5
 script = ExtResource("6_ui")
-
-[node name="MarginContainer" type="MarginContainer" parent="InGameUI"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -250.0
-offset_bottom = 100.0
-grow_horizontal = 0
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-
-[node name="VBoxContainer" type="VBoxContainer" parent="InGameUI/MarginContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="InGameUI/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 24
-text = "Music Volume"
-horizontal_alignment = 2
-
-[node name="HSlider" type="HSlider" parent="InGameUI/MarginContainer/VBoxContainer"]
-layout_mode = 2
-max_value = 1.0
-step = 0.05
-value = 1.0
-
-[node name="HealthMargin" type="MarginContainer" parent="InGameUI"]
-anchors_preset = 0
-offset_right = 200.0
-offset_bottom = 100.0
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-
-[node name="HealthLabel" type="Label" parent="InGameUI/HealthMargin"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 32
-text = "Box Health: 100%"
-
-[node name="ViewMapMargin" type="MarginContainer" parent="InGameUI"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -200.0
-offset_bottom = 100.0
-grow_horizontal = 0
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-
-[node name="ViewMapBtn" type="Button" parent="InGameUI/ViewMapMargin"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "VIEW MAP"
-
-[node name="HintMargin" type="MarginContainer" parent="InGameUI"]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -200.0
-offset_top = -100.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
-
-[node name="HintButton" type="Button" parent="InGameUI/HintMargin"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "HINT (Trajectory)"
 
 [connection signal="finished" from="BGM" to="BGM" method="play"]
