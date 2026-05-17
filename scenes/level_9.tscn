@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://level_9_uid_3215"]
+[gd_scene load_steps=3 format=3 uid="uid://level_9_uid_5657"]
 
 [ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="1_planet"]
 [ext_resource type="PackedScene" path="res://scenes/player_2d.tscn" id="2_player"]
@@ -29,27 +29,27 @@ position = Vector2(150, 500)
 type = 0
 
 [node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(833, 104)
-type = 0
-
-[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1432, 505)
-type = 2
-
-[node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1944, 184)
+position = Vector2(550, 100)
 type = 1
 
-[node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2261, 897)
+[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1000, 600)
 type = 0
 
-[node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2884, 268)
+[node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(700, -150)
 type = 2
 
+[node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1400, 150)
+type = 1
+
+[node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1100, -350)
+type = 0
+
 [node name="Planet7" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(3526, 982)
+position = Vector2(1800, 400)
 type = 3
 
 
@@ -57,8 +57,8 @@ type = 3
 position = Vector2(150, 300)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(1980, 543)
-zoom = Vector2(0.30, 0.30)
+position = Vector2(975, 225)
+zoom = Vector2(0.38, 0.38)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://level_20_uid_8530"]
+[gd_scene load_steps=3 format=3 uid="uid://level_20_uid_6460"]
 
 [ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="1_planet"]
 [ext_resource type="PackedScene" path="res://scenes/player_2d.tscn" id="2_player"]
@@ -25,60 +25,52 @@ stretch_mode = 6
 [node name="Planets" type="Node2D" parent="."]
 
 [node name="Planet1" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(150, 500)
+position = Vector2(150, 400)
 type = 0
 
 [node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(775, -133)
-type = 0
+position = Vector2(550, 750)
+type = 1
 
 [node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1189, 1040)
-type = 2
+position = Vector2(500, 50)
+type = 0
 
 [node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(1355, 16)
-type = 0
+position = Vector2(1000, 400)
+type = 2
 
 [node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2139, 950)
-type = 0
+position = Vector2(850, -200)
+type = 1
 
 [node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2405, -213)
-type = 1
+position = Vector2(1400, 100)
+type = 0
 
 [node name="Planet7" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(2818, 416)
-type = 0
+position = Vector2(1250, 700)
+type = 2
 
 [node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(3217, -375)
-type = 0
-
-[node name="Planet9" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(4273, 326)
-type = 2
-
-[node name="Planet10" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(5090, -382)
+position = Vector2(1750, -100)
 type = 1
 
-[node name="Planet11" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(5845, 117)
-type = 2
+[node name="Planet9" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1600, 500)
+type = 0
 
-[node name="Planet12" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
-position = Vector2(6625, -479)
+[node name="Planet10" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(2150, 200)
 type = 3
 
 
 [node name="Player2D" parent="." instance=ExtResource("2_player")]
-position = Vector2(150, 300)
+position = Vector2(150, 200)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(3750, 280)
-zoom = Vector2(0.16, 0.16)
+position = Vector2(1150, 275)
+zoom = Vector2(0.32, 0.32)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")
