@@ -181,6 +181,15 @@ func _ready():
 	
 	# Remove old UI
 	if has_node("MarginContainer"): $MarginContainer.queue_free()
+	
+	# Add background jump zone to prevent clicks on UI from jumping
+	var jump_zone = Control.new()
+	jump_zone.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	jump_zone.mouse_filter = Control.MOUSE_FILTER_STOP
+	jump_zone.gui_input.connect(_on_jump_zone_gui_input)
+	add_child(jump_zone)
+	move_child(jump_zone, 0)
+	
 	if has_node("HealthMargin"): $HealthMargin.queue_free()
 	if has_node("ViewMapMargin"): $ViewMapMargin.queue_free()
 	if has_node("HintMargin"): $HintMargin.queue_free()
@@ -273,6 +282,12 @@ func _on_player_glide_used():
 		glide_button.text = "glide x%d" % SaveSystem.glide_count
 		glide_button.disabled = true
 		glide_button.modulate.a = 0.3
+
+func _on_jump_zone_gui_input(event: InputEvent):
+	if event is InputEventScreenTouch and event.pressed:
+		if is_instance_valid(player): player._wants_to_jump = true
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if is_instance_valid(player): player._wants_to_jump = true
 
 func _on_back_pressed():
 	get_tree().paused = false

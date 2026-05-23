@@ -68,12 +68,6 @@ func _on_gravity_area_exited(area: Area2D) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_menu_demo and event.is_action_pressed("ui_cancel"):
 		get_tree().change_scene_to_file("res://scenes/level_select.tscn")
-		
-	# Touch / Left Click to Jump
-	if event is InputEventScreenTouch and event.pressed:
-		_wants_to_jump = true
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_wants_to_jump = true
 
 func _physics_process(delta: float) -> void:
 	if is_game_over:
