@@ -262,7 +262,7 @@ func _physics_process(delta: float) -> void:
 				GameManager.game_over("You drifted into deep space!")
 				return
 			
-	if show_trajectory and not is_menu_demo and current_planet != null and on_ground:
+	if show_trajectory and not is_menu_demo and current_planet != null:
 		calculate_trajectory()
 	else:
 		trajectory_points.clear()

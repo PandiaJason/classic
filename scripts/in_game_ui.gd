@@ -124,6 +124,7 @@ func _ready():
 	
 	# Setup Hint Button
 	hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
+	hint_button.button_down.connect(_on_hint_pressed)
 	hint_button.pressed.connect(_on_hint_pressed)
 	
 	var hint_margin = MarginContainer.new()
