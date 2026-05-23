@@ -70,6 +70,62 @@ func _ready():
 	back_margin.add_child(back_button)
 	add_child(back_margin)
 
+	# Setup Shop Panel
+	var shop_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
+	var shop_hbox = HBoxContainer.new()
+	shop_hbox.add_theme_constant_override("separation", 20)
+	shop_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	var ruby_icon = TextureRect.new()
+	ruby_icon.texture = load("res://assets/ruby.png")
+	ruby_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	ruby_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ruby_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ruby_icon.custom_minimum_size = Vector2(30, 30)
+	
+	var score_label = Label.new()
+	score_label.text = str(SaveSystem.global_score)
+	score_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	score_label.add_theme_font_size_override("font_size", 32)
+	score_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	
+	var ruby_hbox = HBoxContainer.new()
+	ruby_hbox.add_child(ruby_icon)
+	ruby_hbox.add_child(score_label)
+	shop_hbox.add_child(ruby_hbox)
+	
+	# Glide assist button or owned label
+	var glide_count_label = Label.new()
+	if SaveSystem.glide_count > 0:
+		glide_count_label.text = "glides: %d" % SaveSystem.glide_count
+		glide_count_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+	else:
+		glide_count_label.text = "glides: 0"
+		glide_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	glide_count_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	glide_count_label.add_theme_font_size_override("font_size", 24)
+	shop_hbox.add_child(glide_count_label)
+	
+	# Always show buy button
+	var buy_btn = UIFactory.create_glass_button("buy glide (30)", Color(0.2, 0.6, 1.0))
+	buy_btn.pressed.connect(_on_buy_glide)
+	# Disable if not enough rubies
+	if SaveSystem.global_score < 30:
+		buy_btn.disabled = true
+		buy_btn.modulate.a = 0.4
+	shop_hbox.add_child(buy_btn)
+	
+	shop_panel.add_child(shop_hbox)
+	
+	var shop_margin = MarginContainer.new()
+	shop_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	shop_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	shop_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	shop_margin.add_theme_constant_override("margin_bottom", 20)
+	shop_margin.add_theme_constant_override("margin_right", 40)
+	shop_margin.add_child(shop_panel)
+	add_child(shop_margin)
+
 func load_style(type: String) -> StyleBoxFlat:
 	var style = StyleBoxFlat.new()
 	style.corner_radius_top_left = 25
@@ -128,3 +184,8 @@ func _on_back_pressed():
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		_on_back_pressed()
+
+func _on_buy_glide():
+	if SaveSystem.purchase_glide():
+		# Refresh the scene to show updated shop
+		get_tree().change_scene_to_file("res://scenes/level_select.tscn")

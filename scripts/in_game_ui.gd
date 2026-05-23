@@ -21,6 +21,7 @@ var hint_button: Button
 var hint_used: bool = false
 var map_timer = null
 var back_button: Button
+var glide_button: Button
 
 func _ready():
 	if is_instance_valid(level_camera):
@@ -150,6 +151,23 @@ func _ready():
 	level_margin.add_child(level_panel)
 	add_child(level_margin)
 	
+	# Setup Glide Assist Button (only if has glides)
+	if SaveSystem.glide_count > 0:
+		glide_button = UIFactory.create_glass_button("glide x%d" % SaveSystem.glide_count, Color(0.2, 0.6, 1.0))
+		glide_button.pressed.connect(_on_glide_pressed)
+		
+		var glide_margin = MarginContainer.new()
+		glide_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		glide_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		glide_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		glide_margin.add_theme_constant_override("margin_bottom", 80)
+		glide_margin.add_theme_constant_override("margin_right", 40)
+		glide_margin.add_child(glide_button)
+		add_child(glide_margin)
+		
+		if is_instance_valid(player):
+			player.glide_used.connect(_on_player_glide_used)
+	
 	# Setup Back Button
 	back_button = UIFactory.create_glass_button("back", UIFactory.RED_COLOR)
 	back_button.pressed.connect(_on_back_pressed)
@@ -182,6 +200,25 @@ func _process(delta: float):
 		else:
 			hint_button.disabled = true
 			hint_button.modulate.a = 0.3
+			
+	# Update glide button state
+	if is_instance_valid(glide_button):
+		if is_instance_valid(player):
+			if SaveSystem.glide_count <= 0:
+				# No glides left at all
+				glide_button.text = "glide x0"
+				glide_button.disabled = true
+				glide_button.modulate.a = 0.3
+			elif player._glide_used_this_flight or player.current_planet != null:
+				# On a planet or already used this flight
+				glide_button.text = "glide x%d" % SaveSystem.glide_count
+				glide_button.disabled = true
+				glide_button.modulate.a = 0.3
+			else:
+				# In zero gravity with glides available
+				glide_button.text = "glide x%d" % SaveSystem.glide_count
+				glide_button.disabled = false
+				glide_button.modulate.a = 1.0
 	
 	if is_instance_valid(level_camera):
 		if is_viewing_map:
@@ -229,6 +266,16 @@ func _on_hint_released():
 
 func _on_view_map_pressed():
 	is_viewing_map = !is_viewing_map
+
+func _on_glide_pressed():
+	if is_instance_valid(player) and not player._glide_used_this_flight and player.current_planet == null and SaveSystem.glide_count > 0:
+		player._wants_to_jump = true
+
+func _on_player_glide_used():
+	if is_instance_valid(glide_button):
+		glide_button.text = "glide x%d" % SaveSystem.glide_count
+		glide_button.disabled = true
+		glide_button.modulate.a = 0.3
 
 func _on_back_pressed():
 	get_tree().paused = false

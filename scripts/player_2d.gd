@@ -19,6 +19,10 @@ var show_trajectory: bool = false
 var overlapping_gravity_areas: Array = []
 var was_on_ground: bool = true
 
+# Glide assist (resets each flight — use one per zero-gravity segment)
+var _glide_used_this_flight: bool = false
+signal glide_used
+
 # Cinematic death state
 var _doomed: bool = false
 var _doom_timer: float = 0.0
@@ -172,6 +176,7 @@ func _physics_process(delta: float) -> void:
 		
 		if on_ground and not was_on_ground:
 			# Player just landed on a planet
+			_glide_used_this_flight = false  # Reset glide for next flight
 			if not is_menu_demo and has_jumped:
 				has_jumped = false
 				# Auto-hide trajectory hint after landing
@@ -217,6 +222,19 @@ func _physics_process(delta: float) -> void:
 		# Player floats in a straight line with their current velocity
 		last_planet = null
 		move_and_slide()
+		
+		# Glide assist - pull toward nearest planet (1 per flight, unlimited per level)
+		if not is_menu_demo and not _glide_used_this_flight and SaveSystem.glide_count > 0:
+			if Input.is_action_just_pressed("ui_accept") or _wants_to_jump:
+				var nearest = _find_nearest_planet()
+				if nearest:
+					var pull_dir = (nearest.global_position - global_position).normalized()
+					velocity = pull_dir * 400.0
+					_glide_used_this_flight = true
+					SaveSystem.use_glide()
+					glide_used.emit()
+					_doomed = false
+					_doom_timer = 0.0
 		
 		if not is_menu_demo and not is_game_over:
 			# --- CINEMATIC DEATH: detect doomed trajectory ---
@@ -376,3 +394,14 @@ func calculate_trajectory():
 				break
 		
 		trajectory_points.append(sim_pos)
+
+func _find_nearest_planet() -> Node2D:
+	var nearest: Node2D = null
+	var min_dist: float = INF
+	for p in _planets_list:
+		if is_instance_valid(p):
+			var dist = global_position.distance_to(p.global_position)
+			if dist < min_dist:
+				min_dist = dist
+				nearest = p
+	return nearest
