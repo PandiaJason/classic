@@ -277,7 +277,7 @@ func _draw():
 		for i in range(trajectory_points.size()):
 			var p = trajectory_points[i]
 			var alpha = 1.0 - (float(i) / trajectory_points.size()) * 0.6
-			draw_circle(to_local(p), 10.0, Color(1.0, 0.9, 0.2, alpha))
+			draw_circle(to_local(p), 6.0, Color(1.0, 0.9, 0.2, alpha))
 
 func update_sprite_region():
 	# Flip sprite based on forward direction

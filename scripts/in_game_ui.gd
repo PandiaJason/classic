@@ -115,6 +115,7 @@ func _ready():
 	view_map_btn.pressed.connect(_on_view_map_pressed)
 	
 	var map_margin = MarginContainer.new()
+	map_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	map_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	map_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	map_margin.add_theme_constant_override("margin_top", 20)
@@ -128,6 +129,7 @@ func _ready():
 	hint_button.pressed.connect(_on_hint_pressed)
 	
 	var hint_margin = MarginContainer.new()
+	hint_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hint_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	hint_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	hint_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -157,6 +159,7 @@ func _ready():
 		glide_button.pressed.connect(_on_glide_pressed)
 		
 		var glide_margin = MarginContainer.new()
+		glide_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		glide_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 		glide_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 		glide_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -173,6 +176,7 @@ func _ready():
 	back_button.pressed.connect(_on_back_pressed)
 	
 	var back_margin = MarginContainer.new()
+	back_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	back_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	back_margin.add_theme_constant_override("margin_bottom", 20)
