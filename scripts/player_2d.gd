@@ -280,9 +280,10 @@ func _physics_process(delta: float) -> void:
 
 func _draw():
 	if show_trajectory and trajectory_points.size() > 0:
-		for p in trajectory_points:
-			# p is in global coordinates, so we need to convert to local to draw properly
-			draw_circle(to_local(p), 4.0, Color(1.0, 1.0, 1.0, 0.7))
+		for i in range(trajectory_points.size()):
+			var p = trajectory_points[i]
+			var alpha = 1.0 - (float(i) / trajectory_points.size()) * 0.6
+			draw_circle(to_local(p), 10.0, Color(1.0, 0.9, 0.2, alpha))
 
 func update_sprite_region():
 	# Flip sprite based on forward direction

@@ -124,8 +124,7 @@ func _ready():
 	
 	# Setup Hint Button
 	hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
-	hint_button.button_down.connect(_on_hint_pressed)
-	hint_button.button_up.connect(_on_hint_released)
+	hint_button.pressed.connect(_on_hint_pressed)
 	
 	var hint_margin = MarginContainer.new()
 	hint_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
@@ -260,9 +259,7 @@ func _on_hint_pressed():
 	# Fade out the button after activation
 	var tween = create_tween()
 	tween.tween_property(hint_button, "modulate:a", 0.3, 0.5)
-
-func _on_hint_released():
-	pass # Trajectory stays visible until player lands
+	hint_button.disabled = true
 
 func _on_view_map_pressed():
 	is_viewing_map = !is_viewing_map
