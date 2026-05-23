@@ -270,6 +270,7 @@ func _on_hint_pressed():
 	hint_used = true
 	if is_instance_valid(player):
 		player.show_trajectory = true
+		player.has_jumped = false # Prevent instant cancel if activated mid-air while falling onto a planet
 	# Fade out the button after activation
 	var tween = create_tween()
 	tween.tween_property(hint_button, "modulate:a", 0.3, 0.5)
