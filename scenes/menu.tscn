@@ -1,7 +1,7 @@
 [gd_scene load_steps=2 format=3 uid="uid://c5w8x8y3k1l9"]
 
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/game_bg.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/bg_ref.jpg" id="2_bg"]
 [ext_resource type="FontFile" path="res://assets/game_font.ttf" id="3_font"]
 [ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="4_planet"]
 [ext_resource type="PackedScene" path="res://scenes/player_2d.tscn" id="5_player"]
