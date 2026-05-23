@@ -70,8 +70,7 @@ func _ready():
 	back_margin.add_child(back_button)
 	add_child(back_margin)
 
-	# Setup Shop Panel
-	var shop_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
+	# Setup Shop UI
 	var shop_hbox = HBoxContainer.new()
 	shop_hbox.add_theme_constant_override("separation", 20)
 	shop_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -88,8 +87,11 @@ func _ready():
 	score_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 	score_label.add_theme_font_size_override("font_size", 32)
 	score_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	score_label.add_theme_constant_override("outline_size", 5)
 	
 	var ruby_hbox = HBoxContainer.new()
+	ruby_hbox.add_theme_constant_override("separation", 5)
+	ruby_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	ruby_hbox.add_child(ruby_icon)
 	ruby_hbox.add_child(score_label)
 	shop_hbox.add_child(ruby_hbox)
@@ -103,7 +105,8 @@ func _ready():
 		glide_count_label.text = "glides: 0"
 		glide_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	glide_count_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	glide_count_label.add_theme_font_size_override("font_size", 24)
+	glide_count_label.add_theme_font_size_override("font_size", 28)
+	glide_count_label.add_theme_constant_override("outline_size", 5)
 	shop_hbox.add_child(glide_count_label)
 	
 	# Always show buy button
@@ -115,15 +118,13 @@ func _ready():
 		buy_btn.modulate.a = 0.4
 	shop_hbox.add_child(buy_btn)
 	
-	shop_panel.add_child(shop_hbox)
-	
 	var shop_margin = MarginContainer.new()
 	shop_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	shop_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	shop_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	shop_margin.add_theme_constant_override("margin_bottom", 20)
 	shop_margin.add_theme_constant_override("margin_right", 40)
-	shop_margin.add_child(shop_panel)
+	shop_margin.add_child(shop_hbox)
 	add_child(shop_margin)
 
 func load_style(type: String) -> StyleBoxFlat:
