@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+var game_over_reason: String = "you were destroyed!"
+
 func create_glass_button(text: String, color: Color) -> Button:
 	var btn = Button.new()
 	btn.text = text
@@ -88,7 +90,7 @@ func _ready():
 	vbox.add_child(skeleton_icon)
 	
 	var subtitle = Label.new()
-	subtitle.text = "you were destroyed!"
+	subtitle.text = game_over_reason
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 	subtitle.add_theme_font_size_override("font_size", 30)
@@ -119,9 +121,9 @@ func _on_retry_pressed():
 	get_tree().paused = false
 	GameManager.reset_score()
 	queue_free()
-	get_tree().reload_current_scene()
+	SceneTransition.reload_current()
 
 func _on_menu_pressed():
 	get_tree().paused = false
 	queue_free()
-	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	SceneTransition.transition_to("res://scenes/menu.tscn")

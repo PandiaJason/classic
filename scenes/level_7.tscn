@@ -58,10 +58,8 @@ zoom = Vector2(0.40, 0.40)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")
-autoplay = true
 
 [node name="InGameUI" type="CanvasLayer" parent="."]
 layer = 5
 script = ExtResource("6_ui")
 
-[connection signal="finished" from="BGM" to="BGM" method="play"]

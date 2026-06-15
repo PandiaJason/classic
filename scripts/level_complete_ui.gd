@@ -107,12 +107,43 @@ func _ready():
 		
 	vbox.add_child(stars_hbox)
 	
+	# Stats breakdown
+	var stats_vbox = VBoxContainer.new()
+	stats_vbox.add_theme_constant_override("separation", 5)
+	stats_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	var rubies_lbl = Label.new()
+	rubies_lbl.text = "rubies collected: %d" % GameManager.level_rubies
+	rubies_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rubies_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	rubies_lbl.add_theme_font_size_override("font_size", 24)
+	rubies_lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.2)) # Premium Gold
+	stats_vbox.add_child(rubies_lbl)
+	
+	var score_lbl = Label.new()
+	score_lbl.text = "score earned: +%d" % GameManager.level_score_earned
+	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	score_lbl.add_theme_font_size_override("font_size", 24)
+	score_lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
+	stats_vbox.add_child(score_lbl)
+	
+	var health_lbl = Label.new()
+	health_lbl.text = "box health: %d%%" % int(GameManager.box_health)
+	health_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	health_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	health_lbl.add_theme_font_size_override("font_size", 24)
+	health_lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
+	stats_vbox.add_child(health_lbl)
+	
+	vbox.add_child(stats_vbox)
+	
 	var box_icon = TextureRect.new()
 	box_icon.texture = load("res://assets/level_complete_success.png")
 	box_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	box_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	box_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	box_icon.custom_minimum_size = Vector2(250, 220)
+	box_icon.custom_minimum_size = Vector2(200, 170)
 	vbox.add_child(box_icon)
 	
 	var hbox = HBoxContainer.new()
@@ -123,7 +154,7 @@ func _ready():
 	menu_btn.pressed.connect(_on_menu_pressed)
 	hbox.add_child(menu_btn)
 	
-	var btn_text = "finish" if GameManager.current_level >= 30 else "next level"
+	var btn_text = "finish" if GameManager.current_level >= 90 else "next level"
 	var next_btn = create_glass_button(btn_text, Color(0.2, 1.0, 0.2))
 	next_btn.pressed.connect(_on_next_pressed)
 	hbox.add_child(next_btn)
@@ -145,4 +176,4 @@ func _on_next_pressed():
 func _on_menu_pressed():
 	get_tree().paused = false
 	queue_free()
-	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	SceneTransition.transition_to("res://scenes/menu.tscn")

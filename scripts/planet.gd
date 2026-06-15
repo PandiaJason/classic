@@ -101,6 +101,32 @@ func setup_planet():
 	
 	var mat = ShaderMaterial.new()
 	mat.shader = load("res://shaders/bubble.gdshader")
+	
+	# Tier-specific gravity bubble colors
+	var bubble_color = Color(0.2, 0.6, 1.0, 0.05)
+	var rim_color = Color(0.8, 0.95, 1.0)
+	var lvl = GameManager.current_level
+	if lvl >= 81:
+		bubble_color = Color(0.8, 0.2, 0.6, 0.05)
+		rim_color = Color(1.0, 0.7, 0.9)
+	elif lvl >= 71:
+		bubble_color = Color(0.1, 0.7, 0.8, 0.05)
+		rim_color = Color(0.6, 0.95, 1.0)
+	elif lvl >= 61:
+		bubble_color = Color(0.9, 0.5, 0.1, 0.05)
+		rim_color = Color(1.0, 0.8, 0.5)
+	elif lvl >= 51:
+		bubble_color = Color(0.2, 0.8, 0.3, 0.05)
+		rim_color = Color(0.7, 1.0, 0.8)
+	elif lvl >= 41:
+		bubble_color = Color(0.6, 0.2, 0.9, 0.05)
+		rim_color = Color(0.9, 0.7, 1.0)
+	elif lvl >= 31:
+		bubble_color = Color(0.1, 0.7, 0.6, 0.05)
+		rim_color = Color(0.6, 1.0, 0.9)
+		
+	mat.set_shader_parameter("bubble_color", bubble_color)
+	mat.set_shader_parameter("rim_color", rim_color)
 	bubble.material = mat
 	
 	# Ensure the bubble is behind the planet sprite but visible

@@ -57,7 +57,6 @@ zoom = Vector2(0.6, 0.6)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")
-autoplay = true
 
 [node name="InGameUI" type="CanvasLayer" parent="."]
 layer = 5
@@ -139,4 +138,3 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "HINT (Trajectory)"
 
-[connection signal="finished" from="BGM" to="BGM" method="play"]

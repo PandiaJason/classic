@@ -22,6 +22,10 @@ var was_on_ground: bool = true
 # Glide assist (resets each flight — use one per zero-gravity segment)
 var _glide_used_this_flight: bool = false
 signal glide_used
+var _tether_planet: Node2D = null
+var _tether_time_left: float = 0.0
+var thruster_particles: CPUParticles2D = null
+var flight_trail_particles: CPUParticles2D = null
 
 # Cinematic death state
 var _doomed: bool = false
@@ -29,6 +33,7 @@ var _doom_timer: float = 0.0
 const DOOM_DELAY: float = 2.5
 
 var _wants_to_jump: bool = false
+var _wants_to_brake: bool = false
 
 var trajectory_points: Array[Vector2] = []
 @onready var floor_ray = $RayCast2D
@@ -36,6 +41,47 @@ var trajectory_points: Array[Vector2] = []
 func _ready() -> void:
 	add_to_group("player")
 	current_speed = max_speed
+	
+	# Initialize maneuvering gas thruster particles dynamically
+	thruster_particles = CPUParticles2D.new()
+	add_child(thruster_particles)
+	thruster_particles.emitting = false
+	thruster_particles.amount = 40
+	thruster_particles.lifetime = 0.35
+	thruster_particles.explosiveness = 0.0
+	thruster_particles.randomness = 0.6
+	thruster_particles.local_coords = false
+	thruster_particles.direction = Vector2.LEFT
+	thruster_particles.spread = 15.0
+	thruster_particles.gravity = Vector2.ZERO
+	thruster_particles.initial_velocity_min = 250.0
+	thruster_particles.initial_velocity_max = 350.0
+	thruster_particles.scale_amount_min = 3.0
+	thruster_particles.scale_amount_max = 8.0
+	
+	var ramp = Gradient.new()
+	ramp.set_color(0, Color(0.6, 0.8, 1.0, 0.8))
+	ramp.set_color(1, Color(0.2, 0.4, 0.8, 0.0))
+	thruster_particles.color_ramp = ramp
+	
+	# Initialize flight trail particles dynamically
+	flight_trail_particles = CPUParticles2D.new()
+	add_child(flight_trail_particles)
+	flight_trail_particles.emitting = false
+	flight_trail_particles.amount = 30
+	flight_trail_particles.lifetime = 0.5
+	flight_trail_particles.local_coords = false
+	flight_trail_particles.spread = 20.0
+	flight_trail_particles.gravity = Vector2.ZERO
+	flight_trail_particles.initial_velocity_min = 10.0
+	flight_trail_particles.initial_velocity_max = 30.0
+	flight_trail_particles.scale_amount_min = 1.5
+	flight_trail_particles.scale_amount_max = 4.0
+	
+	var trail_ramp = Gradient.new()
+	trail_ramp.set_color(0, Color(0.8, 0.95, 1.0, 0.4)) # Pale blue-white
+	trail_ramp.set_color(1, Color(0.5, 0.8, 1.0, 0.0))
+	flight_trail_particles.color_ramp = trail_ramp
 	
 	# Setup an Area2D to detect gravity fields (Spatial Partitioning O(log N) instead of O(N) array search)
 	var detector = Area2D.new()
@@ -65,9 +111,7 @@ func _on_gravity_area_exited(area: Area2D) -> void:
 	if overlapping_gravity_areas.has(area):
 		overlapping_gravity_areas.erase(area)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not is_menu_demo and event.is_action_pressed("ui_cancel"):
-		get_tree().change_scene_to_file("res://scenes/level_select.tscn")
+
 
 func _physics_process(delta: float) -> void:
 	if is_game_over:
@@ -88,6 +132,10 @@ func _physics_process(delta: float) -> void:
 	find_gravity_source(on_ground)
 	
 	if current_planet:
+		# Clear any active grapple tether since we are inside gravity
+		_tether_planet = null
+		_tether_time_left = 0.0
+		
 		# 2. Calculate gravity direction
 		var diff = current_planet.global_position - global_position
 		var gravity_dir = diff.normalized()
@@ -127,8 +175,9 @@ func _physics_process(delta: float) -> void:
 		
 		# 4. Handle auto-drive and braking
 		var direction = Input.get_axis("ui_left", "ui_right")
+		var is_braking = direction < 0 or _wants_to_brake
 		
-		if direction < 0:
+		if is_braking:
 			current_speed -= brake_force * delta
 		else:
 			current_speed += brake_force * 0.5 * delta
@@ -148,13 +197,13 @@ func _physics_process(delta: float) -> void:
 				if GameManager.has_box:
 					GameManager.level_complete()
 				else:
-					GameManager.game_over("You forgot the delivery box!")
+					GameManager.game_over("you forgot the delivery box!")
 				return
 		
 		# Check game over condition
 		if not is_menu_demo and current_speed <= 0.0 and on_ground:
 			is_game_over = true
-			GameManager.game_over("Your bike stopped!")
+			GameManager.game_over("your bike stopped!")
 			return
 
 		
@@ -171,12 +220,21 @@ func _physics_process(delta: float) -> void:
 		if on_ground and not was_on_ground:
 			# Player just landed on a planet
 			_glide_used_this_flight = false  # Reset glide for next flight
-			if not is_menu_demo and has_jumped:
-				has_jumped = false
-				# Auto-hide trajectory hint after landing
+			SoundManager.play_sfx("landing")
+			
+			# Trigger subtle camera shake on landing
+			if not is_menu_demo:
+				var ui = get_tree().get_first_node_in_group("in_game_ui")
+				if ui:
+					ui.shake_camera(8.0, 0.2)
+			
+			if not is_menu_demo:
+				if has_jumped:
+					has_jumped = false
+					if current_planet != null and "type" in current_planet and current_planet.type != 3:
+						GameManager.take_jump_damage()
+				# Auto-hide trajectory hint after landing (regardless of how flight ended)
 				show_trajectory = false
-				if current_planet != null and "type" in current_planet and current_planet.type != 3:
-					GameManager.take_jump_damage()
 		was_on_ground = on_ground
 
 		# 5. Handle movement
@@ -192,10 +250,10 @@ func _physics_process(delta: float) -> void:
 			var jump_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or _wants_to_jump
 			if not is_menu_demo and jump_pressed:
 				# Real Jump!
-				print("JUMP!")
 				has_jumped = true
 				# Override the vertical velocity entirely to launch upwards
 				velocity = (surface_right * current_speed * forward_direction) + (surface_up * -jump_force)
+				SoundManager.play_sfx("jump")
 		else:
 			# Add a tiny bit of air control / forward momentum
 			velocity += surface_right * current_speed * forward_direction * delta * 0.5
@@ -215,20 +273,66 @@ func _physics_process(delta: float) -> void:
 		# ZERO GRAVITY STATE
 		# Player floats in a straight line with their current velocity
 		last_planet = null
-		move_and_slide()
 		
-		# Glide assist - pull toward nearest planet (1 per flight, unlimited per level)
-		if not is_menu_demo and not _glide_used_this_flight and SaveSystem.glide_count > 0:
-			if Input.is_action_just_pressed("ui_accept") or _wants_to_jump:
+		# Glide assist - pull toward nearest planet (can use multiple times per flight)
+		if not is_menu_demo and SaveSystem.glide_count > 0:
+			var just_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or _wants_to_jump
+			if just_pressed:
 				var nearest = _find_nearest_planet()
 				if nearest:
-					var pull_dir = (nearest.global_position - global_position).normalized()
-					velocity = pull_dir * 400.0
+					_tether_planet = nearest
 					_glide_used_this_flight = true
 					SaveSystem.use_glide()
 					glide_used.emit()
 					_doomed = false
 					_doom_timer = 0.0
+					SoundManager.start_sfx_loop("thruster")
+					
+					# Grace timer if triggered by mobile touch tap
+					if _wants_to_jump:
+						_tether_time_left = 1.5
+					else:
+						_tether_time_left = 0.0
+		
+		# Apply tether pull in zero gravity
+		if _tether_planet != null and is_instance_valid(_tether_planet):
+			var is_holding = Input.is_action_pressed("ui_accept") or Input.is_action_pressed("ui_up")
+			var should_release = false
+			
+			if _tether_time_left > 0.0:
+				_tether_time_left -= delta
+				if _tether_time_left <= 0.0:
+					should_release = true
+			elif not is_holding:
+				should_release = true
+				
+			if should_release:
+				_tether_planet = null
+				_tether_time_left = 0.0
+				SoundManager.stop_sfx_loop("thruster")
+				if thruster_particles != null:
+					thruster_particles.emitting = false
+			else:
+				var pull_dir = (_tether_planet.global_position - global_position).normalized()
+				var pull_accel = 1200.0
+				velocity += pull_dir * pull_accel * delta
+				
+				# Enable gas jet plume and orient it away from the planet (action-reaction)
+				if thruster_particles != null:
+					thruster_particles.emitting = true
+					thruster_particles.global_rotation = (global_position - _tether_planet.global_position).angle()
+				
+				# Slingshot speed cap (600.0) for more momentum
+				if velocity.length() > 600.0:
+					velocity = velocity.normalized() * 600.0
+		else:
+			_tether_planet = null
+			_tether_time_left = 0.0
+			SoundManager.stop_sfx_loop("thruster")
+			if thruster_particles != null:
+				thruster_particles.emitting = false
+			
+		move_and_slide()
 		
 		if not is_menu_demo and not is_game_over:
 			# --- CINEMATIC DEATH: detect doomed trajectory ---
@@ -259,14 +363,33 @@ func _physics_process(delta: float) -> void:
 					max_y = max(max_y, p.global_position.y)
 			if global_position.x < min_x - buffer or global_position.x > max_x + buffer or global_position.y < min_y - buffer or global_position.y > max_y + buffer:
 				is_game_over = true
-				GameManager.game_over("You drifted into deep space!")
+				GameManager.game_over("you drifted into deep space!")
 				return
 			
-	if show_trajectory and not is_menu_demo and current_planet != null:
-		calculate_trajectory()
+	if show_trajectory and not is_menu_demo:
+		if current_planet != null and on_ground:
+			calculate_trajectory()
+		else:
+			show_trajectory = false
+			trajectory_points.clear()
 	else:
 		trajectory_points.clear()
 			
+	# Defensive safety cleanup for maneuvering gas thruster loop/particles
+	var is_zero_g = current_planet == null and not on_ground
+	if not is_zero_g or _tether_planet == null or is_game_over:
+		SoundManager.stop_sfx_loop("thruster")
+		if thruster_particles != null:
+			thruster_particles.emitting = false
+			
+	# Update flight trail particles
+	if is_instance_valid(flight_trail_particles):
+		if not is_menu_demo and current_planet == null and velocity.length() > 50.0 and not is_game_over:
+			flight_trail_particles.emitting = true
+			flight_trail_particles.direction = -velocity.normalized()
+		else:
+			flight_trail_particles.emitting = false
+
 	update_sprite_region()
 	queue_redraw()
 	
@@ -278,6 +401,9 @@ func _draw():
 			var p = trajectory_points[i]
 			var alpha = 1.0 - (float(i) / trajectory_points.size()) * 0.6
 			draw_circle(to_local(p), 6.0, Color(1.0, 0.9, 0.2, alpha))
+			
+	# Maneuvering thrusters are pure rocket thrust (no magical ropes drawn)
+	pass
 
 func update_sprite_region():
 	# Flip sprite based on forward direction

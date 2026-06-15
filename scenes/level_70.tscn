@@ -1,0 +1,97 @@
+[gd_scene load_steps=3 format=3 uid="uid://level_70_uid_10110"]
+
+[ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="1_planet"]
+[ext_resource type="PackedScene" path="res://scenes/player_2d.tscn" id="2_player"]
+[ext_resource type="Texture2D" path="res://assets/bg_ref.jpg" id="3_bg"]
+[ext_resource type="AudioStream" path="res://Slow_Clockwork_Sun.mp3" id="5_bgm"]
+[ext_resource type="Script" path="res://scripts/in_game_ui.gd" id="6_ui"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Background" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="TextureRect" type="TextureRect" parent="Background"]
+modulate = Color(0.4, 0.25, 0.1, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Planets" type="Node2D" parent="."]
+
+[node name="Planet1" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(0, 0)
+type = 0
+
+[node name="Planet2" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(600, -400)
+scale = Vector2(0.5, 0.5)
+type = 2
+
+[node name="Planet3" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(600, 400)
+scale = Vector2(0.6, 0.6)
+type = 2
+
+[node name="Planet4" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1200, 0)
+type = 1
+
+[node name="Planet5" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1800, -500)
+scale = Vector2(0.5, 0.5)
+type = 2
+
+[node name="Planet6" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(1800, 500)
+scale = Vector2(0.5, 0.5)
+type = 2
+
+[node name="Planet7" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(2400, 0)
+scale = Vector2(0.6, 0.6)
+type = 2
+
+[node name="Planet8" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(3000, -400)
+scale = Vector2(0.5, 0.5)
+type = 2
+
+[node name="Planet9" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(3000, 400)
+type = 1
+
+[node name="Planet10" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(3600, 0)
+scale = Vector2(0.5, 0.5)
+type = 2
+
+[node name="Planet11" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(4200, -300)
+scale = Vector2(0.6, 0.6)
+type = 2
+
+[node name="Planet12" parent="Planets" groups=["planets"] instance=ExtResource("1_planet")]
+position = Vector2(4800, 0)
+type = 3
+
+
+[node name="Player2D" parent="." instance=ExtResource("2_player")]
+position = Vector2(0, -220)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(2250, -25)
+zoom = Vector2(0.18, 0.18)
+
+[node name="BGM" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_bgm")
+
+[node name="InGameUI" type="CanvasLayer" parent="."]
+layer = 5
+script = ExtResource("6_ui")
+

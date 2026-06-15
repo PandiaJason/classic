@@ -2,7 +2,11 @@ extends Control
 
 @onready var grid = $ScrollContainer/MarginContainer/GridContainer
 
-var total_levels = 30
+var total_levels = 90
+
+var score_label: Label
+var glide_count_label: Label
+var buy_btn: Button
 
 func _ready():
 	BgmManager.play_menu_music()
@@ -37,6 +41,21 @@ func _ready():
 			btn.pressed.connect(_on_level_selected.bind(i))
 		else:
 			btn.text = ""
+			
+			# Determine star gate requirement
+			var req_stars = 0
+			if i >= 81: req_stars = 200
+			elif i >= 71: req_stars = 165
+			elif i >= 61: req_stars = 135
+			elif i >= 51: req_stars = 110
+			elif i >= 41: req_stars = 90
+			elif i >= 31: req_stars = 75
+			elif i >= 26: req_stars = 60
+			elif i >= 21: req_stars = 45
+			elif i >= 16: req_stars = 30
+			elif i >= 11: req_stars = 15
+			elif i >= 6: req_stars = 5
+			
 			var lock_tex = load("res://assets/lock_icon.png")
 			if lock_tex:
 				var lock_icon = TextureRect.new()
@@ -45,11 +64,22 @@ func _ready():
 				lock_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				lock_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 				lock_icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-				lock_icon.offset_left = 30
-				lock_icon.offset_top = 30
-				lock_icon.offset_right = -30
-				lock_icon.offset_bottom = -30
+				lock_icon.offset_left = 35
+				lock_icon.offset_top = 20
+				lock_icon.offset_right = -35
+				lock_icon.offset_bottom = -45
 				btn.add_child(lock_icon)
+				
+			if req_stars > 0:
+				var req_label = Label.new()
+				req_label.text = "%d ★" % req_stars
+				req_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+				req_label.add_theme_font_size_override("font_size", 20)
+				req_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
+				req_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				req_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+				req_label.offset_bottom = -8
+				btn.add_child(req_label)
 				
 			btn.add_theme_stylebox_override("normal", load_style("locked"))
 			btn.add_theme_stylebox_override("hover", load_style("locked"))
@@ -75,6 +105,29 @@ func _ready():
 	shop_hbox.add_theme_constant_override("separation", 20)
 	shop_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
+	# Stars progress indicator
+	var stars_hbox = HBoxContainer.new()
+	stars_hbox.add_theme_constant_override("separation", 5)
+	stars_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	var star_icon = TextureRect.new()
+	star_icon.texture = load("res://assets/star.png")
+	star_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	star_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	star_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	star_icon.custom_minimum_size = Vector2(30, 30)
+	
+	var stars_lbl = Label.new()
+	stars_lbl.text = "%d/%d" % [SaveSystem.get_total_stars(), 270]
+	stars_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	stars_lbl.add_theme_font_size_override("font_size", 32)
+	stars_lbl.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
+	stars_lbl.add_theme_constant_override("outline_size", 5)
+	
+	stars_hbox.add_child(star_icon)
+	stars_hbox.add_child(stars_lbl)
+	shop_hbox.add_child(stars_hbox)
+	
 	var ruby_icon = TextureRect.new()
 	ruby_icon.texture = load("res://assets/ruby.png")
 	ruby_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
@@ -82,8 +135,7 @@ func _ready():
 	ruby_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ruby_icon.custom_minimum_size = Vector2(30, 30)
 	
-	var score_label = Label.new()
-	score_label.text = str(SaveSystem.global_score)
+	score_label = Label.new()
 	score_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 	score_label.add_theme_font_size_override("font_size", 32)
 	score_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
@@ -97,26 +149,18 @@ func _ready():
 	shop_hbox.add_child(ruby_hbox)
 	
 	# Glide assist button or owned label
-	var glide_count_label = Label.new()
-	if SaveSystem.glide_count > 0:
-		glide_count_label.text = "glides: %d" % SaveSystem.glide_count
-		glide_count_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
-	else:
-		glide_count_label.text = "glides: 0"
-		glide_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	glide_count_label = Label.new()
 	glide_count_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 	glide_count_label.add_theme_font_size_override("font_size", 28)
 	glide_count_label.add_theme_constant_override("outline_size", 5)
 	shop_hbox.add_child(glide_count_label)
 	
 	# Always show buy button
-	var buy_btn = UIFactory.create_glass_button("buy glide (30)", Color(0.2, 0.6, 1.0))
+	buy_btn = UIFactory.create_glass_button("buy glide (30)", Color(0.2, 0.6, 1.0))
 	buy_btn.pressed.connect(_on_buy_glide)
-	# Disable if not enough rubies
-	if SaveSystem.global_score < 30:
-		buy_btn.disabled = true
-		buy_btn.modulate.a = 0.4
 	shop_hbox.add_child(buy_btn)
+	
+	_update_shop_ui()
 	
 	var shop_margin = MarginContainer.new()
 	shop_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
@@ -177,10 +221,10 @@ func _on_level_selected(level: int):
 	GameManager.current_level = level
 	GameManager.reset_score()
 	BgmManager.stop_menu_music()
-	get_tree().change_scene_to_file("res://scenes/level_" + str(level) + ".tscn")
+	SceneTransition.transition_to("res://scenes/level_" + str(level) + ".tscn")
 
 func _on_back_pressed():
-	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	SceneTransition.transition_to("res://scenes/menu.tscn")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -188,5 +232,24 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_buy_glide():
 	if SaveSystem.purchase_glide():
-		# Refresh the scene to show updated shop
-		get_tree().change_scene_to_file("res://scenes/level_select.tscn")
+		_update_shop_ui()
+
+func _update_shop_ui() -> void:
+	if is_instance_valid(score_label):
+		score_label.text = str(SaveSystem.global_score)
+		
+	if is_instance_valid(glide_count_label):
+		if SaveSystem.glide_count > 0:
+			glide_count_label.text = "glides: %d" % SaveSystem.glide_count
+			glide_count_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+		else:
+			glide_count_label.text = "glides: 0"
+			glide_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+			
+	if is_instance_valid(buy_btn):
+		if SaveSystem.global_score < 30:
+			buy_btn.disabled = true
+			buy_btn.modulate.a = 0.4
+		else:
+			buy_btn.disabled = false
+			buy_btn.modulate.a = 1.0

@@ -4,6 +4,7 @@ extends Node
 const GOLD_COLOR = Color(1, 0.8, 0.2, 0.8)
 const BLUE_COLOR = Color(0.2, 0.6, 1.0, 0.8)
 const RED_COLOR = Color(1.0, 0.3, 0.3, 0.8)
+const GREEN_COLOR = Color(0.2, 0.8, 0.2, 0.8)
 
 func create_glass_panel(border_color: Color = BLUE_COLOR) -> PanelContainer:
 	var panel = PanelContainer.new()

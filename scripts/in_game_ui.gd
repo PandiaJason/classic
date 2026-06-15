@@ -23,7 +23,26 @@ var map_timer = null
 var back_button: Button
 var glide_button: Button
 
+var is_paused: bool = false
+var pause_overlay: Control = null
+
+var shake_intensity: float = 0.0
+var shake_duration: float = 0.0
+
 func _ready():
+	add_to_group("in_game_ui")
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Manage in-level BGM: play only if music is on and a valid stream is loaded
+	if is_instance_valid(bgm):
+		bgm.autoplay = false
+		if SaveSystem.music_on and bgm.stream != null:
+			bgm.play()
+			# Loop the BGM when it finishes (only if music is still enabled)
+			if not bgm.finished.is_connected(_on_bgm_finished):
+				bgm.finished.connect(_on_bgm_finished)
+		else:
+			bgm.stop()
+	
 	if is_instance_valid(level_camera):
 		# Calculate level bounds from planet positions
 		var planets = get_tree().get_nodes_in_group("planets")
@@ -110,9 +129,19 @@ func _ready():
 	health_margin.add_child(health_panel)
 	add_child(health_margin)
 	
-	# Setup View Map Button
+	# Setup Top Right Buttons (Map & Pause)
+	var top_right_hbox = HBoxContainer.new()
+	top_right_hbox.add_theme_constant_override("separation", 15)
+	
 	view_map_btn = UIFactory.create_glass_button("map", UIFactory.BLUE_COLOR)
 	view_map_btn.pressed.connect(_on_view_map_pressed)
+	top_right_hbox.add_child(view_map_btn)
+	
+	var pause_btn = UIFactory.create_glass_button("pause", UIFactory.GOLD_COLOR)
+	pause_btn.pressed.connect(func():
+		toggle_pause()
+	)
+	top_right_hbox.add_child(pause_btn)
 	
 	var map_margin = MarginContainer.new()
 	map_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -120,7 +149,7 @@ func _ready():
 	map_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	map_margin.add_theme_constant_override("margin_top", 20)
 	map_margin.add_theme_constant_override("margin_right", 40)
-	map_margin.add_child(view_map_btn)
+	map_margin.add_child(top_right_hbox)
 	add_child(map_margin)
 	
 	# Setup Hint Button
@@ -187,17 +216,65 @@ func _ready():
 	# Remove old UI
 	if has_node("MarginContainer"): $MarginContainer.queue_free()
 	
-	# Add background jump zone to prevent clicks on UI from jumping
+	# Left Brake Zone (35% width)
+	var brake_zone = Control.new()
+	brake_zone.name = "BrakeZone"
+	brake_zone.set_anchors_preset(Control.PRESET_FULL_RECT)
+	brake_zone.anchor_right = 0.35
+	brake_zone.mouse_filter = Control.MOUSE_FILTER_STOP
+	brake_zone.gui_input.connect(_on_brake_zone_gui_input)
+	add_child(brake_zone)
+	move_child(brake_zone, 0)
+	
+	if GameManager.current_level == 1:
+		var brake_label = Label.new()
+		brake_label.text = "brake"
+		brake_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		brake_label.add_theme_font_size_override("font_size", 24)
+		brake_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.12))
+		brake_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		brake_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		brake_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		brake_zone.add_child(brake_label)
+	
+	# Right Jump Zone (65% width)
 	var jump_zone = Control.new()
-	jump_zone.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	jump_zone.name = "JumpZone"
+	jump_zone.set_anchors_preset(Control.PRESET_FULL_RECT)
+	jump_zone.anchor_left = 0.35
 	jump_zone.mouse_filter = Control.MOUSE_FILTER_STOP
 	jump_zone.gui_input.connect(_on_jump_zone_gui_input)
 	add_child(jump_zone)
 	move_child(jump_zone, 0)
 	
+	if GameManager.current_level == 1:
+		var jump_label = Label.new()
+		jump_label.text = "jump / glide"
+		jump_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		jump_label.add_theme_font_size_override("font_size", 24)
+		jump_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.12))
+		jump_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		jump_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		jump_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		jump_zone.add_child(jump_label)
+	
 	if has_node("HealthMargin"): $HealthMargin.queue_free()
 	if has_node("ViewMapMargin"): $ViewMapMargin.queue_free()
 	if has_node("HintMargin"): $HintMargin.queue_free()
+	
+	# Auto-start with Map View for 3 seconds, then focus on player
+	is_viewing_map = true
+	map_timer = get_tree().create_timer(3.0)
+	map_timer.timeout.connect(func():
+		is_viewing_map = false
+		if is_instance_valid(level_camera) and is_instance_valid(player):
+			level_camera.global_position = player.global_position
+			level_camera.zoom = default_zoom
+		if GameManager.current_level == 1 and not SaveSystem.tutorial_complete:
+			SaveSystem.tutorial_complete = true
+			SaveSystem.save_data()
+			show_tutorial()
+	)
 
 func _process(delta: float):
 	if is_instance_valid(health_label):
@@ -222,44 +299,60 @@ func _process(delta: float):
 				glide_button.text = "glide x0"
 				glide_button.disabled = true
 				glide_button.modulate.a = 0.3
-			elif player._glide_used_this_flight or player.current_planet != null:
-				# On a planet or already used this flight
+			elif player.current_planet != null:
+				# On a planet
 				glide_button.text = "glide x%d" % SaveSystem.glide_count
 				glide_button.disabled = true
 				glide_button.modulate.a = 0.3
+			elif player._tether_planet != null:
+				# Currently gliding (keep enabled to allow multiple spend/redirects)
+				glide_button.text = "glide x%d" % SaveSystem.glide_count
+				glide_button.disabled = false
+				glide_button.modulate.a = 1.0
 			else:
-				# In zero gravity with glides available
+				# In zero gravity with glides available and not currently active
 				glide_button.text = "glide x%d" % SaveSystem.glide_count
 				glide_button.disabled = false
 				glide_button.modulate.a = 1.0
 	
 	if is_instance_valid(level_camera):
+		var base_pos = level_camera.global_position
 		if is_viewing_map:
 			# Zoom out to show full level
 			level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
-			level_camera.global_position = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
+			base_pos = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
 		else:
 			# Zoom in to follow player
 			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 5.0 * delta)
 			if is_instance_valid(player):
-				var screen_size = get_viewport().get_visible_rect().size / level_camera.zoom
-				var half_w = screen_size.x / 2.0
+				# Use a fixed world-space offset so the camera doesn't fly off at low zoom
+				var look_ahead := 200.0
 				
 				var target_x: float
 				var target_y: float
 				
 				if is_instance_valid(player.current_planet):
 					# While riding a planet, lock the camera to the planet so the screen doesn't spin.
-					# Add horizontal offset so the planet is on the left side of the screen.
-					target_x = player.current_planet.global_position.x + (half_w * 0.5)
+					# Add a small horizontal offset so the planet sits left-of-center.
+					target_x = player.current_planet.global_position.x + look_ahead
 					target_y = player.current_planet.global_position.y
 				else:
 					# While jumping, follow the player through space with the same offset.
-					target_x = player.global_position.x + (half_w * 0.5)
+					target_x = player.global_position.x + look_ahead
 					target_y = player.global_position.y
 					
 				var target = Vector2(target_x, target_y)
-				level_camera.global_position = level_camera.global_position.lerp(target, 6.0 * delta)
+				base_pos = level_camera.global_position.lerp(target, 6.0 * delta)
+				
+		if shake_duration > 0.0:
+			shake_duration -= delta
+			var offset = Vector2(
+				randf_range(-shake_intensity, shake_intensity),
+				randf_range(-shake_intensity, shake_intensity)
+			)
+			level_camera.global_position = base_pos + offset
+		else:
+			level_camera.global_position = base_pos
 
 func _on_hint_pressed():
 	if hint_used:
@@ -280,28 +373,233 @@ func _on_view_map_pressed():
 	is_viewing_map = !is_viewing_map
 
 func _on_glide_pressed():
-	if is_instance_valid(player) and not player._glide_used_this_flight and player.current_planet == null and SaveSystem.glide_count > 0:
+	if is_instance_valid(player) and player.current_planet == null and SaveSystem.glide_count > 0:
 		player._wants_to_jump = true
 
 func _on_player_glide_used():
 	if is_instance_valid(glide_button):
 		glide_button.text = "glide x%d" % SaveSystem.glide_count
-		glide_button.disabled = true
-		glide_button.modulate.a = 0.3
+		if SaveSystem.glide_count > 0:
+			glide_button.disabled = false
+			glide_button.modulate.a = 1.0
+		else:
+			glide_button.disabled = true
+			glide_button.modulate.a = 0.3
 
 func _on_jump_zone_gui_input(event: InputEvent):
+	if not is_instance_valid(player):
+		return
 	if event is InputEventScreenTouch and event.pressed:
-		if is_instance_valid(player): player._wants_to_jump = true
+		player._wants_to_jump = true
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if is_instance_valid(player): player._wants_to_jump = true
+		player._wants_to_jump = true
+
+func _on_brake_zone_gui_input(event: InputEvent):
+	if not is_instance_valid(player):
+		return
+	if event is InputEventScreenTouch:
+		player._wants_to_brake = event.pressed
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		player._wants_to_brake = event.pressed
 
 func _on_back_pressed():
 	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/level_select.tscn")
+	SceneTransition.transition_to("res://scenes/level_select.tscn")
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
+	if event.is_action_pressed("ui_cancel"):
+		toggle_pause()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_M:
 			_on_view_map_pressed()
 		elif event.keycode == KEY_H:
 			_on_hint_pressed()
+
+func toggle_pause():
+	if is_instance_valid(player) and player.is_game_over:
+		return
+	is_paused = !is_paused
+	get_tree().paused = is_paused
+	
+	if is_paused:
+		_create_pause_menu()
+	else:
+		if is_instance_valid(pause_overlay):
+			pause_overlay.queue_free()
+			pause_overlay = null
+
+func _create_pause_menu():
+	pause_overlay = ColorRect.new()
+	pause_overlay.color = Color(0.02, 0.02, 0.12, 0.8)
+	pause_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pause_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(pause_overlay)
+	
+	var panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	pause_overlay.add_child(panel)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 15)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	panel.add_child(vbox)
+	
+	var title = Label.new()
+	title.text = "paused"
+	title.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	title.add_theme_font_size_override("font_size", 44)
+	title.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+	
+	var resume_btn = UIFactory.create_glass_button("resume", UIFactory.GOLD_COLOR)
+	resume_btn.pressed.connect(func():
+		toggle_pause()
+	)
+	vbox.add_child(resume_btn)
+	
+	var retry_btn = UIFactory.create_glass_button("retry", UIFactory.GOLD_COLOR)
+	retry_btn.pressed.connect(func():
+		toggle_pause()
+		GameManager.reset_score()
+		SceneTransition.reload_current()
+	)
+	vbox.add_child(retry_btn)
+	
+	var music_text = "music: on" if SaveSystem.music_on else "music: off"
+	var music_btn = UIFactory.create_glass_button(music_text, UIFactory.GOLD_COLOR)
+	music_btn.pressed.connect(func():
+		SaveSystem.music_on = not SaveSystem.music_on
+		SaveSystem.save_data()
+		if SaveSystem.music_on:
+			music_btn.text = "music: on"
+			if is_instance_valid(bgm) and bgm.stream != null:
+				bgm.play()
+		else:
+			music_btn.text = "music: off"
+			if is_instance_valid(bgm):
+				bgm.stop()
+	)
+	vbox.add_child(music_btn)
+	
+	var sfx_text = "sfx: on" if SaveSystem.sfx_on else "sfx: off"
+	var sfx_btn = UIFactory.create_glass_button(sfx_text, UIFactory.GOLD_COLOR)
+	sfx_btn.pressed.connect(func():
+		SaveSystem.sfx_on = not SaveSystem.sfx_on
+		SaveSystem.save_data()
+		if SaveSystem.sfx_on:
+			sfx_btn.text = "sfx: on"
+		else:
+			sfx_btn.text = "sfx: off"
+			# Kill any currently playing SFX loops immediately
+			SoundManager.stop_sfx_loop("thruster")
+	)
+	vbox.add_child(sfx_btn)
+	
+	var quit_btn = UIFactory.create_glass_button("quit to menu", UIFactory.RED_COLOR)
+	quit_btn.pressed.connect(func():
+		toggle_pause()
+		SceneTransition.transition_to("res://scenes/menu.tscn")
+	)
+	vbox.add_child(quit_btn)
+
+func _on_bgm_finished():
+	# Only loop in-level BGM if music is still enabled
+	if is_instance_valid(bgm) and SaveSystem.music_on and bgm.stream != null:
+		bgm.play()
+
+func shake_camera(intensity: float, duration: float):
+	shake_intensity = intensity
+	shake_duration = duration
+
+func show_tutorial():
+	print("[Tutorial] show_tutorial called! Pausing game tree.")
+	get_tree().paused = true
+	
+	var tut_overlay = ColorRect.new()
+	tut_overlay.name = "TutorialOverlay"
+	tut_overlay.color = Color(0, 0, 0, 0.75)
+	tut_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tut_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	tut_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(tut_overlay)
+	
+	var panel = UIFactory.create_glass_panel(UIFactory.BLUE_COLOR)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	tut_overlay.add_child(panel)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 12)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.process_mode = Node.PROCESS_MODE_ALWAYS
+	vbox.mouse_filter = Control.MOUSE_FILTER_PASS
+	panel.add_child(vbox)
+	
+	var title = Label.new()
+	title.text = "how to deliver"
+	title.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	title.add_theme_font_size_override("font_size", 36)
+	title.add_theme_color_override("font_color", Color(0.2, 0.6, 1.0))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+	
+	var controls = [
+		{"keys": "auto-drive", "desc": "your bike drives forward automatically on planets."},
+		{"keys": "space / tap right screen", "desc": "launch into orbit or release tether gravity field."},
+		{"keys": "left arrow or a / hold left screen", "desc": "slow down to avoid flying off planets too fast."},
+		{"keys": "click glide button", "desc": "redirect velocity in outer space (buy glides in menu)."},
+		{"keys": "reach portal", "desc": "deliver the fragile box to the portal with high health for 3 stars."}
+	]
+	
+	for item in controls:
+		var item_hbox = HBoxContainer.new()
+		item_hbox.add_theme_constant_override("separation", 10)
+		item_hbox.mouse_filter = Control.MOUSE_FILTER_PASS
+		
+		var label_keys = Label.new()
+		label_keys.text = "[%s]" % item["keys"]
+		label_keys.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		label_keys.add_theme_font_size_override("font_size", 20)
+		label_keys.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+		label_keys.custom_minimum_size = Vector2(250, 0)
+		item_hbox.add_child(label_keys)
+		
+		var label_desc = Label.new()
+		label_desc.text = "— %s" % item["desc"]
+		label_desc.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		label_desc.add_theme_font_size_override("font_size", 18)
+		label_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label_desc.custom_minimum_size = Vector2(400, 0)
+		item_hbox.add_child(label_desc)
+		
+		vbox.add_child(item_hbox)
+		
+	var spacer = Control.new()
+	spacer.custom_minimum_size = Vector2(0, 10)
+	vbox.add_child(spacer)
+	
+	var start_btn = UIFactory.create_glass_button("start delivery", UIFactory.GREEN_COLOR)
+	start_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	start_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	start_btn.pressed.connect(func():
+		print("[Tutorial] Start delivery button pressed! Resuming game and removing overlay.")
+		get_tree().paused = false
+		tut_overlay.queue_free()
+	)
+	vbox.add_child(start_btn)
+	
+	# Auto-close tutorial after 10 seconds if player does not press start
+	var auto_close_timer = get_tree().create_timer(10.0, true)
+	auto_close_timer.timeout.connect(func():
+		if is_instance_valid(tut_overlay):
+			print("[Tutorial] 10-second auto-close timeout reached. Resuming game.")
+			get_tree().paused = false
+			tut_overlay.queue_free()
+	)

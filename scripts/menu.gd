@@ -35,25 +35,36 @@ func _ready():
 	score_margin.add_child(score_panel)
 	add_child(score_margin)
 	
-	# Music Toggle using UIFactory — restore saved state
+	# Unmute Master bus to ensure sound effects always work
 	var bus_idx = AudioServer.get_bus_index("Master")
-	AudioServer.set_bus_mute(bus_idx, not SaveSystem.music_on)
+	AudioServer.set_bus_mute(bus_idx, false)
+	
+	# Music and SFX Toggle Container using UIFactory
+	var audio_vbox = VBoxContainer.new()
+	audio_vbox.add_theme_constant_override("separation", 10)
+	
 	var music_text = " music: on" if SaveSystem.music_on else " music: off"
 	var music_btn = UIFactory.create_glass_button(music_text.strip_edges(), UIFactory.BLUE_COLOR)
-	var music_margin = MarginContainer.new()
-	music_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	music_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	music_margin.add_theme_constant_override("margin_bottom", 30)
-	music_margin.add_theme_constant_override("margin_left", 30)
-	music_margin.add_child(music_btn)
-	add_child(music_margin)
-	
 	music_btn.pressed.connect(_on_music_pressed.bind(music_btn))
+	audio_vbox.add_child(music_btn)
+	
+	var sfx_text = " sfx: on" if SaveSystem.sfx_on else " sfx: off"
+	var sfx_btn = UIFactory.create_glass_button(sfx_text.strip_edges(), UIFactory.BLUE_COLOR)
+	sfx_btn.pressed.connect(_on_sfx_pressed.bind(sfx_btn))
+	audio_vbox.add_child(sfx_btn)
+	
+	var audio_margin = MarginContainer.new()
+	audio_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	audio_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	audio_margin.add_theme_constant_override("margin_bottom", 30)
+	audio_margin.add_theme_constant_override("margin_left", 30)
+	audio_margin.add_child(audio_vbox)
+	add_child(audio_margin)
 	
 	# Calculate and Display Delivery Rate
 	var unlocked_count = 0
 	var total_stars = 0
-	for i in range(1, 31):
+	for i in range(1, 91):
 		if SaveSystem.is_level_unlocked(i):
 			unlocked_count += 1
 			total_stars += SaveSystem.get_stars(i)
@@ -120,15 +131,27 @@ func _ready():
 	add_child(copy_margin)
 
 func _on_music_pressed(btn: Button):
-	var bus_idx = AudioServer.get_bus_index("Master")
-	var is_muted = AudioServer.is_bus_mute(bus_idx)
-	AudioServer.set_bus_mute(bus_idx, not is_muted)
-	btn.text = " music: off" if not is_muted else " music: on"
-	SaveSystem.music_on = is_muted  # was muted, now it's on (and vice versa)
+	SaveSystem.music_on = not SaveSystem.music_on
 	SaveSystem.save_data()
+	
+	if SaveSystem.music_on:
+		btn.text = " music: on"
+		BgmManager.play_menu_music()
+	else:
+		btn.text = " music: off"
+		BgmManager.stop_menu_music()
+
+func _on_sfx_pressed(btn: Button):
+	SaveSystem.sfx_on = not SaveSystem.sfx_on
+	SaveSystem.save_data()
+	
+	if SaveSystem.sfx_on:
+		btn.text = " sfx: on"
+	else:
+		btn.text = " sfx: off"
 
 func _on_start_pressed():
-	get_tree().change_scene_to_file("res://scenes/level_select.tscn")
+	SceneTransition.transition_to("res://scenes/level_select.tscn")
 
 func _on_reset_pressed():
 	var overlay = ColorRect.new()
@@ -175,10 +198,11 @@ func _on_reset_pressed():
 	confirm_btn.pressed.connect(func():
 		SaveSystem.unlocked_levels = 1
 		SaveSystem.global_score = 0
-		for i in range(1, 31):
+		SaveSystem.glide_count = 0
+		for i in range(1, 91):
 			SaveSystem.level_stars[i] = 0
 		SaveSystem.save_data()
-		get_tree().reload_current_scene()
+		SceneTransition.reload_current()
 	)
 
 	btn_row.add_child(cancel_btn)

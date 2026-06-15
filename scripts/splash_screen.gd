@@ -10,4 +10,4 @@ func _ready():
 	timer.start()
 
 func _go_to_menu():
-	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	SceneTransition.transition_to("res://scenes/menu.tscn")

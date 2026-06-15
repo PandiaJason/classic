@@ -15,7 +15,7 @@ config/description="A gravity-based space delivery game by pandiajason"
 run/main_scene="res://scenes/splash_screen.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 boot_splash/show_image=false
-config/icon="res://assets/planet_2.png"
+config/icon="res://assets/planet_1.png"
 
 [autoload]
 
@@ -25,6 +25,8 @@ AsteroidManager="*res://scripts/asteroid_manager.gd"
 UIFactory="*res://scripts/ui_factory.gd"
 ResourceManager="*res://scripts/resource_manager.gd"
 BgmManager="*res://scripts/bgm_manager.gd"
+SceneTransition="*res://scripts/scene_transition.gd"
+SoundManager="*res://scripts/sound_manager.gd"
 
 [display]
 
