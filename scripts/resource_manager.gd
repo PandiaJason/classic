@@ -33,5 +33,20 @@ func pre_cache():
 	get_texture("res://assets/flag.png")
 	get_scene("res://scenes/ruby.tscn")
 	get_scene("res://scenes/game_over_ui.tscn")
-	get_scene("res://scenes/level_complete_ui.tscn")
 	get_scene("res://scenes/explosion.tscn")
+
+var _light_texture: Texture2D = null
+
+func get_light_texture() -> Texture2D:
+	if _light_texture == null:
+		var size = 128
+		var img = Image.create(size, size, false, Image.FORMAT_RGBA8)
+		var center = size / 2.0
+		for y in range(size):
+			for x in range(size):
+				var dist = Vector2(x - center, y - center).length()
+				var pct = clamp(1.0 - (dist / center), 0.0, 1.0)
+				var alpha = pct * pct
+				img.set_pixel(x, y, Color(1.0, 1.0, 1.0, alpha))
+		_light_texture = ImageTexture.create_from_image(img)
+	return _light_texture

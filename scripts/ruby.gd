@@ -1,6 +1,14 @@
 extends Area2D
 
 func _ready() -> void:
+	# Add a glowing ruby light
+	var light = PointLight2D.new()
+	light.texture = ResourceManager.get_light_texture()
+	light.texture_scale = 1.0
+	light.color = Color(1.0, 0.3, 0.2)
+	light.energy = 1.2
+	add_child(light)
+
 	body_entered.connect(_on_body_entered)
 	
 	# Add a floating animation

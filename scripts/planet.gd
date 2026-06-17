@@ -78,6 +78,16 @@ func setup_planet():
 			# Position it on the surface of the planet (radius = 100)
 			flag_sprite.position = Vector2(0, -85.0)
 			flag_sprite.scale = Vector2(0.12, 0.12)
+			
+			# Add a green glowing portal light to the flag
+			var portal_light = PointLight2D.new()
+			portal_light.texture = ResourceManager.get_light_texture()
+			portal_light.texture_scale = 2.0
+			portal_light.color = Color(0.2, 1.0, 0.4) # Bright green glow
+			portal_light.energy = 1.5
+			portal_light.position = Vector2(0, -flag_tex.get_size().y * 0.12 / 2.0)
+			flag_sprite.add_child(portal_light)
+			
 			if has_node("Visuals"):
 				$Visuals.add_child(flag_sprite)
 			
