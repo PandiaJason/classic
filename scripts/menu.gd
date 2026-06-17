@@ -39,26 +39,72 @@ func _ready():
 	var bus_idx = AudioServer.get_bus_index("Master")
 	AudioServer.set_bus_mute(bus_idx, false)
 	
-	# Music and SFX Toggle Container using UIFactory
+	# Music and SFX Volume Sliders using UIFactory
+	var audio_panel = UIFactory.create_glass_panel(UIFactory.BLUE_COLOR)
+	
 	var audio_vbox = VBoxContainer.new()
-	audio_vbox.add_theme_constant_override("separation", 10)
+	audio_vbox.add_theme_constant_override("separation", 6)
+	audio_vbox.custom_minimum_size = Vector2(250, 0)
 	
-	var music_text = " music: on" if SaveSystem.music_on else " music: off"
-	var music_btn = UIFactory.create_glass_button(music_text.strip_edges(), UIFactory.BLUE_COLOR)
-	music_btn.pressed.connect(_on_music_pressed.bind(music_btn))
-	audio_vbox.add_child(music_btn)
+	# Music Section
+	var music_label = Label.new()
+	music_label.text = "music: %d%%" % int(SaveSystem.music_volume * 100)
+	music_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	music_label.add_theme_font_size_override("font_size", 22)
+	music_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	audio_vbox.add_child(music_label)
 	
-	var sfx_text = " sfx: on" if SaveSystem.sfx_on else " sfx: off"
-	var sfx_btn = UIFactory.create_glass_button(sfx_text.strip_edges(), UIFactory.BLUE_COLOR)
-	sfx_btn.pressed.connect(_on_sfx_pressed.bind(sfx_btn))
-	audio_vbox.add_child(sfx_btn)
+	var music_slider = HSlider.new()
+	music_slider.min_value = 0.0
+	music_slider.max_value = 1.0
+	music_slider.step = 0.05
+	music_slider.value = SaveSystem.music_volume
+	music_slider.focus_mode = Control.FOCUS_NONE
+	music_slider.value_changed.connect(func(val):
+		SaveSystem.music_volume = val
+		SaveSystem.music_on = val > 0.01
+		SaveSystem.save_data()
+		music_label.text = "music: %d%%" % int(val * 100)
+		BgmManager.update_volume()
+	)
+	audio_vbox.add_child(music_slider)
+	
+	# Space spacer
+	var spacer = Control.new()
+	spacer.custom_minimum_size = Vector2(0, 5)
+	audio_vbox.add_child(spacer)
+	
+	# SFX Section
+	var sfx_label = Label.new()
+	sfx_label.text = "sfx: %d%%" % int(SaveSystem.sfx_volume * 100)
+	sfx_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	sfx_label.add_theme_font_size_override("font_size", 22)
+	sfx_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	audio_vbox.add_child(sfx_label)
+	
+	var sfx_slider = HSlider.new()
+	sfx_slider.min_value = 0.0
+	sfx_slider.max_value = 1.0
+	sfx_slider.step = 0.05
+	sfx_slider.value = SaveSystem.sfx_volume
+	sfx_slider.focus_mode = Control.FOCUS_NONE
+	sfx_slider.value_changed.connect(func(val):
+		SaveSystem.sfx_volume = val
+		SaveSystem.sfx_on = val > 0.01
+		SaveSystem.save_data()
+		sfx_label.text = "sfx: %d%%" % int(val * 100)
+		SoundManager.update_looping_sfx_volumes()
+	)
+	audio_vbox.add_child(sfx_slider)
+	
+	audio_panel.add_child(audio_vbox)
 	
 	var audio_margin = MarginContainer.new()
 	audio_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	audio_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	audio_margin.add_theme_constant_override("margin_bottom", 30)
 	audio_margin.add_theme_constant_override("margin_left", 30)
-	audio_margin.add_child(audio_vbox)
+	audio_margin.add_child(audio_panel)
 	add_child(audio_margin)
 	
 	# Calculate and Display Delivery Rate
@@ -130,25 +176,7 @@ func _ready():
 	copy_margin.add_child(copyright)
 	add_child(copy_margin)
 
-func _on_music_pressed(btn: Button):
-	SaveSystem.music_on = not SaveSystem.music_on
-	SaveSystem.save_data()
-	
-	if SaveSystem.music_on:
-		btn.text = " music: on"
-		BgmManager.play_menu_music()
-	else:
-		btn.text = " music: off"
-		BgmManager.stop_menu_music()
 
-func _on_sfx_pressed(btn: Button):
-	SaveSystem.sfx_on = not SaveSystem.sfx_on
-	SaveSystem.save_data()
-	
-	if SaveSystem.sfx_on:
-		btn.text = " sfx: on"
-	else:
-		btn.text = " sfx: off"
 
 func _on_start_pressed():
 	SceneTransition.transition_to("res://scenes/level_select.tscn")

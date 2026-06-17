@@ -35,7 +35,8 @@ func _ready():
 	# Manage in-level BGM: play only if music is on and a valid stream is loaded
 	if is_instance_valid(bgm):
 		bgm.autoplay = false
-		if SaveSystem.music_on and bgm.stream != null:
+		if SaveSystem.music_on and SaveSystem.music_volume > 0.01 and bgm.stream != null:
+			bgm.volume_db = linear_to_db(SaveSystem.music_volume)
 			bgm.play()
 			# Loop the BGM when it finishes (only if music is still enabled)
 			if not bgm.finished.is_connected(_on_bgm_finished):
@@ -469,35 +470,63 @@ func _create_pause_menu():
 	)
 	vbox.add_child(retry_btn)
 	
-	var music_text = "music: on" if SaveSystem.music_on else "music: off"
-	var music_btn = UIFactory.create_glass_button(music_text, UIFactory.GOLD_COLOR)
-	music_btn.pressed.connect(func():
-		SaveSystem.music_on = not SaveSystem.music_on
+	# Music Section
+	var music_label = Label.new()
+	music_label.text = "music: %d%%" % int(SaveSystem.music_volume * 100)
+	music_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	music_label.add_theme_font_size_override("font_size", 24)
+	music_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	music_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	vbox.add_child(music_label)
+	
+	var music_slider = HSlider.new()
+	music_slider.min_value = 0.0
+	music_slider.max_value = 1.0
+	music_slider.step = 0.05
+	music_slider.value = SaveSystem.music_volume
+	music_slider.focus_mode = Control.FOCUS_NONE
+	music_slider.custom_minimum_size = Vector2(200, 0)
+	music_slider.value_changed.connect(func(val):
+		SaveSystem.music_volume = val
+		SaveSystem.music_on = val > 0.01
 		SaveSystem.save_data()
-		if SaveSystem.music_on:
-			music_btn.text = "music: on"
-			if is_instance_valid(bgm) and bgm.stream != null:
-				bgm.play()
-		else:
-			music_btn.text = "music: off"
-			if is_instance_valid(bgm):
+		music_label.text = "music: %d%%" % int(val * 100)
+		if is_instance_valid(bgm):
+			if val > 0.01:
+				bgm.volume_db = linear_to_db(val)
+				if not bgm.playing and bgm.stream != null:
+					bgm.play()
+			else:
 				bgm.stop()
 	)
-	vbox.add_child(music_btn)
+	vbox.add_child(music_slider)
 	
-	var sfx_text = "sfx: on" if SaveSystem.sfx_on else "sfx: off"
-	var sfx_btn = UIFactory.create_glass_button(sfx_text, UIFactory.GOLD_COLOR)
-	sfx_btn.pressed.connect(func():
-		SaveSystem.sfx_on = not SaveSystem.sfx_on
+	# SFX Section
+	var sfx_label = Label.new()
+	sfx_label.text = "sfx: %d%%" % int(SaveSystem.sfx_volume * 100)
+	sfx_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	sfx_label.add_theme_font_size_override("font_size", 24)
+	sfx_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sfx_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	vbox.add_child(sfx_label)
+	
+	var sfx_slider = HSlider.new()
+	sfx_slider.min_value = 0.0
+	sfx_slider.max_value = 1.0
+	sfx_slider.step = 0.05
+	sfx_slider.value = SaveSystem.sfx_volume
+	sfx_slider.focus_mode = Control.FOCUS_NONE
+	sfx_slider.custom_minimum_size = Vector2(200, 0)
+	sfx_slider.value_changed.connect(func(val):
+		SaveSystem.sfx_volume = val
+		SaveSystem.sfx_on = val > 0.01
 		SaveSystem.save_data()
-		if SaveSystem.sfx_on:
-			sfx_btn.text = "sfx: on"
-		else:
-			sfx_btn.text = "sfx: off"
-			# Kill any currently playing SFX loops immediately
+		sfx_label.text = "sfx: %d%%" % int(val * 100)
+		SoundManager.update_looping_sfx_volumes()
+		if val <= 0.01:
 			SoundManager.stop_sfx_loop("thruster")
 	)
-	vbox.add_child(sfx_btn)
+	vbox.add_child(sfx_slider)
 	
 	var quit_btn = UIFactory.create_glass_button("quit to menu", UIFactory.RED_COLOR)
 	quit_btn.pressed.connect(func():
@@ -508,7 +537,8 @@ func _create_pause_menu():
 
 func _on_bgm_finished():
 	# Only loop in-level BGM if music is still enabled
-	if is_instance_valid(bgm) and SaveSystem.music_on and bgm.stream != null:
+	if is_instance_valid(bgm) and SaveSystem.music_on and SaveSystem.music_volume > 0.01 and bgm.stream != null:
+		bgm.volume_db = linear_to_db(SaveSystem.music_volume)
 		bgm.play()
 
 func shake_camera(intensity: float, duration: float):

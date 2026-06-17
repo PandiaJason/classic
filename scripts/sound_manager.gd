@@ -20,7 +20,7 @@ func _ready() -> void:
 	_generate_sfx_library()
 
 func play_sfx(name: String) -> void:
-	if not SaveSystem.sfx_on:
+	if not SaveSystem.sfx_on or SaveSystem.sfx_volume <= 0.01:
 		return
 	# Disabled all click/button sounds as requested
 	if name == "click" or not sfx_library.has(name):
@@ -29,12 +29,13 @@ func play_sfx(name: String) -> void:
 	# Use pool round-robin
 	var player = player_pool[pool_index]
 	player.stream = sfx_library[name]
+	player.volume_db = linear_to_db(SaveSystem.sfx_volume)
 	player.play()
 	
 	pool_index = (pool_index + 1) % pool_size
 
 func start_sfx_loop(name: String) -> void:
-	if not SaveSystem.sfx_on:
+	if not SaveSystem.sfx_on or SaveSystem.sfx_volume <= 0.01:
 		return
 	if not sfx_library.has(name):
 		return
@@ -49,6 +50,7 @@ func start_sfx_loop(name: String) -> void:
 		player.stream.loop_begin = 0
 		player.stream.loop_end = player.stream.data.size() / 2
 	add_child(player)
+	player.volume_db = linear_to_db(SaveSystem.sfx_volume)
 	player.play()
 	looping_players[name] = player
 
@@ -58,6 +60,13 @@ func stop_sfx_loop(name: String) -> void:
 		player.stop()
 		player.queue_free()
 		looping_players.erase(name)
+
+func update_looping_sfx_volumes() -> void:
+	var vol_db = linear_to_db(SaveSystem.sfx_volume)
+	for name in looping_players.keys():
+		var player = looping_players[name]
+		if is_instance_valid(player):
+			player.volume_db = vol_db
 
 func _generate_sfx_library() -> void:
 	sfx_library["jump"] = _generate_sweep(150.0, 800.0, 0.15, "sine")

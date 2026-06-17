@@ -11,8 +11,10 @@ var unlocked_levels = 1
 var global_score = 0
 # Music preference
 var music_on = true
+var music_volume: float = 0.8
 # SFX preference
 var sfx_on = true
+var sfx_volume: float = 0.8
 # Glide assist consumable count
 var glide_count: int = 0
 # Tutorial completion state
@@ -27,7 +29,9 @@ func load_data():
 		unlocked_levels = config.get_value("Progress", "unlocked_levels", 1)
 		global_score = config.get_value("Progress", "global_score", 0)
 		music_on = config.get_value("Progress", "music_on", true)
+		music_volume = config.get_value("Progress", "music_volume", 0.8)
 		sfx_on = config.get_value("Progress", "sfx_on", true)
+		sfx_volume = config.get_value("Progress", "sfx_volume", 0.8)
 		glide_count = config.get_value("Progress", "glide_count", 0)
 		tutorial_complete = config.get_value("Progress", "tutorial_complete", false)
 		# Load stars for all 30 possible levels
@@ -38,7 +42,9 @@ func load_data():
 		unlocked_levels = 1
 		global_score = 0
 		music_on = true
+		music_volume = 0.8
 		sfx_on = true
+		sfx_volume = 0.8
 		glide_count = 0
 		tutorial_complete = false
 		for i in range(1, 91):
@@ -49,7 +55,9 @@ func save_data():
 	config.set_value("Progress", "unlocked_levels", unlocked_levels)
 	config.set_value("Progress", "global_score", global_score)
 	config.set_value("Progress", "music_on", music_on)
+	config.set_value("Progress", "music_volume", music_volume)
 	config.set_value("Progress", "sfx_on", sfx_on)
+	config.set_value("Progress", "sfx_volume", sfx_volume)
 	config.set_value("Progress", "glide_count", glide_count)
 	config.set_value("Progress", "tutorial_complete", tutorial_complete)
 	for i in level_stars.keys():

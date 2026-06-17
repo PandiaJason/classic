@@ -26,8 +26,6 @@ var _tether_planet: Node2D = null
 var _tether_time_left: float = 0.0
 var thruster_particles: CPUParticles2D = null
 var flight_trail_particles: CPUParticles2D = null
-var headlight: PointLight2D = null
-var engine_light: PointLight2D = null
 
 # Cinematic death state
 var _doomed: bool = false
@@ -102,24 +100,6 @@ func _ready() -> void:
 	
 	# Pre-fetch planets list once to avoid repeated scene tree lookups
 	_planets_list = get_tree().get_nodes_in_group("planets")
-	
-	# Initialize headlight
-	headlight = PointLight2D.new()
-	headlight.texture = ResourceManager.get_light_texture()
-	headlight.texture_scale = 1.8
-	headlight.color = Color(1.0, 0.95, 0.8) # Warm white headlight
-	headlight.energy = 0.8
-	headlight.position = Vector2(0, -30)
-	add_child(headlight)
-
-	# Initialize engine booster glow
-	engine_light = PointLight2D.new()
-	engine_light.texture = ResourceManager.get_light_texture()
-	engine_light.texture_scale = 1.0
-	engine_light.color = Color(0.3, 0.7, 1.0) # Light blue thruster flame glow
-	engine_light.energy = 0.0 # Starts off
-	engine_light.position = Vector2(0, -18)
-	add_child(engine_light)
 
 var _planets_list: Array = []
 
@@ -409,30 +389,6 @@ func _physics_process(delta: float) -> void:
 			flight_trail_particles.direction = -velocity.normalized()
 		else:
 			flight_trail_particles.emitting = false
-
-	# Update lights
-	if is_instance_valid(engine_light):
-		if not is_game_over and current_planet == null:
-			if _tether_planet != null:
-				engine_light.energy = 1.5
-				engine_light.color = Color(0.3, 0.7, 1.0) # Light blue thruster
-				engine_light.texture_scale = 1.5
-			else:
-				engine_light.energy = 0.8
-				engine_light.color = Color(0.8, 0.4, 0.1) # Orange engine flame
-				engine_light.texture_scale = 1.0
-		else:
-			engine_light.energy = 0.2 # Faint idle glow on planet
-			engine_light.color = Color(0.8, 0.4, 0.1)
-			engine_light.texture_scale = 0.6
-
-	if is_instance_valid(headlight):
-		if is_game_over:
-			headlight.energy = 0.0
-		else:
-			headlight.energy = 0.8
-			var look_dir = forward_direction
-			headlight.position = Vector2(look_dir * 15.0, -30)
 
 	update_sprite_region()
 	queue_redraw()
