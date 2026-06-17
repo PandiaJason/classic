@@ -20,7 +20,6 @@ var view_map_btn: Button
 var hint_button: Button
 var hint_used: bool = false
 var map_timer = null
-var back_button: Button
 var glide_button: Button
 
 var is_paused: bool = false
@@ -201,18 +200,7 @@ func _ready():
 		if is_instance_valid(player):
 			player.glide_used.connect(_on_player_glide_used)
 	
-	# Setup Back Button
-	back_button = UIFactory.create_glass_button("back", UIFactory.RED_COLOR)
-	back_button.pressed.connect(_on_back_pressed)
-	
-	var back_margin = MarginContainer.new()
-	back_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	back_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	back_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	back_margin.add_theme_constant_override("margin_bottom", 20)
-	back_margin.add_theme_constant_override("margin_left", 40)
-	back_margin.add_child(back_button)
-	add_child(back_margin)
+
 	
 	# Remove old UI
 	if has_node("MarginContainer"): $MarginContainer.queue_free()
@@ -403,9 +391,7 @@ func _on_brake_zone_gui_input(event: InputEvent):
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		player._wants_to_brake = event.pressed
 
-func _on_back_pressed():
-	get_tree().paused = false
-	SceneTransition.transition_to("res://scenes/level_select.tscn")
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
