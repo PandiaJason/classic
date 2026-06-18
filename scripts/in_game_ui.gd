@@ -323,7 +323,7 @@ func _process(delta: float):
 			base_pos = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
 		else:
 			# Zoom in to follow player
-			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 5.0 * delta)
+			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 8.0 * delta)
 			if is_instance_valid(player):
 				# Use a fixed world-space offset so the camera doesn't fly off at low zoom
 				var look_ahead := 200.0
@@ -342,7 +342,7 @@ func _process(delta: float):
 					target_y = player.global_position.y
 					
 				var target = Vector2(target_x, target_y)
-				base_pos = level_camera.global_position.lerp(target, 6.0 * delta)
+				base_pos = level_camera.global_position.lerp(target, 8.0 * delta)
 				
 		if shake_duration > 0.0:
 			shake_duration -= delta
@@ -715,17 +715,17 @@ func start_countdown():
 		# Animate the label scaling/fade for punchy arcade feel
 		countdown_label.scale = Vector2(1.5, 1.5)
 		var tween = create_tween()
-		tween.tween_property(countdown_label, "scale", Vector2(1.0, 1.0), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(countdown_label, "scale", Vector2(1.0, 1.0), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		
-		# Wait 1 second (respecting pause mode since process always)
-		await get_tree().create_timer(1.0, false).timeout
+		# Wait 0.33 seconds (respecting pause mode since process always)
+		await get_tree().create_timer(0.33, false).timeout
 		
 	# Zoom in to player (go to zoom)
 	countdown_label.text = ""
 	is_viewing_map = false
 	
-	# Wait for camera to complete zoom-in (0.8 seconds)
-	await get_tree().create_timer(0.8, false).timeout
+	# Wait for camera to complete zoom-in (0.4 seconds)
+	await get_tree().create_timer(0.4, false).timeout
 	
 	# Enable controls and show go!
 	GameManager.is_gameplay_started = true
