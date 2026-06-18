@@ -32,6 +32,11 @@ var shake_duration: float = 0.0
 func _ready():
 	add_to_group("in_game_ui")
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	
+	# Dynamically set background color modulation based on current level (every 10 levels gets a unique theme)
+	var bg_rect = get_node_or_null("../Background/TextureRect")
+	if bg_rect:
+		bg_rect.modulate = get_tier_bg_color(GameManager.current_level)
 	# Manage in-level BGM: play only if music is on and a valid stream is loaded
 	if is_instance_valid(bgm):
 		bgm.autoplay = false
@@ -623,3 +628,23 @@ func show_tutorial():
 			get_tree().paused = false
 			tut_overlay.queue_free()
 	)
+
+func get_tier_bg_color(lvl: int) -> Color:
+	if lvl >= 81:
+		return Color(0.35, 0.3, 0.1, 1.0)      # 81-90: Gold/Yellow (Theme 9)
+	elif lvl >= 71:
+		return Color(0.45, 0.15, 0.15, 1.0)    # 71-80: Red/Rose (Theme 8)
+	elif lvl >= 61:
+		return Color(0.4, 0.15, 0.3, 1.0)      # 61-70: Magenta/Pink (Theme 7)
+	elif lvl >= 51:
+		return Color(0.1, 0.3, 0.45, 1.0)      # 51-60: Cyan/Sky Blue (Theme 6)
+	elif lvl >= 41:
+		return Color(0.4, 0.25, 0.1, 1.0)      # 41-50: Orange (Theme 5)
+	elif lvl >= 31:
+		return Color(0.15, 0.35, 0.2, 1.0)     # 31-40: Green (Theme 4)
+	elif lvl >= 21:
+		return Color(0.3, 0.15, 0.45, 1.0)     # 21-30: Purple (Theme 3)
+	elif lvl >= 11:
+		return Color(0.1, 0.35, 0.35, 1.0)     # 11-20: Teal/Cyan (Theme 2)
+	else:
+		return Color(0.15, 0.25, 0.45, 1.0)    # 1-10: Blue (Theme 1)

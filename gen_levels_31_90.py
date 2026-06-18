@@ -58,19 +58,19 @@ def build_scene(lvl: int, planets: list[dict], zoom: float) -> str:
 
     zoom_r = round(zoom, 2)
 
-    # Determine background modulation based on level tier
+    # Determine background modulation based on level tier (every 10 levels gets a unique theme)
     if lvl >= 81:
-        mod_color = "Color(0.4, 0.15, 0.3, 1)" # Ultimate: Magenta/Pink
+        mod_color = "Color(0.35, 0.3, 0.1, 1)" # Gold/Yellow (Theme 9)
     elif lvl >= 71:
-        mod_color = "Color(0.15, 0.35, 0.4, 1)" # Cosmic: Cyan/Teal
+        mod_color = "Color(0.45, 0.15, 0.15, 1)" # Red/Rose (Theme 8)
     elif lvl >= 61:
-        mod_color = "Color(0.4, 0.25, 0.1, 1)" # Insane: Orange/Gold
+        mod_color = "Color(0.4, 0.15, 0.3, 1)" # Magenta/Pink (Theme 7)
     elif lvl >= 51:
-        mod_color = "Color(0.15, 0.35, 0.2, 1)" # Nightmare: Green
+        mod_color = "Color(0.1, 0.3, 0.45, 1)" # Cyan/Sky Blue (Theme 6)
     elif lvl >= 41:
-        mod_color = "Color(0.3, 0.15, 0.4, 1)" # Legend: Purple
+        mod_color = "Color(0.4, 0.25, 0.1, 1)" # Orange (Theme 5)
     else:
-        mod_color = "Color(0.4, 0.4, 0.4, 1)" # Master: Default/Blue
+        mod_color = "Color(0.15, 0.35, 0.2, 1)" # Green (Theme 4)
 
     scene = f'''[gd_scene load_steps=3 format=3 uid="uid://level_{lvl}_uid_{uid}"]
 

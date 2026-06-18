@@ -117,20 +117,29 @@ func setup_planet():
 	var rim_color = Color(0.8, 0.95, 1.0)
 	var lvl = GameManager.current_level
 	if lvl >= 81:
-		bubble_color = Color(0.8, 0.2, 0.6, 0.05)
-		rim_color = Color(1.0, 0.7, 0.9)
+		bubble_color = Color(0.9, 0.8, 0.1, 0.05)      # 81-90: Gold (Theme 9)
+		rim_color = Color(1.0, 0.95, 0.7)
 	elif lvl >= 71:
-		bubble_color = Color(0.1, 0.7, 0.8, 0.05)
-		rim_color = Color(0.6, 0.95, 1.0)
+		bubble_color = Color(0.9, 0.2, 0.2, 0.05)      # 71-80: Red (Theme 8)
+		rim_color = Color(1.0, 0.7, 0.7)
 	elif lvl >= 61:
-		bubble_color = Color(0.9, 0.5, 0.1, 0.05)
-		rim_color = Color(1.0, 0.8, 0.5)
+		bubble_color = Color(0.8, 0.2, 0.6, 0.05)      # 61-70: Magenta (Theme 7)
+		rim_color = Color(1.0, 0.7, 0.9)
 	elif lvl >= 51:
-		bubble_color = Color(0.2, 0.8, 0.3, 0.05)
-		rim_color = Color(0.7, 1.0, 0.8)
+		bubble_color = Color(0.1, 0.7, 0.9, 0.05)      # 51-60: Cyan/Sky Blue (Theme 6)
+		rim_color = Color(0.6, 0.95, 1.0)
 	elif lvl >= 41:
-		bubble_color = Color(0.6, 0.2, 0.9, 0.05)
+		bubble_color = Color(0.9, 0.5, 0.1, 0.05)      # 41-50: Orange (Theme 5)
+		rim_color = Color(1.0, 0.8, 0.5)
+	elif lvl >= 31:
+		bubble_color = Color(0.2, 0.8, 0.3, 0.05)      # 31-40: Green (Theme 4)
+		rim_color = Color(0.7, 1.0, 0.8)
+	elif lvl >= 21:
+		bubble_color = Color(0.6, 0.2, 0.9, 0.05)      # 21-30: Purple (Theme 3)
 		rim_color = Color(0.9, 0.7, 1.0)
+	elif lvl >= 11:
+		bubble_color = Color(0.1, 0.7, 0.6, 0.05)      # 11-20: Teal/Cyan (Theme 2)
+		rim_color = Color(0.6, 1.0, 0.9)
 		
 	mat.set_shader_parameter("bubble_color", bubble_color)
 	mat.set_shader_parameter("rim_color", rim_color)
