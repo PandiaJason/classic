@@ -158,7 +158,7 @@ func _ready():
 	shop_hbox.add_child(glide_count_label)
 	
 	# Always show buy button
-	buy_btn = UIFactory.create_glass_button("buy glide (30)", Color(0.2, 0.6, 1.0))
+	buy_btn = UIFactory.create_glass_button("buy glide (10)", Color(0.2, 0.6, 1.0))
 	buy_btn.pressed.connect(_on_buy_glide)
 	shop_hbox.add_child(buy_btn)
 
@@ -170,7 +170,7 @@ func _ready():
 	shop_hbox.add_child(speed_count_label)
 	
 	# Always show buy speed button
-	buy_speed_btn = UIFactory.create_glass_button("buy speed (30)", Color(1.0, 0.4, 0.2))
+	buy_speed_btn = UIFactory.create_glass_button("buy speed (10)", Color(1.0, 0.4, 0.2))
 	buy_speed_btn.pressed.connect(_on_buy_speed)
 	shop_hbox.add_child(buy_speed_btn)
 	
@@ -265,7 +265,7 @@ func _update_shop_ui() -> void:
 			glide_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 			
 	if is_instance_valid(buy_btn):
-		if SaveSystem.global_rubies < 30:
+		if SaveSystem.global_rubies < 10:
 			buy_btn.disabled = true
 			buy_btn.modulate.a = 0.4
 		else:
@@ -281,7 +281,7 @@ func _update_shop_ui() -> void:
 			speed_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 			
 	if is_instance_valid(buy_speed_btn):
-		if SaveSystem.global_rubies < 30:
+		if SaveSystem.global_rubies < 10:
 			buy_speed_btn.disabled = true
 			buy_speed_btn.modulate.a = 0.4
 		else:

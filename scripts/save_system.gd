@@ -128,8 +128,8 @@ func is_level_unlocked(level_id: int) -> bool:
 	return true
 
 func purchase_glide() -> bool:
-	if global_rubies >= 30:
-		global_rubies -= 30
+	if global_rubies >= 10:
+		global_rubies -= 10
 		glide_count += 1
 		save_data()
 		return true
@@ -143,8 +143,8 @@ func use_glide() -> bool:
 	return false
 
 func purchase_speed() -> bool:
-	if global_rubies >= 30:
-		global_rubies -= 30
+	if global_rubies >= 10:
+		global_rubies -= 10
 		speed_count += 1
 		save_data()
 		return true
