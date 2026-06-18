@@ -4,7 +4,7 @@ extends Control
 
 var total_levels = 90
 
-var score_label: Label
+var ruby_label: Label
 var glide_count_label: Label
 var buy_btn: Button
 var speed_count_label: Label
@@ -137,17 +137,17 @@ func _ready():
 	ruby_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ruby_icon.custom_minimum_size = Vector2(30, 30)
 	
-	score_label = Label.new()
-	score_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	score_label.add_theme_font_size_override("font_size", 32)
-	score_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
-	score_label.add_theme_constant_override("outline_size", 5)
+	ruby_label = Label.new()
+	ruby_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	ruby_label.add_theme_font_size_override("font_size", 32)
+	ruby_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	ruby_label.add_theme_constant_override("outline_size", 5)
 	
 	var ruby_hbox = HBoxContainer.new()
 	ruby_hbox.add_theme_constant_override("separation", 5)
 	ruby_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	ruby_hbox.add_child(ruby_icon)
-	ruby_hbox.add_child(score_label)
+	ruby_hbox.add_child(ruby_label)
 	shop_hbox.add_child(ruby_hbox)
 	
 	# Glide assist button or owned label
@@ -233,7 +233,7 @@ func add_stars(parent: Control, star_count: int):
 
 func _on_level_selected(level: int):
 	GameManager.current_level = level
-	GameManager.reset_score()
+	GameManager.reset_rubies()
 	BgmManager.stop_menu_music()
 	SceneTransition.transition_to("res://scenes/level_" + str(level) + ".tscn")
 
@@ -253,8 +253,8 @@ func _on_buy_speed():
 		_update_shop_ui()
 
 func _update_shop_ui() -> void:
-	if is_instance_valid(score_label):
-		score_label.text = str(SaveSystem.global_score)
+	if is_instance_valid(ruby_label):
+		ruby_label.text = str(SaveSystem.global_rubies)
 		
 	if is_instance_valid(glide_count_label):
 		if SaveSystem.glide_count > 0:
@@ -265,7 +265,7 @@ func _update_shop_ui() -> void:
 			glide_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 			
 	if is_instance_valid(buy_btn):
-		if SaveSystem.global_score < 30:
+		if SaveSystem.global_rubies < 30:
 			buy_btn.disabled = true
 			buy_btn.modulate.a = 0.4
 		else:
@@ -281,7 +281,7 @@ func _update_shop_ui() -> void:
 			speed_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 			
 	if is_instance_valid(buy_speed_btn):
-		if SaveSystem.global_score < 30:
+		if SaveSystem.global_rubies < 30:
 			buy_speed_btn.disabled = true
 			buy_speed_btn.modulate.a = 0.4
 		else:

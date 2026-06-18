@@ -14,7 +14,7 @@ var map_zoom = Vector2(0.25, 0.25)
 var level_min = Vector2.ZERO
 var level_max = Vector2.ZERO
 
-var score_label: Label
+var ruby_label: Label
 var health_label: Label
 var view_map_btn: Button
 var hint_button: Button
@@ -79,10 +79,10 @@ func _ready():
 		level_camera.zoom = map_zoom
 		level_camera.global_position = level_center_pos
 	
-	# Setup Score Panel
-	var score_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
-	var score_hbox = HBoxContainer.new()
-	score_hbox.add_theme_constant_override("separation", 10)
+	# Setup Ruby Panel
+	var ruby_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
+	var ruby_hbox = HBoxContainer.new()
+	ruby_hbox.add_theme_constant_override("separation", 10)
 	
 	var ruby_icon = TextureRect.new()
 	ruby_icon.texture = ResourceManager.get_texture("res://assets/ruby.png")
@@ -91,21 +91,21 @@ func _ready():
 	ruby_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ruby_icon.custom_minimum_size = Vector2(30, 30)
 	
-	score_label = Label.new()
-	score_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	score_label.add_theme_font_size_override("font_size", 32)
-	score_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
-	score_label.add_theme_constant_override("outline_size", 5)
+	ruby_label = Label.new()
+	ruby_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	ruby_label.add_theme_font_size_override("font_size", 32)
+	ruby_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	ruby_label.add_theme_constant_override("outline_size", 5)
 	
-	score_hbox.add_child(ruby_icon)
-	score_hbox.add_child(score_label)
-	score_panel.add_child(score_hbox)
+	ruby_hbox.add_child(ruby_icon)
+	ruby_hbox.add_child(ruby_label)
+	ruby_panel.add_child(ruby_hbox)
 	
-	var score_margin = MarginContainer.new()
-	score_margin.add_theme_constant_override("margin_left", 20)
-	score_margin.add_theme_constant_override("margin_top", 20)
-	score_margin.add_child(score_panel)
-	add_child(score_margin)
+	var ruby_margin = MarginContainer.new()
+	ruby_margin.add_theme_constant_override("margin_left", 20)
+	ruby_margin.add_theme_constant_override("margin_top", 20)
+	ruby_margin.add_child(ruby_panel)
+	add_child(ruby_margin)
 	
 	# Setup Health Panel
 	var health_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
@@ -251,8 +251,8 @@ func _ready():
 func _process(delta: float):
 	if is_instance_valid(health_label):
 		health_label.text = "box health: %d%%" % int(GameManager.box_health)
-	if is_instance_valid(score_label):
-		score_label.text = "score: %d" % GameManager.current_score
+	if is_instance_valid(ruby_label):
+		ruby_label.text = "ruby: %d" % GameManager.current_rubies
 	
 	# Disable hint button when in zero gravity
 	if is_instance_valid(hint_button) and not hint_used:
@@ -470,7 +470,7 @@ func _create_pause_menu():
 	var retry_btn = UIFactory.create_glass_button("retry", UIFactory.GOLD_COLOR)
 	retry_btn.pressed.connect(func():
 		toggle_pause()
-		GameManager.reset_score()
+		GameManager.reset_rubies()
 		SceneTransition.reload_current()
 	)
 	vbox.add_child(retry_btn)

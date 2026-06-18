@@ -132,6 +132,16 @@ func _process(delta: float):
 	if vbox.position.y + vbox.size.y < 0:
 		_finish_credits()
 
+func _unhandled_input(event: InputEvent) -> void:
+	if finished:
+		return
+	var is_key = event is InputEventKey and event.pressed
+	var is_click = event is InputEventMouseButton and event.pressed
+	var is_joy = event is InputEventJoypadButton and event.pressed
+	var is_touch = event is InputEventScreenTouch and event.pressed
+	if is_key or is_click or is_joy or is_touch:
+		_finish_credits()
+
 func _finish_credits():
 	finished = true
 	SceneTransition.transition_to("res://scenes/menu.tscn")

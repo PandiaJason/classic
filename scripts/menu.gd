@@ -38,7 +38,7 @@ func _ready():
 	$VBoxContainer.add_child(button_vbox)
 	
 	# Use UIFactory for central panels
-	var score_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
+	var ruby_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
 	var hbox = HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 10)
 	
@@ -48,25 +48,25 @@ func _ready():
 	ruby_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ruby_icon.custom_minimum_size = Vector2(40, 40)
 	
-	var score_label = Label.new()
-	score_label.text = "score: " + str(SaveSystem.global_score)
-	score_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	score_label.add_theme_font_size_override("font_size", 30)
-	score_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
-	score_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	score_label.add_theme_constant_override("outline_size", 8)
+	var ruby_label = Label.new()
+	ruby_label.text = "ruby: " + str(SaveSystem.global_rubies)
+	ruby_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	ruby_label.add_theme_font_size_override("font_size", 30)
+	ruby_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	ruby_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	ruby_label.add_theme_constant_override("outline_size", 8)
 	
 	hbox.add_child(ruby_icon)
-	hbox.add_child(score_label)
-	score_panel.add_child(hbox)
+	hbox.add_child(ruby_label)
+	ruby_panel.add_child(hbox)
 	
-	var score_margin = MarginContainer.new()
-	score_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	score_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	score_margin.add_theme_constant_override("margin_top", 30)
-	score_margin.add_theme_constant_override("margin_right", 30)
-	score_margin.add_child(score_panel)
-	add_child(score_margin)
+	var ruby_margin = MarginContainer.new()
+	ruby_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	ruby_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	ruby_margin.add_theme_constant_override("margin_top", 30)
+	ruby_margin.add_theme_constant_override("margin_right", 30)
+	ruby_margin.add_child(ruby_panel)
+	add_child(ruby_margin)
 	
 	# Unmute Master bus to ensure sound effects always work
 	var bus_idx = AudioServer.get_bus_index("Master")
@@ -249,7 +249,7 @@ func _on_tutorial_pressed():
 		{"icon": "res://assets/custom_player.png", "keys": "space / tap screen", "desc": "launch into orbit or release tether gravity field."},
 		{"icon": "res://assets/custom_player.png", "keys": "click glide button", "desc": "redirect velocity in outer space (buy glides in menu)."},
 		{"icon": "res://assets/custom_player.png", "keys": "shift / click speed button", "desc": "speed up outer space flying (buy speed boosts in menu)."},
-		{"icon": "res://assets/ruby.png", "keys": "space rubies", "desc": "collect glowing rubies around levels to increase score."},
+		{"icon": "res://assets/ruby.png", "keys": "space rubies", "desc": "collect glowing rubies around levels to increase ruby."},
 		{"icon": "res://assets/asteroid.png", "keys": "asteroids", "desc": "avoid fast-moving space rocks that damage your cargo."},
 		{"icon": "res://assets/flag.png", "keys": "reach portal", "desc": "deliver the fragile box to the portal with high health."}
 	]
@@ -323,7 +323,7 @@ func _on_reset_pressed():
 	vbox.add_child(warn_title)
 
 	var warn_msg = Label.new()
-	warn_msg.text = "all progress, stars and score\nwill be permanently deleted!"
+	warn_msg.text = "all progress, stars and ruby\nwill be permanently deleted!"
 	warn_msg.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 	warn_msg.add_theme_font_size_override("font_size", 28)
 	warn_msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -342,7 +342,7 @@ func _on_reset_pressed():
 	var confirm_btn = UIFactory.create_glass_button("yes, reset!", UIFactory.RED_COLOR)
 	confirm_btn.pressed.connect(func():
 		SaveSystem.unlocked_levels = 1
-		SaveSystem.global_score = 0
+		SaveSystem.global_rubies = 0
 		SaveSystem.glide_count = 0
 		for i in range(1, 91):
 			SaveSystem.level_stars[i] = 0

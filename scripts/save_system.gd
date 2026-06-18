@@ -7,8 +7,8 @@ var config = ConfigFile.new()
 var level_stars = {}
 # highest unlocked level
 var unlocked_levels = 1
-# Global score system
-var global_score = 0
+# Global ruby system
+var global_rubies = 0
 # Music preference
 var music_on = true
 var music_volume: float = 0.8
@@ -29,7 +29,7 @@ func load_data():
 	var err = config.load(SAVE_PATH)
 	if err == OK:
 		unlocked_levels = config.get_value("Progress", "unlocked_levels", 1)
-		global_score = config.get_value("Progress", "global_score", 0)
+		global_rubies = config.get_value("Progress", "global_rubies", config.get_value("Progress", "global_score", 0))
 		music_on = config.get_value("Progress", "music_on", true)
 		music_volume = config.get_value("Progress", "music_volume", 0.8)
 		sfx_on = config.get_value("Progress", "sfx_on", true)
@@ -43,7 +43,7 @@ func load_data():
 	else:
 		# Initialize default
 		unlocked_levels = 1
-		global_score = 0
+		global_rubies = 0
 		music_on = true
 		music_volume = 0.8
 		sfx_on = true
@@ -57,7 +57,8 @@ func load_data():
 
 func save_data():
 	config.set_value("Progress", "unlocked_levels", unlocked_levels)
-	config.set_value("Progress", "global_score", global_score)
+	config.set_value("Progress", "global_rubies", global_rubies)
+	config.set_value("Progress", "global_score", global_rubies)
 	config.set_value("Progress", "music_on", music_on)
 	config.set_value("Progress", "music_volume", music_volume)
 	config.set_value("Progress", "sfx_on", sfx_on)
@@ -127,8 +128,8 @@ func is_level_unlocked(level_id: int) -> bool:
 	return true
 
 func purchase_glide() -> bool:
-	if global_score >= 30:
-		global_score -= 30
+	if global_rubies >= 30:
+		global_rubies -= 30
 		glide_count += 1
 		save_data()
 		return true
@@ -142,8 +143,8 @@ func use_glide() -> bool:
 	return false
 
 func purchase_speed() -> bool:
-	if global_score >= 30:
-		global_score -= 30
+	if global_rubies >= 30:
+		global_rubies -= 30
 		speed_count += 1
 		save_data()
 		return true

@@ -18,7 +18,7 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.name == "Player2D":
-		GameManager.add_score(10)
+		GameManager.add_ruby(10)
 		GameManager.repair_box(5.0)
 		SoundManager.play_sfx("ruby")
 		_spawn_sparkle_particles()

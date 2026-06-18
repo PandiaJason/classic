@@ -119,7 +119,7 @@ func _ready():
 
 func _on_retry_pressed():
 	get_tree().paused = false
-	GameManager.reset_score()
+	GameManager.reset_rubies()
 	queue_free()
 	SceneTransition.reload_current()
 

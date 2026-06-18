@@ -1,6 +1,6 @@
 extends Node
 
-var current_score: int = 0
+var current_rubies: int = 0
 var has_box: bool = true
 var box_health: float = 100.0
 var current_level: int = 1
@@ -49,29 +49,29 @@ func level_complete() -> void:
 		get_tree().root.add_child(ui)
 
 var level_rubies: int = 0
-var level_score_earned: int = 0
+var level_rubies_earned: int = 0
 
-func add_score(points: int) -> void:
-	current_score += points
-	level_score_earned += points
+func add_ruby(points: int) -> void:
+	current_rubies += points
+	level_rubies_earned += points
 	if points == 10:
 		level_rubies += 1
-	SaveSystem.global_score += points
+	SaveSystem.global_rubies += points
 	SaveSystem.save_data()
 
-func reset_score() -> void:
-	current_score = 0
+func reset_rubies() -> void:
+	current_rubies = 0
 	level_rubies = 0
-	level_score_earned = 0
+	level_rubies_earned = 0
 	has_box = true
 	box_health = 100.0
 	is_gameplay_started = false
 	health_changed.emit(box_health)
 
 func load_next_level() -> void:
-	# current_score is kept for the session, but we also saved it globally
+	# current_rubies is kept for the session, but we also saved it globally
 	level_rubies = 0
-	level_score_earned = 0
+	level_rubies_earned = 0
 	has_box = true
 	box_health = 100.0
 	current_level += 1

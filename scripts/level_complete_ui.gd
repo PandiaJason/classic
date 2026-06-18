@@ -120,13 +120,13 @@ func _ready():
 	rubies_lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.2)) # Premium Gold
 	stats_vbox.add_child(rubies_lbl)
 	
-	var score_lbl = Label.new()
-	score_lbl.text = "score earned: +%d" % GameManager.level_score_earned
-	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	score_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	score_lbl.add_theme_font_size_override("font_size", 24)
-	score_lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
-	stats_vbox.add_child(score_lbl)
+	var ruby_earned_lbl = Label.new()
+	ruby_earned_lbl.text = "ruby earned: +%d" % GameManager.level_rubies_earned
+	ruby_earned_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ruby_earned_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	ruby_earned_lbl.add_theme_font_size_override("font_size", 24)
+	ruby_earned_lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
+	stats_vbox.add_child(ruby_earned_lbl)
 	
 	var health_lbl = Label.new()
 	health_lbl.text = "box health: %d%%" % int(GameManager.box_health)
