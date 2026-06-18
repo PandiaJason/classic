@@ -73,15 +73,29 @@ func _ready():
 				btn.add_child(lock_icon)
 				
 			if req_stars > 0:
+				var req_hbox = HBoxContainer.new()
+				req_hbox.add_theme_constant_override("separation", 2)
+				req_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+				req_hbox.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+				req_hbox.offset_bottom = -8
+				
 				var req_label = Label.new()
-				req_label.text = "%d ★" % req_stars
+				req_label.text = str(req_stars)
 				req_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 				req_label.add_theme_font_size_override("font_size", 20)
 				req_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
-				req_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				req_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-				req_label.offset_bottom = -8
-				btn.add_child(req_label)
+				
+				var req_star_icon = TextureRect.new()
+				req_star_icon.texture = load("res://assets/star.png")
+				req_star_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+				req_star_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				req_star_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				req_star_icon.custom_minimum_size = Vector2(16, 16)
+				req_star_icon.modulate = Color(1.0, 0.4, 0.4) # Tint it red to match the text
+				
+				req_hbox.add_child(req_label)
+				req_hbox.add_child(req_star_icon)
+				btn.add_child(req_hbox)
 				
 			btn.add_theme_stylebox_override("normal", load_style("locked"))
 			btn.add_theme_stylebox_override("hover", load_style("locked"))
