@@ -397,7 +397,14 @@ func _show_daily_rewards_popup():
 	var overlay = ColorRect.new()
 	overlay.color = Color(0, 0, 0, 0.75)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(overlay)
+	
+	# Create center container inside overlay
+	var center = CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_PASS
+	overlay.add_child(center)
 	
 	# Create dialog
 	var dialog = PanelContainer.new()
@@ -417,6 +424,7 @@ func _show_daily_rewards_popup():
 	style.content_margin_top = 30
 	style.content_margin_bottom = 30
 	dialog.add_theme_stylebox_override("panel", style)
+	center.add_child(dialog)
 	
 	var vbox = VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 25)
@@ -524,9 +532,11 @@ func _show_daily_rewards_popup():
 		if day == 7:
 			icon.custom_minimum_size = Vector2(45, 45) # Large bonus ruby
 			if not is_claimed:
-				var pulse_tween = create_tween().set_loops()
-				pulse_tween.tween_property(icon, "scale", Vector2(1.15, 1.15), 0.6).set_trans(Tween.TRANS_SINE)
-				pulse_tween.tween_property(icon, "scale", Vector2(0.85, 0.85), 0.6).set_trans(Tween.TRANS_SINE)
+				icon.ready.connect(func():
+					var pulse_tween = icon.create_tween().set_loops()
+					pulse_tween.tween_property(icon, "scale", Vector2(1.15, 1.15), 0.6).set_trans(Tween.TRANS_SINE)
+					pulse_tween.tween_property(icon, "scale", Vector2(0.85, 0.85), 0.6).set_trans(Tween.TRANS_SINE)
+				)
 				icon.pivot_offset = Vector2(22.5, 22.5)
 		else:
 			icon.custom_minimum_size = Vector2(30, 30)
@@ -574,7 +584,6 @@ func _show_daily_rewards_popup():
 	var close_btn = UIFactory.create_glass_button("close", UIFactory.BLUE_COLOR)
 	close_btn.pressed.connect(func():
 		overlay.queue_free()
-		dialog.queue_free()
 	)
 	
 	if claim_avail:
@@ -674,6 +683,13 @@ func _show_daily_rewards_popup():
 					icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 					if day == 7:
 						icon.custom_minimum_size = Vector2(45, 45)
+						if not is_claimed:
+							icon.ready.connect(func():
+								var pulse_tween = icon.create_tween().set_loops()
+								pulse_tween.tween_property(icon, "scale", Vector2(1.15, 1.15), 0.6).set_trans(Tween.TRANS_SINE)
+								pulse_tween.tween_property(icon, "scale", Vector2(0.85, 0.85), 0.6).set_trans(Tween.TRANS_SINE)
+							)
+							icon.pivot_offset = Vector2(22.5, 22.5)
 					else:
 						icon.custom_minimum_size = Vector2(30, 30)
 					card_vbox.add_child(icon)
@@ -712,10 +728,5 @@ func _show_daily_rewards_popup():
 		
 	actions_hbox.add_child(close_btn)
 	vbox.add_child(actions_hbox)
-	
 	dialog.add_child(vbox)
-	
-	var center = CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	center.add_child(dialog)
-	add_child(center)
+
