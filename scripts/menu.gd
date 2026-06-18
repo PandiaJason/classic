@@ -180,7 +180,7 @@ func _ready():
 
 	# Copyright notice (bottom center)
 	var copyright = Label.new()
-	copyright.text = "copyright by hikki studios — dev @pandiajason"
+	copyright.text = "copyright by hikki studios"
 	copyright.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 	copyright.add_theme_font_size_override("font_size", 18)
 	copyright.add_theme_color_override("font_color", Color(1, 0.8, 0.2, 0.6))

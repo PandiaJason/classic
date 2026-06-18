@@ -179,4 +179,4 @@ Music toggle is saved between sessions.
 
 ---
 
-*copyright by hikki studios — dev @pandiajason*
+*copyright by hikki studios*

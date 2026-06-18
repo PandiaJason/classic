@@ -79,6 +79,6 @@ func load_next_level() -> void:
 	health_changed.emit(box_health)
 	
 	if current_level > 90:
-		SceneTransition.transition_to("res://scenes/level_select.tscn")
+		SceneTransition.transition_to("res://scenes/credits.tscn")
 	else:
 		SceneTransition.transition_to("res://scenes/level_" + str(current_level) + ".tscn")
