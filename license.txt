@@ -1,0 +1,22 @@
+ranotot end user license agreement (eula)
+
+copyright (c) 2026 hikki studios. all rights reserved.
+
+1. license grant
+hikki studios grants you a non-exclusive, non-transferable, revocable, free license to download, install, and play ranotot for personal, non-commercial entertainment.
+
+2. ownership
+the game, including all code, graphics, music, sound effects, level designs, characters, and trademarks, is the intellectual property of hikki studios. you do not acquire any ownership rights to the game.
+
+3. restrictions
+you may not:
+- modify, adapt, translate, reverse engineer, decompile, or disassemble the game.
+- sell, rent, lease, sub-license, or distribute the game or any part of it.
+- use the game for any commercial purposes.
+- copy or distribute any of the assets (art, music, code) separately from the game.
+
+4. future monetization
+this game is currently offered free of charge. hikki studios reserves the right to introduce optional in-game purchases, microtransactions, or other monetization models in future updates of the game.
+
+5. warranty disclaimer & limitation of liability
+the game is provided "as is" without warranty of any kind. hikki studios shall not be liable for any damages arising out of the use or inability to use the game.

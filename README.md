@@ -1,10 +1,27 @@
-# 🛵 Ranotot — 2D Space Delivery Game
+# ranotot
 
-A gravity-based 2D platformer where you deliver packages across planets in space. Jump between planets, avoid asteroids, and complete 30 levels!
+hop on your space scooter and become the galaxy’s craziest delivery driver!
 
-**Engine:** Godot 4.6 (GL Compatibility)  
-**Platforms:** macOS, Windows, Linux  
-**Developer:** Hikki Studios / @pandiajason
+in ranotot, you race through space, jump between planets, dodge dangerous asteroids, and deliver fragile cargo without crashing. use each planet’s gravity to ride around it, launch into space, and land safely on the next world.
+
+one bad jump… and you’ll drift forever into the endless void!
+
+## gameplay
+* **ride around planets**: every planet has its own gravity. drive all around them in full 360° movement and use gravity to fly to the next planet.
+* **master perfect jumps**: timing matters! jump too soon or too late and you could miss your landing completely.
+* **glide assist**: use your collected rubies in the shop to buy glide assists to redirect your velocity in zero-gravity space when you miss a jump!
+* **dodge asteroids**: watch out for fast-moving space rocks that can damage your delivery box.
+* **collect space rubies**: grab glowing rubies hidden around levels to increase your score, buy powerups, and earn 3-star ratings.
+
+## features
+* **90 epic and challenging levels**: test your skills across six tier difficulties (master, legend, nightmare, insane, cosmic, and ultimate) with tougher jumps, moving hazards, and tricky gravity puzzles.
+* **star gates**: collect stars on completed levels to unlock the higher difficulty tiers as you progress.
+* **visual variety**: experience beautiful visual shifts as you advance tiers, featuring unique background cosmic nebula colors and matching colored gravity well shields.
+* **smooth cinematic camera**: the camera follows your scooter smoothly while keeping the action easy to see.
+* **colorful cartoon space worlds**: explore vibrant planets with shiny bubble shields and cool sci-fi visuals.
+* **awesome space music**: enjoy an original soundtrack packed with energetic cosmic vibes.
+
+can you become the ultimate space courier? deliver every package safely, collect every ruby, and earn perfect ratings on every level!
 
 ---
 
@@ -162,4 +179,4 @@ Music toggle is saved between sessions.
 
 ---
 
-*Copyrighted by @pandiajason — Hikki Studios*
+*copyright by hikki studios — dev @pandiajason*
