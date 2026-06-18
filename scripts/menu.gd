@@ -2,6 +2,7 @@ extends Control
 
 var _ruby_btn: TextureButton = null
 var _pulse_time: float = 0.0
+var _ruby_label: Label = null
 
 func _ready():
 	BgmManager.play_menu_music()
@@ -50,6 +51,7 @@ func _ready():
 	
 	var ruby_label = Label.new()
 	ruby_label.text = "ruby: " + str(SaveSystem.global_rubies)
+	_ruby_label = ruby_label
 	ruby_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 	ruby_label.add_theme_font_size_override("font_size", 30)
 	ruby_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
@@ -209,6 +211,26 @@ func _ready():
 	copy_margin.add_theme_constant_override("margin_bottom", 8)
 	copy_margin.add_child(copyright)
 	add_child(copy_margin)
+	
+	# Setup Daily Reward button on the top left, below rate panel
+	var daily_btn = UIFactory.create_glass_button("daily reward", UIFactory.GOLD_COLOR)
+	daily_btn.add_theme_font_size_override("font_size", 20)
+	daily_btn.pressed.connect(func():
+		_show_daily_rewards_popup()
+	)
+	
+	var daily_margin = MarginContainer.new()
+	daily_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	daily_margin.add_theme_constant_override("margin_top", 110)
+	daily_margin.add_theme_constant_override("margin_left", 30)
+	daily_margin.add_child(daily_btn)
+	add_child(daily_margin)
+	
+	# Auto-open daily reward if available
+	if SaveSystem.is_daily_reward_available():
+		get_tree().create_timer(0.2).timeout.connect(func():
+			_show_daily_rewards_popup()
+		)
 
 
 
@@ -369,3 +391,331 @@ func _process(delta: float):
 		
 		var brightness = 1.0 + (sin(_pulse_time) + 1.0) * 0.2
 		_ruby_btn.modulate = Color(brightness, brightness, brightness, 1.0)
+
+func _show_daily_rewards_popup():
+	# Create overlay
+	var overlay = ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.75)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(overlay)
+	
+	# Create dialog
+	var dialog = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.1, 0.85)
+	style.corner_radius_top_left = 25
+	style.corner_radius_top_right = 25
+	style.corner_radius_bottom_right = 25
+	style.corner_radius_bottom_left = 25
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(1, 0.8, 0.2, 0.8) # Gold border
+	style.content_margin_left = 40
+	style.content_margin_right = 40
+	style.content_margin_top = 30
+	style.content_margin_bottom = 30
+	dialog.add_theme_stylebox_override("panel", style)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 25)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	# Title
+	var title = Label.new()
+	title.text = "daily streak rewards"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	title.add_theme_font_size_override("font_size", 36)
+	title.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	title.add_theme_constant_override("outline_size", 6)
+	title.add_theme_color_override("font_outline_color", Color.BLACK)
+	vbox.add_child(title)
+	
+	# Subtitle/Description
+	var subtitle = Label.new()
+	subtitle.text = "play consecutive days to earn rubies! miss a day and it restarts lol."
+	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	subtitle.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	subtitle.add_theme_font_size_override("font_size", 18)
+	subtitle.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	vbox.add_child(subtitle)
+	
+	# HBox for the 7 days
+	var cards_hbox = HBoxContainer.new()
+	cards_hbox.add_theme_constant_override("separation", 12)
+	cards_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	var current_streak = SaveSystem.streak_count
+	var last_claim = SaveSystem.last_claim_day
+	var claim_avail = SaveSystem.is_daily_reward_available()
+	var today_candidate = SaveSystem.get_next_streak_day()
+	
+	for day in range(1, 8):
+		var card = PanelContainer.new()
+		card.custom_minimum_size = Vector2(110, 160)
+		
+		var card_style = StyleBoxFlat.new()
+		card_style.corner_radius_top_left = 15
+		card_style.corner_radius_top_right = 15
+		card_style.corner_radius_bottom_right = 15
+		card_style.corner_radius_bottom_left = 15
+		card_style.border_width_left = 2
+		card_style.border_width_top = 2
+		card_style.border_width_right = 2
+		card_style.border_width_bottom = 2
+		
+		var is_claimed = false
+		var is_today = false
+		var is_locked = false
+		
+		if claim_avail:
+			if day < today_candidate:
+				is_claimed = true
+			elif day == today_candidate:
+				is_today = true
+			else:
+				is_locked = true
+		else:
+			if day <= current_streak:
+				is_claimed = true
+			else:
+				is_locked = true
+				
+		# Color and style based on state
+		if is_today:
+			card_style.bg_color = Color(1.0, 0.8, 0.2, 0.25)
+			card_style.border_color = Color(1.0, 0.8, 0.2, 1.0) # Golden glow border
+			card_style.shadow_color = Color(1.0, 0.8, 0.0, 0.3)
+			card_style.shadow_size = 10
+		elif is_claimed:
+			card_style.bg_color = Color(0.1, 0.4, 0.1, 0.15)
+			card_style.border_color = Color(0.2, 0.8, 0.2, 0.5)
+		else:
+			card_style.bg_color = Color(0.1, 0.1, 0.15, 0.4)
+			card_style.border_color = Color(0.3, 0.3, 0.4, 0.3)
+			
+		card.add_theme_stylebox_override("panel", card_style)
+		
+		var card_vbox = VBoxContainer.new()
+		card_vbox.add_theme_constant_override("separation", 10)
+		card_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+		
+		# Day Label
+		var day_lbl = Label.new()
+		day_lbl.text = "day %d" % day
+		day_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		day_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		day_lbl.add_theme_font_size_override("font_size", 18)
+		if is_today:
+			day_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+		elif is_claimed:
+			day_lbl.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
+		else:
+			day_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		card_vbox.add_child(day_lbl)
+		
+		# Ruby Icon
+		var icon = TextureRect.new()
+		icon.texture = ResourceManager.get_texture("res://assets/ruby.png")
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		if day == 7:
+			icon.custom_minimum_size = Vector2(45, 45) # Large bonus ruby
+			if not is_claimed:
+				var pulse_tween = create_tween().set_loops()
+				pulse_tween.tween_property(icon, "scale", Vector2(1.15, 1.15), 0.6).set_trans(Tween.TRANS_SINE)
+				pulse_tween.tween_property(icon, "scale", Vector2(0.85, 0.85), 0.6).set_trans(Tween.TRANS_SINE)
+				icon.pivot_offset = Vector2(22.5, 22.5)
+		else:
+			icon.custom_minimum_size = Vector2(30, 30)
+		card_vbox.add_child(icon)
+		
+		# Amount
+		var amt_lbl = Label.new()
+		var amt = 300 if day == 7 else 50
+		amt_lbl.text = "+%d" % amt
+		amt_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		amt_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		amt_lbl.add_theme_font_size_override("font_size", 20 if day == 7 else 18)
+		if day == 7:
+			amt_lbl.add_theme_color_override("font_color", Color(1, 0.8, 0.2)) # Golden/Yellow
+		else:
+			amt_lbl.add_theme_color_override("font_color", Color.WHITE)
+		card_vbox.add_child(amt_lbl)
+		
+		# Status indicator
+		var status_lbl = Label.new()
+		status_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		status_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		status_lbl.add_theme_font_size_override("font_size", 14)
+		if is_claimed:
+			status_lbl.text = "claimed"
+			status_lbl.add_theme_color_override("font_color", Color(0.2, 0.8, 0.2))
+		elif is_today:
+			status_lbl.text = "claim!"
+			status_lbl.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2))
+		else:
+			status_lbl.text = "locked"
+			status_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		card_vbox.add_child(status_lbl)
+		
+		card.add_child(card_vbox)
+		cards_hbox.add_child(card)
+		
+	vbox.add_child(cards_hbox)
+	
+	# Actions row
+	var actions_hbox = HBoxContainer.new()
+	actions_hbox.add_theme_constant_override("separation", 20)
+	actions_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	var close_btn = UIFactory.create_glass_button("close", UIFactory.BLUE_COLOR)
+	close_btn.pressed.connect(func():
+		overlay.queue_free()
+		dialog.queue_free()
+	)
+	
+	if claim_avail:
+		var target_amount = 300 if today_candidate == 7 else 50
+		var claim_btn = UIFactory.create_glass_button("claim %d rubies!" % target_amount, UIFactory.GOLD_COLOR)
+		claim_btn.pressed.connect(func():
+			var res = SaveSystem.claim_daily_reward()
+			if res.get("success", false):
+				SoundManager.play_sfx("ruby")
+				# Animate ruby counter update
+				if is_instance_valid(_ruby_label):
+					_ruby_label.text = "ruby: " + str(SaveSystem.global_rubies)
+				
+				# Animate a popup completion effect
+				title.text = "claimed +%d rubies!" % res.get("amount", 0)
+				title.add_theme_color_override("font_color", Color(0.2, 1.0, 0.2))
+				subtitle.text = "congratulations! streak is now %d day(s)." % res.get("streak", 0)
+				
+				claim_btn.visible = false
+				close_btn.text = "awesome!"
+				
+				# Rebuild the calendar cards to show claimed state instantly
+				for child in cards_hbox.get_children():
+					child.queue_free()
+				
+				# Wait a frame to let cards free, then rebuild them
+				await get_tree().process_frame
+				
+				var new_streak = SaveSystem.streak_count
+				var new_claim_avail = SaveSystem.is_daily_reward_available()
+				var new_today_candidate = SaveSystem.get_next_streak_day()
+				
+				for day in range(1, 8):
+					var card = PanelContainer.new()
+					card.custom_minimum_size = Vector2(110, 160)
+					
+					var card_style = StyleBoxFlat.new()
+					card_style.corner_radius_top_left = 15
+					card_style.corner_radius_top_right = 15
+					card_style.corner_radius_bottom_right = 15
+					card_style.corner_radius_bottom_left = 15
+					card_style.border_width_left = 2
+					card_style.border_width_top = 2
+					card_style.border_width_right = 2
+					card_style.border_width_bottom = 2
+					
+					var is_claimed = false
+					var is_today = false
+					var is_locked = false
+					
+					if new_claim_avail:
+						if day < new_today_candidate:
+							is_claimed = true
+						elif day == new_today_candidate:
+							is_today = true
+						else:
+							is_locked = true
+					else:
+						# just claimed today
+						if day <= new_streak or (day == 7 and res.get("amount", 0) == 300):
+							is_claimed = true
+						else:
+							is_locked = true
+							
+					if is_today:
+						card_style.bg_color = Color(1.0, 0.8, 0.2, 0.25)
+						card_style.border_color = Color(1.0, 0.8, 0.2, 1.0)
+					elif is_claimed:
+						card_style.bg_color = Color(0.1, 0.4, 0.1, 0.15)
+						card_style.border_color = Color(0.2, 0.8, 0.2, 0.5)
+					else:
+						card_style.bg_color = Color(0.1, 0.1, 0.15, 0.4)
+						card_style.border_color = Color(0.3, 0.3, 0.4, 0.3)
+						
+					card.add_theme_stylebox_override("panel", card_style)
+					
+					var card_vbox = VBoxContainer.new()
+					card_vbox.add_theme_constant_override("separation", 10)
+					card_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+					
+					var day_lbl = Label.new()
+					day_lbl.text = "day %d" % day
+					day_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+					day_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+					day_lbl.add_theme_font_size_override("font_size", 18)
+					if is_today:
+						day_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+					elif is_claimed:
+						day_lbl.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
+					else:
+						day_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+					card_vbox.add_child(day_lbl)
+					
+					var icon = TextureRect.new()
+					icon.texture = ResourceManager.get_texture("res://assets/ruby.png")
+					icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+					icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+					if day == 7:
+						icon.custom_minimum_size = Vector2(45, 45)
+					else:
+						icon.custom_minimum_size = Vector2(30, 30)
+					card_vbox.add_child(icon)
+					
+					var amt_lbl = Label.new()
+					var amt = 300 if day == 7 else 50
+					amt_lbl.text = "+%d" % amt
+					amt_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+					amt_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+					amt_lbl.add_theme_font_size_override("font_size", 20 if day == 7 else 18)
+					if day == 7:
+						amt_lbl.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+					else:
+						amt_lbl.add_theme_color_override("font_color", Color.WHITE)
+					card_vbox.add_child(amt_lbl)
+					
+					var status_lbl = Label.new()
+					status_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+					status_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+					status_lbl.add_theme_font_size_override("font_size", 14)
+					if is_claimed:
+						status_lbl.text = "claimed"
+						status_lbl.add_theme_color_override("font_color", Color(0.2, 0.8, 0.2))
+					elif is_today:
+						status_lbl.text = "claim!"
+						status_lbl.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2))
+					else:
+						status_lbl.text = "locked"
+						status_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+					card_vbox.add_child(status_lbl)
+					
+					card.add_child(card_vbox)
+					cards_hbox.add_child(card)
+		)
+		actions_hbox.add_child(claim_btn)
+		
+	actions_hbox.add_child(close_btn)
+	vbox.add_child(actions_hbox)
+	
+	dialog.add_child(vbox)
+	
+	var center = CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.add_child(dialog)
+	add_child(center)

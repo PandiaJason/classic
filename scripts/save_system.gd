@@ -21,6 +21,9 @@ var glide_count: int = 0
 var speed_count: int = 0
 # Tutorial completion state
 var tutorial_complete: bool = false
+# Daily streak system
+var streak_count: int = 0
+var last_claim_day: int = -1
 
 func _ready():
 	load_data()
@@ -37,6 +40,8 @@ func load_data():
 		glide_count = config.get_value("Progress", "glide_count", 0)
 		speed_count = config.get_value("Progress", "speed_count", 0)
 		tutorial_complete = config.get_value("Progress", "tutorial_complete", false)
+		streak_count = config.get_value("Progress", "streak_count", 0)
+		last_claim_day = config.get_value("Progress", "last_claim_day", -1)
 		# Load stars for all 30 possible levels
 		for i in range(1, 91):
 			level_stars[i] = config.get_value("Stars", str(i), 0)
@@ -51,6 +56,8 @@ func load_data():
 		glide_count = 0
 		speed_count = 0
 		tutorial_complete = false
+		streak_count = 0
+		last_claim_day = -1
 		for i in range(1, 91):
 			level_stars[i] = 0
 		save_data()
@@ -66,6 +73,8 @@ func save_data():
 	config.set_value("Progress", "glide_count", glide_count)
 	config.set_value("Progress", "speed_count", speed_count)
 	config.set_value("Progress", "tutorial_complete", tutorial_complete)
+	config.set_value("Progress", "streak_count", streak_count)
+	config.set_value("Progress", "last_claim_day", last_claim_day)
 	for i in level_stars.keys():
 		config.set_value("Stars", str(i), level_stars[i])
 	config.save(SAVE_PATH)
@@ -156,3 +165,43 @@ func use_speed() -> bool:
 		save_data()
 		return true
 	return false
+
+func get_local_day_number() -> int:
+	var bias_seconds = Time.get_time_zone_from_system().get("bias", 0) * 60
+	return int((Time.get_unix_time_from_system() + bias_seconds) / 86400)
+
+func is_daily_reward_available() -> bool:
+	var today = get_local_day_number()
+	return last_claim_day == -1 or today > last_claim_day
+
+func get_next_streak_day() -> int:
+	var today = get_local_day_number()
+	if last_claim_day == -1:
+		return 1
+	elif today == last_claim_day:
+		return streak_count
+	elif today == last_claim_day + 1:
+		return (streak_count % 7) + 1
+	else:
+		return 1
+
+func claim_daily_reward() -> Dictionary:
+	if not is_daily_reward_available():
+		return {"success": false, "amount": 0, "streak": streak_count}
+		
+	var today = get_local_day_number()
+	var next_streak = get_next_streak_day()
+	var amount = 0
+	
+	if next_streak == 7:
+		amount = 300
+		streak_count = 0
+	else:
+		amount = 50
+		streak_count = next_streak
+		
+	last_claim_day = today
+	global_rubies += amount
+	save_data()
+	
+	return {"success": true, "amount": amount, "streak": streak_count}
