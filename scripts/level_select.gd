@@ -7,6 +7,8 @@ var total_levels = 90
 var score_label: Label
 var glide_count_label: Label
 var buy_btn: Button
+var speed_count_label: Label
+var buy_speed_btn: Button
 
 func _ready():
 	BgmManager.play_menu_music()
@@ -159,6 +161,18 @@ func _ready():
 	buy_btn = UIFactory.create_glass_button("buy glide (30)", Color(0.2, 0.6, 1.0))
 	buy_btn.pressed.connect(_on_buy_glide)
 	shop_hbox.add_child(buy_btn)
+
+	# Speed assist button or owned label
+	speed_count_label = Label.new()
+	speed_count_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	speed_count_label.add_theme_font_size_override("font_size", 28)
+	speed_count_label.add_theme_constant_override("outline_size", 5)
+	shop_hbox.add_child(speed_count_label)
+	
+	# Always show buy speed button
+	buy_speed_btn = UIFactory.create_glass_button("buy speed (30)", Color(1.0, 0.4, 0.2))
+	buy_speed_btn.pressed.connect(_on_buy_speed)
+	shop_hbox.add_child(buy_speed_btn)
 	
 	_update_shop_ui()
 	
@@ -234,6 +248,10 @@ func _on_buy_glide():
 	if SaveSystem.purchase_glide():
 		_update_shop_ui()
 
+func _on_buy_speed():
+	if SaveSystem.purchase_speed():
+		_update_shop_ui()
+
 func _update_shop_ui() -> void:
 	if is_instance_valid(score_label):
 		score_label.text = str(SaveSystem.global_score)
@@ -253,3 +271,19 @@ func _update_shop_ui() -> void:
 		else:
 			buy_btn.disabled = false
 			buy_btn.modulate.a = 1.0
+
+	if is_instance_valid(speed_count_label):
+		if SaveSystem.speed_count > 0:
+			speed_count_label.text = "speeds: %d" % SaveSystem.speed_count
+			speed_count_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+		else:
+			speed_count_label.text = "speeds: 0"
+			speed_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+			
+	if is_instance_valid(buy_speed_btn):
+		if SaveSystem.global_score < 30:
+			buy_speed_btn.disabled = true
+			buy_speed_btn.modulate.a = 0.4
+		else:
+			buy_speed_btn.disabled = false
+			buy_speed_btn.modulate.a = 1.0

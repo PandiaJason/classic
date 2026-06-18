@@ -2,7 +2,21 @@ extends Control
 
 func _ready():
 	BgmManager.play_menu_music()
-	$VBoxContainer/StartButton.pressed.connect(_on_start_pressed)
+	# Group buttons inside a VBox for tight vertical stacking
+	var button_vbox = VBoxContainer.new()
+	button_vbox.add_theme_constant_override("separation", 16)
+	button_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	var start_btn = $VBoxContainer/StartButton
+	$VBoxContainer.remove_child(start_btn)
+	button_vbox.add_child(start_btn)
+	start_btn.pressed.connect(_on_start_pressed)
+	
+	var tutorial_btn = UIFactory.create_glass_button("how to play", UIFactory.BLUE_COLOR)
+	tutorial_btn.pressed.connect(_on_tutorial_pressed)
+	button_vbox.add_child(tutorial_btn)
+	
+	$VBoxContainer.add_child(button_vbox)
 	
 	# Use UIFactory for central panels
 	var score_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
@@ -180,6 +194,90 @@ func _ready():
 
 func _on_start_pressed():
 	SceneTransition.transition_to("res://scenes/level_select.tscn")
+
+func _on_tutorial_pressed():
+	var tut_overlay = ColorRect.new()
+	tut_overlay.name = "TutorialOverlay"
+	tut_overlay.color = Color(0, 0, 0, 0.8)
+	tut_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tut_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(tut_overlay)
+	
+	var panel = UIFactory.create_glass_panel(UIFactory.BLUE_COLOR)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	tut_overlay.add_child(panel)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 12)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.mouse_filter = Control.MOUSE_FILTER_PASS
+	panel.add_child(vbox)
+	
+	var title = Label.new()
+	title.text = "how to deliver"
+	title.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	title.add_theme_font_size_override("font_size", 36)
+	title.add_theme_color_override("font_color", Color(0.2, 0.6, 1.0))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+	
+	var controls = [
+		{"icon": "res://assets/planet_1.png", "keys": "auto-drive", "desc": "your bike drives forward automatically on planets."},
+		{"icon": "res://assets/custom_player.png", "keys": "space / tap right screen", "desc": "launch into orbit or release tether gravity field."},
+		{"icon": "res://assets/custom_player.png", "keys": "left arrow or a / hold left", "desc": "slow down to avoid flying off planets too fast."},
+		{"icon": "res://assets/custom_player.png", "keys": "click glide button", "desc": "redirect velocity in outer space (buy glides in menu)."},
+		{"icon": "res://assets/custom_player.png", "keys": "shift / click speed button", "desc": "speed up outer space flying (buy speed boosts in menu)."},
+		{"icon": "res://assets/ruby.png", "keys": "space rubies", "desc": "collect glowing rubies around levels to increase score."},
+		{"icon": "res://assets/asteroid.png", "keys": "asteroids", "desc": "avoid fast-moving space rocks that damage your cargo."},
+		{"icon": "res://assets/flag.png", "keys": "reach portal", "desc": "deliver the fragile box to the portal with high health."}
+	]
+	
+	for item in controls:
+		var item_hbox = HBoxContainer.new()
+		item_hbox.add_theme_constant_override("separation", 15)
+		item_hbox.mouse_filter = Control.MOUSE_FILTER_PASS
+		
+		# Asset Icon
+		var icon_rect = TextureRect.new()
+		icon_rect.texture = ResourceManager.get_texture(item["icon"])
+		icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon_rect.custom_minimum_size = Vector2(40, 40)
+		item_hbox.add_child(icon_rect)
+		
+		# Key bindings
+		var label_keys = Label.new()
+		label_keys.text = "[%s]" % item["keys"]
+		label_keys.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		label_keys.add_theme_font_size_override("font_size", 20)
+		label_keys.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+		label_keys.custom_minimum_size = Vector2(240, 0)
+		item_hbox.add_child(label_keys)
+		
+		# Description
+		var label_desc = Label.new()
+		label_desc.text = "— %s" % item["desc"]
+		label_desc.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		label_desc.add_theme_font_size_override("font_size", 18)
+		label_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label_desc.custom_minimum_size = Vector2(400, 0)
+		item_hbox.add_child(label_desc)
+		
+		vbox.add_child(item_hbox)
+		
+	var spacer = Control.new()
+	spacer.custom_minimum_size = Vector2(0, 10)
+	vbox.add_child(spacer)
+	
+	var close_btn = UIFactory.create_glass_button("close", UIFactory.RED_COLOR)
+	close_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	close_btn.pressed.connect(func():
+		tut_overlay.queue_free()
+	)
+	vbox.add_child(close_btn)
 
 func _on_reset_pressed():
 	var overlay = ColorRect.new()

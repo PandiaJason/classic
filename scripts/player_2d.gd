@@ -22,6 +22,10 @@ var was_on_ground: bool = true
 # Glide assist (resets each flight — use one per zero-gravity segment)
 var _glide_used_this_flight: bool = false
 signal glide_used
+# Speed boost assist
+signal speed_used
+var _wants_to_speed: bool = false
+var _shift_was_pressed: bool = false
 var _tether_planet: Node2D = null
 var _tether_time_left: float = 0.0
 var thruster_particles: CPUParticles2D = null
@@ -274,6 +278,18 @@ func _physics_process(delta: float) -> void:
 		# Player floats in a straight line with their current velocity
 		last_planet = null
 		
+		# Speed boost assist - accelerate player forward in outer space
+		if not is_menu_demo and SaveSystem.speed_count > 0:
+			var speed_just_pressed = (Input.is_key_pressed(KEY_SHIFT) and not _shift_was_pressed) or _wants_to_speed
+			if speed_just_pressed:
+				if SaveSystem.use_speed():
+					velocity = velocity.normalized() * (velocity.length() * 1.8)
+					speed_used.emit()
+					SoundManager.play_sfx("tether")
+					_doomed = false
+					_doom_timer = 0.0
+					_wants_to_speed = false
+
 		# Glide assist - pull toward nearest planet (can use multiple times per flight)
 		if not is_menu_demo and SaveSystem.glide_count > 0:
 			var just_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or _wants_to_jump
@@ -394,6 +410,8 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 	
 	_wants_to_jump = false # clear the input queue at the end of the frame
+	_shift_was_pressed = Input.is_key_pressed(KEY_SHIFT)
+	_wants_to_speed = false
 
 func _draw():
 	if show_trajectory and trajectory_points.size() > 0:

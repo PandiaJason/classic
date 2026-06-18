@@ -21,6 +21,7 @@ var hint_button: Button
 var hint_used: bool = false
 var map_timer = null
 var glide_button: Button
+var speed_button: Button
 
 var is_paused: bool = false
 var pause_overlay: Control = null
@@ -200,6 +201,24 @@ func _ready():
 		if is_instance_valid(player):
 			player.glide_used.connect(_on_player_glide_used)
 	
+	# Setup Speed Assist Button (only if has speed charges)
+	if SaveSystem.speed_count > 0:
+		speed_button = UIFactory.create_glass_button("speed x%d" % SaveSystem.speed_count, Color(1.0, 0.4, 0.2))
+		speed_button.pressed.connect(_on_speed_pressed)
+		
+		var speed_margin = MarginContainer.new()
+		speed_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		speed_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		speed_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		speed_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		speed_margin.add_theme_constant_override("margin_bottom", 140)
+		speed_margin.add_theme_constant_override("margin_right", 40)
+		speed_margin.add_child(speed_button)
+		add_child(speed_margin)
+		
+		if is_instance_valid(player):
+			player.speed_used.connect(_on_player_speed_used)
+	
 
 	
 	# Remove old UI
@@ -215,16 +234,7 @@ func _ready():
 	add_child(brake_zone)
 	move_child(brake_zone, 0)
 	
-	if GameManager.current_level == 1:
-		var brake_label = Label.new()
-		brake_label.text = "brake"
-		brake_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-		brake_label.add_theme_font_size_override("font_size", 24)
-		brake_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.12))
-		brake_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		brake_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		brake_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-		brake_zone.add_child(brake_label)
+
 	
 	# Right Jump Zone (65% width)
 	var jump_zone = Control.new()
@@ -236,16 +246,7 @@ func _ready():
 	add_child(jump_zone)
 	move_child(jump_zone, 0)
 	
-	if GameManager.current_level == 1:
-		var jump_label = Label.new()
-		jump_label.text = "jump / glide"
-		jump_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-		jump_label.add_theme_font_size_override("font_size", 24)
-		jump_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.12))
-		jump_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		jump_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		jump_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-		jump_zone.add_child(jump_label)
+
 	
 	if has_node("HealthMargin"): $HealthMargin.queue_free()
 	if has_node("ViewMapMargin"): $ViewMapMargin.queue_free()
@@ -259,10 +260,6 @@ func _ready():
 		if is_instance_valid(level_camera) and is_instance_valid(player):
 			level_camera.global_position = player.global_position
 			level_camera.zoom = default_zoom
-		if GameManager.current_level == 1 and not SaveSystem.tutorial_complete:
-			SaveSystem.tutorial_complete = true
-			SaveSystem.save_data()
-			show_tutorial()
 	)
 
 func _process(delta: float):
@@ -303,6 +300,22 @@ func _process(delta: float):
 				glide_button.text = "glide x%d" % SaveSystem.glide_count
 				glide_button.disabled = false
 				glide_button.modulate.a = 1.0
+
+	# Update speed button state
+	if is_instance_valid(speed_button):
+		if is_instance_valid(player):
+			if SaveSystem.speed_count <= 0:
+				speed_button.text = "speed x0"
+				speed_button.disabled = true
+				speed_button.modulate.a = 0.3
+			elif player.current_planet != null:
+				speed_button.text = "speed x%d" % SaveSystem.speed_count
+				speed_button.disabled = true
+				speed_button.modulate.a = 0.3
+			else:
+				speed_button.text = "speed x%d" % SaveSystem.speed_count
+				speed_button.disabled = false
+				speed_button.modulate.a = 1.0
 	
 	if is_instance_valid(level_camera):
 		var base_pos = level_camera.global_position
@@ -374,6 +387,20 @@ func _on_player_glide_used():
 		else:
 			glide_button.disabled = true
 			glide_button.modulate.a = 0.3
+
+func _on_speed_pressed():
+	if is_instance_valid(player) and player.current_planet == null and SaveSystem.speed_count > 0:
+		player._wants_to_speed = true
+
+func _on_player_speed_used():
+	if is_instance_valid(speed_button):
+		speed_button.text = "speed x%d" % SaveSystem.speed_count
+		if SaveSystem.speed_count > 0:
+			speed_button.disabled = false
+			speed_button.modulate.a = 1.0
+		else:
+			speed_button.disabled = true
+			speed_button.modulate.a = 0.3
 
 func _on_jump_zone_gui_input(event: InputEvent):
 	if not is_instance_valid(player):

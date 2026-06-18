@@ -17,6 +17,8 @@ var sfx_on = true
 var sfx_volume: float = 0.8
 # Glide assist consumable count
 var glide_count: int = 0
+# Speed boost consumable count
+var speed_count: int = 0
 # Tutorial completion state
 var tutorial_complete: bool = false
 
@@ -33,6 +35,7 @@ func load_data():
 		sfx_on = config.get_value("Progress", "sfx_on", true)
 		sfx_volume = config.get_value("Progress", "sfx_volume", 0.8)
 		glide_count = config.get_value("Progress", "glide_count", 0)
+		speed_count = config.get_value("Progress", "speed_count", 0)
 		tutorial_complete = config.get_value("Progress", "tutorial_complete", false)
 		# Load stars for all 30 possible levels
 		for i in range(1, 91):
@@ -46,6 +49,7 @@ func load_data():
 		sfx_on = true
 		sfx_volume = 0.8
 		glide_count = 0
+		speed_count = 0
 		tutorial_complete = false
 		for i in range(1, 91):
 			level_stars[i] = 0
@@ -59,6 +63,7 @@ func save_data():
 	config.set_value("Progress", "sfx_on", sfx_on)
 	config.set_value("Progress", "sfx_volume", sfx_volume)
 	config.set_value("Progress", "glide_count", glide_count)
+	config.set_value("Progress", "speed_count", speed_count)
 	config.set_value("Progress", "tutorial_complete", tutorial_complete)
 	for i in level_stars.keys():
 		config.set_value("Stars", str(i), level_stars[i])
@@ -132,6 +137,21 @@ func purchase_glide() -> bool:
 func use_glide() -> bool:
 	if glide_count > 0:
 		glide_count -= 1
+		save_data()
+		return true
+	return false
+
+func purchase_speed() -> bool:
+	if global_score >= 30:
+		global_score -= 30
+		speed_count += 1
+		save_data()
+		return true
+	return false
+
+func use_speed() -> bool:
+	if speed_count > 0:
+		speed_count -= 1
 		save_data()
 		return true
 	return false
