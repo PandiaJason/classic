@@ -259,7 +259,7 @@ func _update_shop_ui() -> void:
 	if is_instance_valid(glide_count_label):
 		if SaveSystem.glide_count > 0:
 			glide_count_label.text = "glides: %d" % SaveSystem.glide_count
-			glide_count_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+			glide_count_label.add_theme_color_override("font_color", Color.WHITE)
 		else:
 			glide_count_label.text = "glides: 0"
 			glide_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
@@ -275,7 +275,7 @@ func _update_shop_ui() -> void:
 	if is_instance_valid(speed_count_label):
 		if SaveSystem.speed_count > 0:
 			speed_count_label.text = "speeds: %d" % SaveSystem.speed_count
-			speed_count_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+			speed_count_label.add_theme_color_override("font_color", Color.WHITE)
 		else:
 			speed_count_label.text = "speeds: 0"
 			speed_count_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))

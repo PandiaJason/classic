@@ -1,5 +1,8 @@
 extends Control
 
+var _ruby_btn: TextureButton = null
+var _pulse_time: float = 0.0
+
 func _ready():
 	BgmManager.play_menu_music()
 	# Group buttons inside a VBox for tight vertical stacking
@@ -17,6 +20,24 @@ func _ready():
 	tutorial_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	tutorial_btn.pressed.connect(_on_tutorial_pressed)
 	button_vbox.add_child(tutorial_btn)
+	
+	if SaveSystem.unlocked_levels > 90:
+		var spacer = Control.new()
+		spacer.custom_minimum_size = Vector2(0, 8)
+		button_vbox.add_child(spacer)
+		
+		var ruby_btn = TextureButton.new()
+		ruby_btn.texture_normal = ResourceManager.get_texture("res://assets/ruby.png")
+		ruby_btn.ignore_texture_size = true
+		ruby_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+		ruby_btn.custom_minimum_size = Vector2(48, 48)
+		ruby_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		ruby_btn.tooltip_text = "view credits"
+		ruby_btn.pressed.connect(func():
+			SceneTransition.transition_to("res://scenes/credits.tscn")
+		)
+		button_vbox.add_child(ruby_btn)
+		_ruby_btn = ruby_btn
 	
 	$VBoxContainer.add_child(button_vbox)
 	
@@ -165,18 +186,19 @@ func _ready():
 	rate_margin.add_child(rate_panel)
 	add_child(rate_margin)
 
-	# Reset Button using UIFactory (Red Style)
-	var reset_btn = UIFactory.create_glass_button("reset", UIFactory.RED_COLOR)
-	var reset_margin = MarginContainer.new()
-	reset_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	reset_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	reset_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	reset_margin.add_theme_constant_override("margin_bottom", 30)
-	reset_margin.add_theme_constant_override("margin_right", 30)
-	reset_margin.add_child(reset_btn)
-	add_child(reset_margin)
+	if SaveSystem.unlocked_levels > 90:
+		# Reset Button using UIFactory (Red Style)
+		var reset_btn = UIFactory.create_glass_button("reset", UIFactory.RED_COLOR)
+		var reset_margin = MarginContainer.new()
+		reset_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		reset_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		reset_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		reset_margin.add_theme_constant_override("margin_bottom", 30)
+		reset_margin.add_theme_constant_override("margin_right", 30)
+		reset_margin.add_child(reset_btn)
+		add_child(reset_margin)
 
-	reset_btn.pressed.connect(_on_reset_pressed)
+		reset_btn.pressed.connect(_on_reset_pressed)
 
 	# Copyright notice (bottom center)
 	var copyright = Label.new()
@@ -336,3 +358,13 @@ func _on_reset_pressed():
 	btn_row.add_child(confirm_btn)
 	vbox.add_child(btn_row)
 	dialog.add_child(vbox)
+
+func _process(delta: float):
+	if is_instance_valid(_ruby_btn):
+		_pulse_time += delta * 4.0
+		var pulse_scale = 1.0 + sin(_pulse_time) * 0.12
+		_ruby_btn.scale = Vector2(pulse_scale, pulse_scale)
+		_ruby_btn.pivot_offset = _ruby_btn.custom_minimum_size / 2.0
+		
+		var brightness = 1.0 + (sin(_pulse_time) + 1.0) * 0.2
+		_ruby_btn.modulate = Color(brightness, brightness, brightness, 1.0)
