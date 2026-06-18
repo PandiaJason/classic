@@ -224,23 +224,10 @@ func _ready():
 	# Remove old UI
 	if has_node("MarginContainer"): $MarginContainer.queue_free()
 	
-	# Left Brake Zone (35% width)
-	var brake_zone = Control.new()
-	brake_zone.name = "BrakeZone"
-	brake_zone.set_anchors_preset(Control.PRESET_FULL_RECT)
-	brake_zone.anchor_right = 0.35
-	brake_zone.mouse_filter = Control.MOUSE_FILTER_STOP
-	brake_zone.gui_input.connect(_on_brake_zone_gui_input)
-	add_child(brake_zone)
-	move_child(brake_zone, 0)
-	
-
-	
-	# Right Jump Zone (65% width)
+	# Full screen Jump Zone
 	var jump_zone = Control.new()
 	jump_zone.name = "JumpZone"
 	jump_zone.set_anchors_preset(Control.PRESET_FULL_RECT)
-	jump_zone.anchor_left = 0.35
 	jump_zone.mouse_filter = Control.MOUSE_FILTER_STOP
 	jump_zone.gui_input.connect(_on_jump_zone_gui_input)
 	add_child(jump_zone)
@@ -409,16 +396,6 @@ func _on_jump_zone_gui_input(event: InputEvent):
 		player._wants_to_jump = true
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		player._wants_to_jump = true
-
-func _on_brake_zone_gui_input(event: InputEvent):
-	if not is_instance_valid(player):
-		return
-	if event is InputEventScreenTouch:
-		player._wants_to_brake = event.pressed
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		player._wants_to_brake = event.pressed
-
-
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):

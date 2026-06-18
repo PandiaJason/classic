@@ -37,7 +37,6 @@ var _doom_timer: float = 0.0
 const DOOM_DELAY: float = 2.5
 
 var _wants_to_jump: bool = false
-var _wants_to_brake: bool = false
 
 var trajectory_points: Array[Vector2] = []
 @onready var floor_ray = $RayCast2D
@@ -177,15 +176,8 @@ func _physics_process(delta: float) -> void:
 				
 		last_planet = current_planet
 		
-		# 4. Handle auto-drive and braking
-		var direction = Input.get_axis("ui_left", "ui_right")
-		var is_braking = direction < 0 or _wants_to_brake
-		
-		if is_braking:
-			current_speed -= brake_force * delta
-		else:
-			current_speed += brake_force * 0.5 * delta
-			
+		# 4. Handle auto-drive
+		current_speed += brake_force * 0.5 * delta
 		current_speed = clamp(current_speed, 0.0, max_speed)
 		
 		# Re-evaluate on_ground just to be safe
