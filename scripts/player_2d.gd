@@ -120,17 +120,7 @@ func _physics_process(delta: float) -> void:
 	if is_game_over:
 		return
 		
-	if not GameManager.is_gameplay_started:
-		velocity = Vector2.ZERO
-		find_gravity_source(true)
-		if current_planet:
-			var diff = current_planet.global_position - global_position
-			var gravity_dir = diff.normalized()
-			var target_rotation = gravity_dir.angle() - PI/2
-			rotation = lerp_angle(rotation, target_rotation, 25 * delta)
-		move_and_slide()
-		return
-		
+
 	# Determine if on ground BEFORE finding gravity source to prevent accidental planet swapping
 	var on_ground = false
 	if current_planet:
@@ -255,7 +245,7 @@ func _physics_process(delta: float) -> void:
 			velocity = (surface_right * current_speed * forward_direction) + (surface_up * current_vertical)
 				
 			var jump_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or _wants_to_jump
-			if not is_menu_demo and jump_pressed:
+			if not is_menu_demo and jump_pressed and GameManager.is_gameplay_started:
 				# Real Jump!
 				has_jumped = true
 				# Override the vertical velocity entirely to launch upwards
