@@ -23,6 +23,10 @@ func _on_spawn_timer_timeout() -> void:
 	if not is_instance_valid(scene) or scene.name in ["Menu", "LevelSelect", "SplashScreen"]:
 		return
 		
+	# Do not spawn before gameplay starts (countdown/zoom-in phase)
+	if not GameManager.is_gameplay_started:
+		return
+		
 	# Only spawn in Level 4 and above
 	if GameManager.current_level < 4:
 		return

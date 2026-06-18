@@ -244,13 +244,9 @@ func _ready():
 	if has_node("ViewMapMargin"): $ViewMapMargin.queue_free()
 	if has_node("HintMargin"): $HintMargin.queue_free()
 	
-	# Auto-start with Map View for 3 seconds, then focus on player and run countdown
+	# Auto-start with Map View and run countdown immediately
 	is_viewing_map = true
-	map_timer = get_tree().create_timer(3.0)
-	map_timer.timeout.connect(func():
-		is_viewing_map = false
-		start_countdown()
-	)
+	start_countdown()
 
 func _process(delta: float):
 	if is_instance_valid(health_label):
@@ -407,6 +403,8 @@ func _on_player_speed_used():
 func _on_jump_zone_gui_input(event: InputEvent):
 	if not is_instance_valid(player):
 		return
+	if not GameManager.is_gameplay_started:
+		return
 	if event is InputEventScreenTouch and event.pressed:
 		player._wants_to_jump = true
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -417,6 +415,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_pause()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventKey and event.pressed and not event.echo:
+		if not GameManager.is_gameplay_started:
+			return
 		if event.keycode == KEY_M:
 			_on_view_map_pressed()
 		elif event.keycode == KEY_H:
@@ -685,16 +685,32 @@ func start_countdown():
 		view_map_btn.disabled = true
 		view_map_btn.modulate.a = 0.3
 		
-	# Countdown sequence: 3 -> 2 -> 1 -> go!
-	var sequence = ["3", "2", "1", "go!"]
+	# If level 4, show the asteroid warning message
+	var warning_panel = null
+	var warning_margin = null
+	if GameManager.current_level == 4:
+		warning_panel = UIFactory.create_glass_panel(UIFactory.RED_COLOR)
+		var warning_label = Label.new()
+		warning_label.text = "from this level onwards u will get asteroid"
+		warning_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		warning_label.add_theme_font_size_override("font_size", 24)
+		warning_label.add_theme_color_override("font_color", Color(1, 0.4, 0.4))
+		warning_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		warning_panel.add_child(warning_label)
+		
+		warning_margin = MarginContainer.new()
+		warning_margin.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+		warning_margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		warning_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		warning_margin.add_theme_constant_override("margin_bottom", 120)
+		warning_margin.add_child(warning_panel)
+		add_child(warning_margin)
+		
+	# Countdown sequence: 3 -> 2 -> 1 (while in full map view)
+	var sequence = ["3", "2", "1"]
 	for text in sequence:
 		countdown_label.text = text
-		
-		# Play a sound effect for ticks and "go!"
-		if text == "go!":
-			SoundManager.play_sfx("tether") # high pitch sound for go!
-		else:
-			SoundManager.play_sfx("jump") # tick sound
+		SoundManager.play_sfx("jump") # tick sound
 			
 		# Animate the label scaling/fade for punchy arcade feel
 		countdown_label.scale = Vector2(1.5, 1.5)
@@ -704,12 +720,36 @@ func start_countdown():
 		# Wait 1 second (respecting pause mode since process always)
 		await get_tree().create_timer(1.0, false).timeout
 		
-	countdown_label.queue_free()
+	# Zoom in to player (go to zoom)
+	countdown_label.text = ""
+	is_viewing_map = false
+	
+	# Wait for camera to complete zoom-in (0.8 seconds)
+	await get_tree().create_timer(0.8, false).timeout
+	
+	# Enable controls and show go!
+	GameManager.is_gameplay_started = true
+	
+	# Play "go!" sound and show "go!" animation
+	SoundManager.play_sfx("tether") # high pitch go! sound
+	countdown_label.text = "go!"
+	countdown_label.scale = Vector2(1.6, 1.6)
+	var tween = create_tween()
+	tween.tween_property(countdown_label, "scale", Vector2(1.0, 1.0), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(countdown_label, "modulate:a", 0.0, 0.4).set_delay(0.4)
+	
+	# Fade out warning panel if it exists
+	if is_instance_valid(warning_panel):
+		var warning_tween = create_tween()
+		warning_tween.tween_property(warning_panel, "modulate:a", 0.0, 0.5)
 	
 	# Enable view map button
 	if is_instance_valid(view_map_btn):
 		view_map_btn.disabled = false
 		view_map_btn.modulate.a = 1.0
 		
-	GameManager.is_gameplay_started = true
+	await get_tree().create_timer(0.8, false).timeout
+	countdown_label.queue_free()
+	if is_instance_valid(warning_margin):
+		warning_margin.queue_free()
 
