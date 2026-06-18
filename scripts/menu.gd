@@ -12,7 +12,8 @@ func _ready():
 	button_vbox.add_child(start_btn)
 	start_btn.pressed.connect(_on_start_pressed)
 	
-	var tutorial_btn = UIFactory.create_glass_button("how to play", UIFactory.BLUE_COLOR)
+	var tutorial_btn = UIFactory.create_glass_button("tutorial", UIFactory.BLUE_COLOR)
+	tutorial_btn.add_theme_font_size_override("font_size", 20)
 	tutorial_btn.pressed.connect(_on_tutorial_pressed)
 	button_vbox.add_child(tutorial_btn)
 	
