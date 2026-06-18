@@ -70,7 +70,7 @@ def build_scene(lvl: int, planets: list[dict], zoom: float) -> str:
     elif lvl >= 41:
         mod_color = "Color(0.3, 0.15, 0.4, 1)" # Legend: Purple
     else:
-        mod_color = "Color(0.15, 0.3, 0.35, 1)" # Master: Teal/Blue
+        mod_color = "Color(0.4, 0.4, 0.4, 1)" # Master: Default/Blue
 
     scene = f'''[gd_scene load_steps=3 format=3 uid="uid://level_{lvl}_uid_{uid}"]
 

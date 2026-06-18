@@ -131,9 +131,6 @@ func setup_planet():
 	elif lvl >= 41:
 		bubble_color = Color(0.6, 0.2, 0.9, 0.05)
 		rim_color = Color(0.9, 0.7, 1.0)
-	elif lvl >= 31:
-		bubble_color = Color(0.1, 0.7, 0.6, 0.05)
-		rim_color = Color(0.6, 1.0, 0.9)
 		
 	mat.set_shader_parameter("bubble_color", bubble_color)
 	mat.set_shader_parameter("rim_color", rim_color)

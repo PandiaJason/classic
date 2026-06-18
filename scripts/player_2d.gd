@@ -344,7 +344,13 @@ func _physics_process(delta: float) -> void:
 		
 		if not is_menu_demo and not is_game_over:
 			# --- CINEMATIC DEATH: detect doomed trajectory ---
-			if not _doomed and not is_heading_towards_any_planet():
+			var is_gliding = _tether_planet != null and is_instance_valid(_tether_planet)
+			if is_gliding:
+				_doomed = false
+				_doom_timer = 0.0
+				rotation = lerp_angle(rotation, velocity.angle(), 10.0 * delta)
+				
+			if not _doomed and not is_gliding and not is_heading_towards_any_planet():
 				_doomed = true
 				_doom_timer = 0.0
 			
