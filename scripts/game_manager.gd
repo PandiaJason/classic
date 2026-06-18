@@ -4,6 +4,7 @@ var current_score: int = 0
 var has_box: bool = true
 var box_health: float = 100.0
 var current_level: int = 1
+var is_gameplay_started: bool = false
 
 signal health_changed(new_health)
 
@@ -64,6 +65,7 @@ func reset_score() -> void:
 	level_score_earned = 0
 	has_box = true
 	box_health = 100.0
+	is_gameplay_started = false
 	health_changed.emit(box_health)
 
 func load_next_level() -> void:
@@ -73,6 +75,7 @@ func load_next_level() -> void:
 	has_box = true
 	box_health = 100.0
 	current_level += 1
+	is_gameplay_started = false
 	health_changed.emit(box_health)
 	
 	if current_level > 90:

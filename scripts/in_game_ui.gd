@@ -244,14 +244,12 @@ func _ready():
 	if has_node("ViewMapMargin"): $ViewMapMargin.queue_free()
 	if has_node("HintMargin"): $HintMargin.queue_free()
 	
-	# Auto-start with Map View for 3 seconds, then focus on player
+	# Auto-start with Map View for 3 seconds, then focus on player and run countdown
 	is_viewing_map = true
 	map_timer = get_tree().create_timer(3.0)
 	map_timer.timeout.connect(func():
 		is_viewing_map = false
-		if is_instance_valid(level_camera) and is_instance_valid(player):
-			level_camera.global_position = player.global_position
-			level_camera.zoom = default_zoom
+		start_countdown()
 	)
 
 func _process(delta: float):
@@ -308,6 +306,18 @@ func _process(delta: float):
 				speed_button.text = "speed x%d" % SaveSystem.speed_count
 				speed_button.disabled = false
 				speed_button.modulate.a = 1.0
+	
+	# Disable buttons during countdown
+	if not GameManager.is_gameplay_started:
+		if is_instance_valid(hint_button):
+			hint_button.disabled = true
+			hint_button.modulate.a = 0.3
+		if is_instance_valid(glide_button):
+			glide_button.disabled = true
+			glide_button.modulate.a = 0.3
+		if is_instance_valid(speed_button):
+			speed_button.disabled = true
+			speed_button.modulate.a = 0.3
 	
 	if is_instance_valid(level_camera):
 		var base_pos = level_camera.global_position
@@ -648,3 +658,58 @@ func get_tier_bg_color(lvl: int) -> Color:
 		return Color(0.1, 0.35, 0.35, 1.0)     # 11-20: Teal/Cyan (Theme 2)
 	else:
 		return Color(0.15, 0.25, 0.45, 1.0)    # 1-10: Blue (Theme 1)
+
+func start_countdown():
+	# Create a countdown label in the center of the screen
+	var countdown_label = Label.new()
+	countdown_label.name = "CountdownLabel"
+	countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	countdown_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	countdown_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	countdown_label.add_theme_font_size_override("font_size", 120)
+	countdown_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	countdown_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	countdown_label.add_theme_constant_override("outline_size", 20)
+	
+	# Position in the center of the viewport
+	countdown_label.custom_minimum_size = Vector2(300, 150)
+	countdown_label.set_anchors_preset(Control.PRESET_CENTER)
+	countdown_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	countdown_label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	countdown_label.pivot_offset = Vector2(150, 75)
+	
+	add_child(countdown_label)
+	
+	# Disable view map button during countdown
+	if is_instance_valid(view_map_btn):
+		view_map_btn.disabled = true
+		view_map_btn.modulate.a = 0.3
+		
+	# Countdown sequence: 3 -> 2 -> 1 -> go!
+	var sequence = ["3", "2", "1", "go!"]
+	for text in sequence:
+		countdown_label.text = text
+		
+		# Play a sound effect for ticks and "go!"
+		if text == "go!":
+			SoundManager.play_sfx("tether") # high pitch sound for go!
+		else:
+			SoundManager.play_sfx("jump") # tick sound
+			
+		# Animate the label scaling/fade for punchy arcade feel
+		countdown_label.scale = Vector2(1.5, 1.5)
+		var tween = create_tween()
+		tween.tween_property(countdown_label, "scale", Vector2(1.0, 1.0), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		
+		# Wait 1 second (respecting pause mode since process always)
+		await get_tree().create_timer(1.0, false).timeout
+		
+	countdown_label.queue_free()
+	
+	# Enable view map button
+	if is_instance_valid(view_map_btn):
+		view_map_btn.disabled = false
+		view_map_btn.modulate.a = 1.0
+		
+	GameManager.is_gameplay_started = true
+
