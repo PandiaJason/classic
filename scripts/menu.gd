@@ -22,21 +22,17 @@ func _ready():
 	button_vbox.add_child(tutorial_btn)
 	
 	if SaveSystem.unlocked_levels > 90:
-		var spacer = Control.new()
-		spacer.custom_minimum_size = Vector2(0, 8)
-		button_vbox.add_child(spacer)
-		
 		var ruby_btn = TextureButton.new()
 		ruby_btn.texture_normal = ResourceManager.get_texture("res://assets/ruby.png")
 		ruby_btn.ignore_texture_size = true
 		ruby_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		ruby_btn.custom_minimum_size = Vector2(48, 48)
-		ruby_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		ruby_btn.tooltip_text = "view credits"
 		ruby_btn.pressed.connect(func():
 			SceneTransition.transition_to("res://scenes/credits.tscn")
 		)
-		button_vbox.add_child(ruby_btn)
+		var title_lbl = $VBoxContainer/TitleLabel
+		title_lbl.add_child(ruby_btn)
 		_ruby_btn = ruby_btn
 	
 	$VBoxContainer.add_child(button_vbox)
@@ -365,6 +361,11 @@ func _process(delta: float):
 		var pulse_scale = 1.0 + sin(_pulse_time) * 0.12
 		_ruby_btn.scale = Vector2(pulse_scale, pulse_scale)
 		_ruby_btn.pivot_offset = _ruby_btn.custom_minimum_size / 2.0
+		
+		# Keep it centered above the title text
+		var title_lbl = $VBoxContainer/TitleLabel
+		_ruby_btn.position.x = (title_lbl.size.x - _ruby_btn.custom_minimum_size.x) / 2.0
+		_ruby_btn.position.y = -60.0
 		
 		var brightness = 1.0 + (sin(_pulse_time) + 1.0) * 0.2
 		_ruby_btn.modulate = Color(brightness, brightness, brightness, 1.0)

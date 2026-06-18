@@ -74,6 +74,8 @@ func _ready() -> void:
 	flight_trail_particles.amount = 30
 	flight_trail_particles.lifetime = 0.5
 	flight_trail_particles.local_coords = false
+	flight_trail_particles.direction = Vector2.LEFT
+	flight_trail_particles.position = Vector2(-35, -15)
 	flight_trail_particles.spread = 20.0
 	flight_trail_particles.gravity = Vector2.ZERO
 	flight_trail_particles.initial_velocity_min = 10.0
@@ -397,11 +399,10 @@ func _physics_process(delta: float) -> void:
 		if thruster_particles != null:
 			thruster_particles.emitting = false
 			
-	# Update flight trail particles
+	# Update flight trail particles (scooter exhaust air)
 	if is_instance_valid(flight_trail_particles):
-		if not is_menu_demo and current_planet == null and velocity.length() > 50.0 and not is_game_over:
+		if velocity.length() > 50.0 and not is_game_over:
 			flight_trail_particles.emitting = true
-			flight_trail_particles.direction = -velocity.normalized()
 		else:
 			flight_trail_particles.emitting = false
 

@@ -475,6 +475,13 @@ func _create_pause_menu():
 	)
 	vbox.add_child(retry_btn)
 	
+	var levels_btn = UIFactory.create_glass_button("levels", UIFactory.GOLD_COLOR)
+	levels_btn.pressed.connect(func():
+		toggle_pause()
+		SceneTransition.transition_to("res://scenes/level_select.tscn")
+	)
+	vbox.add_child(levels_btn)
+	
 	# Music Section
 	var music_label = Label.new()
 	music_label.text = "music: %d%%" % int(SaveSystem.music_volume * 100)
