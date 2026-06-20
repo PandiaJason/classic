@@ -229,14 +229,29 @@ func _ready():
 	# Remove old UI
 	if has_node("MarginContainer"): $MarginContainer.queue_free()
 	
-	# Full screen Jump Zone
+	# Left screen: Speed Zone
+	var speed_zone = Control.new()
+	speed_zone.name = "SpeedZone"
+	speed_zone.anchor_left = 0.0
+	speed_zone.anchor_top = 0.0
+	speed_zone.anchor_right = 0.5
+	speed_zone.anchor_bottom = 1.0
+	speed_zone.mouse_filter = Control.MOUSE_FILTER_STOP
+	speed_zone.gui_input.connect(_on_speed_zone_gui_input)
+	add_child(speed_zone)
+	move_child(speed_zone, 0)
+
+	# Right screen: Jump/Release Zone
 	var jump_zone = Control.new()
 	jump_zone.name = "JumpZone"
-	jump_zone.set_anchors_preset(Control.PRESET_FULL_RECT)
+	jump_zone.anchor_left = 0.5
+	jump_zone.anchor_top = 0.0
+	jump_zone.anchor_right = 1.0
+	jump_zone.anchor_bottom = 1.0
 	jump_zone.mouse_filter = Control.MOUSE_FILTER_STOP
 	jump_zone.gui_input.connect(_on_jump_zone_gui_input)
 	add_child(jump_zone)
-	move_child(jump_zone, 0)
+	move_child(jump_zone, 1)
 	
 
 	
@@ -409,6 +424,16 @@ func _on_jump_zone_gui_input(event: InputEvent):
 		player._wants_to_jump = true
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		player._wants_to_jump = true
+
+func _on_speed_zone_gui_input(event: InputEvent):
+	if not is_instance_valid(player):
+		return
+	if not GameManager.is_gameplay_started:
+		return
+	if event is InputEventScreenTouch and event.pressed:
+		player._wants_to_speed = true
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		player._wants_to_speed = true
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):

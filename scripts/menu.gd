@@ -268,9 +268,9 @@ func _on_tutorial_pressed():
 	
 	var controls = [
 		{"icon": "res://assets/planet_1.png", "keys": "auto-drive", "desc": "your bike drives forward automatically on planets."},
-		{"icon": "res://assets/custom_player.png", "keys": "space / tap screen", "desc": "launch into orbit or release tether gravity field."},
+		{"icon": "res://assets/custom_player.png", "keys": "space / tap right screen", "desc": "launch into orbit or release tether gravity field."},
 		{"icon": "res://assets/custom_player.png", "keys": "click glide button", "desc": "redirect velocity in outer space (buy glides in menu)."},
-		{"icon": "res://assets/custom_player.png", "keys": "shift / click speed button", "desc": "speed up outer space flying (buy speed boosts in menu)."},
+		{"icon": "res://assets/custom_player.png", "keys": "shift / tap left screen", "desc": "speed up outer space flying (buy speed boosts in menu)."},
 		{"icon": "res://assets/ruby.png", "keys": "space rubies", "desc": "collect glowing rubies around levels to increase ruby."},
 		{"icon": "res://assets/asteroid.png", "keys": "asteroids", "desc": "avoid fast-moving space rocks that damage your cargo."},
 		{"icon": "res://assets/flag.png", "keys": "reach portal", "desc": "deliver the fragile box to the portal with high health."}
