@@ -361,9 +361,32 @@ func _process(delta: float) -> void:
 			
 	if has_node("ScrollContainer"):
 		var scroll_container = $ScrollContainer
+		var scrolled = false
 		if abs(right_stick_y) > 0.15:
 			var scroll_speed = 800.0
 			scroll_container.scroll_vertical += int(right_stick_y * scroll_speed * delta)
+			scrolled = true
 		if abs(right_stick_x) > 0.15:
 			var scroll_speed = 800.0
 			scroll_container.scroll_horizontal += int(right_stick_x * scroll_speed * delta)
+			scrolled = true
+			
+		if scrolled:
+			# Find the button closest to the center of the scroll container's viewport on screen and focus it
+			var viewport_rect = scroll_container.get_global_rect()
+			var viewport_center = viewport_rect.position + viewport_rect.size / 2.0
+			
+			var closest_btn: Button = null
+			var min_dist = INF
+			
+			for child in grid.get_children():
+				if child is Button and child.visible:
+					var child_rect = child.get_global_rect()
+					var child_center = child_rect.position + child_rect.size / 2.0
+					var dist = child_center.distance_to(viewport_center)
+					if dist < min_dist:
+						min_dist = dist
+						closest_btn = child
+						
+			if closest_btn and closest_btn != get_viewport().gui_get_focus_owner():
+				closest_btn.grab_focus()
