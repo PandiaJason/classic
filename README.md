@@ -14,169 +14,100 @@ one bad jump… and you’ll drift forever into the endless void!
 * **collect space rubies**: grab glowing rubies hidden around levels to increase your score, buy powerups, and earn 3-star ratings.
 
 ## features
-* **90 epic and challenging levels**: test your skills across six tier difficulties (master, legend, nightmare, insane, cosmic, and ultimate) with tougher jumps, moving hazards, and tricky gravity puzzles.
+* **90 challenge-packed levels**: test your skills across six difficulty tiers (master, legend, nightmare, insane, cosmic, and ultimate) with tougher jumps, moving hazards, and tricky gravity puzzles.
 * **star gates**: collect stars on completed levels to unlock the higher difficulty tiers as you progress.
+* **daily rewards streak**: open the daily rewards calendar in the main menu to claim bonus rubies for playing consecutive days.
 * **visual variety**: experience beautiful visual shifts as you advance tiers, featuring unique background cosmic nebula colors and matching colored gravity well shields.
 * **smooth cinematic camera**: the camera follows your scooter smoothly while keeping the action easy to see.
 * **colorful cartoon space worlds**: explore vibrant planets with shiny bubble shields and cool sci-fi visuals.
 * **awesome space music**: enjoy an original soundtrack packed with energetic cosmic vibes.
 
-can you become the ultimate space courier? deliver every package safely, collect every ruby, and earn perfect ratings on every level!
+## controls & mappings
 
----
+### keyboard & mouse
+* **jump/glide**: Space or Up Arrow
+* **speed boost**: Shift Key
+* **toggle hint**: H Key
+* **view full map**: M Key (shows map for 3 seconds)
+* **pause menu**: Esc / Escape Key
 
-## 🚀 Quick Commands
+### gamepad (xbox/playstation)
+* **jump/glide**: A Button (Cross on PlayStation)
+* **speed boost**: X Button (Square on PlayStation)
+* **toggle hint**: L Button (Left Shoulder / L1)
+* **view full map**: R Button (Right Shoulder / R1)
+* **pause menu**: Start Button (Options / Menu)
+* **ui navigation**: D-pad or Left Joystick to navigate menus; A Button to select
+* **level select scrolling**: Right Joystick (lever) to scroll vertically/horizontally through the level select grid smoothly (focus automatically snaps to the center button)
 
-### Compile for All Platforms (macOS + Windows + Linux)
+## haptic feedback (controller rumble)
+the game features premium, lightweight vibration haptics that play on your gamepad for the following events:
+* **planet landing**: a light, good vibration on impact
+* **jumping**: a brief, subtle launch pulse
+* **glide start**: a quick initial glide trigger vibration (no continuous wear-and-tear rumble)
+* **collecting rubies**: a very light, satisfying collection pulse
+* **asteroid collision**: a solid, defensive package damage rumble
+* **taking jump damage**: a quick impact warning pulse
 
+> [!NOTE]
+> **web browser haptics**: web exports support haptic feedback over HTTPS via a custom JavaScript bridge actuator fallback. if vibration is missing in Chrome/Edge on macOS, check the browser console. macOS Bluetooth controller drivers often block vibration signals to the Web Gamepad API. connect your controller via USB or play on Windows/Android to experience full web haptics.
+
+## 🚀 quick commands
+
+### compile for all platforms
+compiles all binary builds and updates the web assets. this command preserves Vercel configuration files:
 ```bash
-cd "/Users/admin/jas games/ranotot" && \
-rm -rf exports && mkdir -p exports && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "macOS" "/Users/admin/jas games/ranotot/exports/ranotot.zip" --headless && \
-unzip -qo exports/ranotot.zip -d exports/ && rm exports/ranotot.zip && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "Windows Desktop" "/Users/admin/jas games/ranotot/exports/ranotot.exe" --headless && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "Linux" "/Users/admin/jas games/ranotot/exports/ranotot_linux.x86_64" --headless && \
-echo "✅ ALL BUILDS DONE" && ls -lh exports/
-```
-
-### Compile macOS Only
-
-```bash
-cd "/Users/admin/jas games/ranotot" && \
-rm -rf exports && mkdir -p exports && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "macOS" "/Users/admin/jas games/ranotot/exports/ranotot.zip" --headless && \
-unzip -qo exports/ranotot.zip -d exports/ && rm exports/ranotot.zip && \
-echo "✅ macOS BUILD DONE"
-```
-
-### Compile Windows Only
-
-```bash
-cd "/Users/admin/jas games/ranotot" && \
+cd "/Users/admin/Jas Games/ranotot" && \
 mkdir -p exports && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "Windows Desktop" "/Users/admin/jas games/ranotot/exports/ranotot.exe" --headless && \
-echo "✅ Windows BUILD DONE"
+/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "macOS" "/Users/admin/Jas Games/ranotot/exports/ranotot.zip" --headless && \
+unzip -qo exports/ranotot.zip -d exports/ && rm -f exports/ranotot.zip && \
+/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Windows Desktop" "/Users/admin/Jas Games/ranotot/exports/ranotot.exe" --headless && \
+/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Linux" "/Users/admin/Jas Games/ranotot/exports/ranotot_linux.x86_64" --headless && \
+mkdir -p exports/web && \
+/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Web" "/Users/admin/Jas Games/ranotot/exports/web/game.html" --headless && \
+mkdir -p exports/ranotot_Web && \
+/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Web" "/Users/admin/Jas Games/ranotot/exports/ranotot_Web/index.html" --headless && \
+echo "✅ ALL PLATFORM BUILDS COMPILED"
 ```
 
-### Compile Linux Only
-
+### deploy to vercel (web app)
+promotes the local compiled web target directly to the live production server:
 ```bash
-cd "/Users/admin/jas games/ranotot" && \
-mkdir -p exports && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "Linux" "/Users/admin/jas games/ranotot/exports/ranotot_linux.x86_64" --headless && \
-echo "✅ Linux BUILD DONE"
+cd "/Users/admin/Jas Games/ranotot/exports/web" && npx vercel --prod --yes
 ```
 
----
+## 📦 git commands
 
-## 📦 Git Commands
-
-### Commit & Push All Changes
-
+### commit & push changes
 ```bash
-cd "/Users/admin/jas games/ranotot" && \
+cd "/Users/admin/Jas Games/ranotot" && \
 git add . && \
 git commit -m "Your commit message here" && \
 git push origin main
 ```
 
-### Commit, Compile All, and Push (Full Pipeline)
-
+## 🔧 level generation
+levels are generated using a Python layout script:
 ```bash
-cd "/Users/admin/jas games/ranotot" && \
-git add . && \
-git commit -m "Your commit message here" && \
-rm -rf exports && mkdir -p exports && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "macOS" "/Users/admin/jas games/ranotot/exports/ranotot.zip" --headless && \
-unzip -qo exports/ranotot.zip -d exports/ && rm exports/ranotot.zip && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "Windows Desktop" "/Users/admin/jas games/ranotot/exports/ranotot.exe" --headless && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/jas games/ranotot" --export-release "Linux" "/Users/admin/jas games/ranotot/exports/ranotot_linux.x86_64" --headless && \
-git push origin main && \
-echo "✅ COMMIT + COMPILE + PUSH DONE"
+cd "/Users/admin/godot connector" && python3 generate_levels.py
 ```
+> ⚠️ After regenerating levels, you must recompile the game exports!
 
-### Check Git Status
+## 📋 build outputs (final kept versions)
 
-```bash
-cd "/Users/admin/jas games/ranotot" && git status
-```
-
-### View Recent Commits
-
-```bash
-cd "/Users/admin/jas games/ranotot" && git log --oneline -10
-```
-
----
-
-## 🔧 Level Generation
-
-Levels are generated using the Python script. Run this if you change level layouts:
-
-```bash
-cd "/Users/admin/godot connector" && \
-python3 generate_levels.py && \
-echo "✅ LEVELS REGENERATED"
-```
-
-> ⚠️ After regenerating levels, you must recompile the game!
-
----
-
-## 🗂️ Project Structure
-
-```
-ranotot/
-├── assets/          # Textures, fonts, icons
-├── scenes/          # .tscn scene files (levels, UI, entities)
-├── scripts/         # .gd GDScript files
-│   ├── player_2d.gd       # Player physics, gravity, jump
-│   ├── in_game_ui.gd      # Camera system, HUD, map/hint buttons
-│   ├── planet.gd           # Planet gravity, types, visuals
-│   ├── asteroid.gd         # Asteroid behavior
-│   ├── asteroid_manager.gd # Asteroid spawning
-│   ├── game_manager.gd     # Game flow, scoring
-│   ├── save_system.gd      # Save/load progress
-│   ├── ui_factory.gd       # Reusable UI components
-│   └── resource_manager.gd # Texture caching
-├── shaders/         # Visual shaders (blur, bubble)
-├── exports/         # Compiled builds (not in git)
-├── export_presets.cfg  # Build configurations
-└── project.godot    # Godot project settings
-```
-
----
-
-## 🎮 Game Mechanics
-
-- **Gravity**: Each planet has its own gravity field. Player orbits on the surface.
-- **Jump**: Space/Up arrow to jump off a planet into zero gravity.
-- **Camera**: Fixed zoom (0.5) for all levels. Stays still on planets, scrolls with deadzone in zero-G.
-- **Death**: Leaving level map bounds OR getting hit by an asteroid.
-- **Hint**: Tap to show trajectory (only while on a planet, one use per level).
-- **Map**: Tap to see full level for 3 seconds.
-- **Delivery Box**: Loses health when hit by asteroids. Reach the flag planet to complete.
-- **Stars**: 1-3 stars based on remaining box health.
-
----
-
-## 📋 Build Outputs
-
-| Platform | File | Location |
-|----------|------|----------|
+| Platform | Output File | Path |
+|----------|-------------|------|
 | macOS | `ranotot.app` | `exports/ranotot.app` |
 | Windows | `ranotot.exe` + `ranotot.pck` | `exports/` |
-| Linux | `ranotot_linux.x86_64` | `exports/` |
+| Linux | `ranotot_Linux.x86_64` | `exports/` |
+| Web (Vercel) | `game.html` + `index.html` | `exports/web/` |
+| Web (Direct) | `index.html` + `index.pck` | `exports/ranotot_Web/` |
+
+## 🎵 audio
+* **menu bgm**: `Slow_Clockwork_Sun.mp3`
+* **in-game bgm**: `Petal_Path_Dash.mp3`
+
+audio setting states are automatically saved between sessions.
 
 ---
-
-## 🎵 Audio
-
-- **Menu BGM**: `Slow_Clockwork_Sun.mp3`
-- **In-Game BGM**: `Petal_Path_Dash.mp3`
-
-Music toggle is saved between sessions.
-
----
-
 *copyright by hikki studios*
