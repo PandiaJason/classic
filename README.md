@@ -1,26 +1,42 @@
 # ranotot
 
-hop on your space scooter and become the galaxy’s craziest delivery driver!
+hop on your scooter and become the galaxy’s craziest delivery driver!
 
-in ranotot, you race through space, jump between planets, dodge dangerous asteroids, and deliver fragile cargo without crashing. use each planet’s gravity to ride around it, launch into space, and land safely on the next world.
+race across dangerous worlds, launch between planets, dodge deadly asteroids, and deliver fragile cargo without crashing. use each world’s gravity to build momentum, soar through space, and land safely on your next destination.
 
-one bad jump… and you’ll drift forever into the endless void!
+one bad jump… and you’ll drift forever into the endless void.
 
 ## gameplay
-* **ride around planets**: every planet has its own gravity. drive all around them in full 360° movement and use gravity to fly to the next planet.
-* **master perfect jumps**: timing matters! jump too soon or too late and you could miss your landing completely.
-* **glide assist**: use your collected rubies in the shop to buy glide assists to redirect your velocity in zero-gravity space when you miss a jump!
-* **dodge asteroids**: watch out for fast-moving space rocks that can damage your delivery box.
-* **collect space rubies**: grab glowing rubies hidden around levels to increase your score, buy powerups, and earn 3-star ratings.
+
+### ride around entire planets
+every world has its own gravity field. drive in full 360° around planets, build speed, and launch yourself toward the next destination.
+
+### master perfect jumps
+timing is everything. jump too early or too late and your delivery could be lost in deep space.
+
+### glide & speed assists
+collect rubies and spend them in the shop on glide assists to correct your trajectory or speed assists to blast through zero-gravity sections.
+
+### dodge dangerous asteroids
+watch for incoming space rocks that can damage your cargo and ruin a perfect run.
+
+### collect valuable rubies
+find hidden rubies to buy upgrades, unlock progression gates, and achieve perfect 3-star ratings.
 
 ## features
-* **90 challenge-packed levels**: test your skills across six difficulty tiers (master, legend, nightmare, insane, cosmic, and ultimate) with tougher jumps, moving hazards, and tricky gravity puzzles.
-* **star gates**: collect stars on completed levels to unlock the higher difficulty tiers as you progress.
-* **daily rewards streak**: open the daily rewards calendar in the main menu to claim bonus rubies for playing consecutive days.
-* **visual variety**: experience beautiful visual shifts as you advance tiers, featuring unique background cosmic nebula colors and matching colored gravity well shields.
-* **smooth cinematic camera**: the camera follows your scooter smoothly while keeping the action easy to see.
-* **colorful cartoon space worlds**: explore vibrant planets with shiny bubble shields and cool sci-fi visuals.
-* **awesome space music**: enjoy an original soundtrack packed with energetic cosmic vibes.
+* **90 handcrafted levels**: progress through escalations of speed, orbit sizes, and tricky jump layouts.
+* **6 escalating difficulty tiers**: unlock master, legend, nightmare, insane, cosmic, and ultimate stages.
+* **9 unique cosmic visual themes**: experience different background nebula visual variations as you change tiers.
+* **star gates**: collect stars to unlock higher tiers and test your mastery.
+* **daily rewards & streak bonuses**: log in consecutively to claim rubies from your calendar on the menu.
+* **smooth cinematic camera**: camera follows your scooter automatically with a comfortable follow focus.
+* **fast arcade-style level starts**: jump right back into the action instantly after crashing.
+* **colorful cartoon sci-fi visuals**: enjoy gorgeous, bright planetary systems and sci-fi aesthetic.
+* **original energetic soundtrack**: custom soundtrack designed to keep the momentum going.
+* **movie-style end credits**: skip or watch the full scrolling credits list after beat level 90.
+* **windows, linux, macos, and web support**: play natively or in a browser.
+
+---
 
 ## controls & mappings
 
