@@ -1,40 +1,46 @@
 # ranotot
 
-hop on your scooter and become the galaxy’s craziest delivery driver!
+Hop on your scooter and become the galaxy’s craziest delivery driver!
 
-race across dangerous worlds, launch between planets, dodge deadly asteroids, and deliver fragile cargo without crashing. use each world’s gravity to build momentum, soar through space, and land safely on your next destination.
+Race across dangerous worlds, launch between planets, dodge deadly asteroids, and deliver fragile cargo without crashing. Use each world’s gravity to build momentum, soar through space, and land safely on your next destination.
 
-one bad jump… and you’ll drift forever into the endless void.
+One bad jump… and you’ll drift forever into the endless void. play online: https://ranotot.vercel.app/
 
-## gameplay
+## Gameplay
 
-### ride around entire planets
-every world has its own gravity field. drive in full 360° around planets, build speed, and launch yourself toward the next destination.
+### Ride Around Entire Planets
+Every world has its own gravity field. Drive in full 360° around planets, build speed, and launch yourself toward the next destination.
 
-### master perfect jumps
-timing is everything. jump too early or too late and your delivery could be lost in deep space.
+### Master Perfect Jumps
+Timing is everything. Jump too early or too late and your delivery could be lost in deep space.
 
-### glide & speed assists
-collect rubies and spend them in the shop on glide assists to correct your trajectory or speed assists to blast through zero-gravity sections.
+### Glide & Speed Assists
+Collect rubies and spend them in the shop on Glide Assists to correct your trajectory or Speed Assists to blast through zero-gravity sections.
 
-### dodge dangerous asteroids
-watch for incoming space rocks that can damage your cargo and ruin a perfect run.
+### Dodge Dangerous Asteroids
+Watch for incoming space rocks that can damage your cargo and ruin a perfect run.
 
-### collect valuable rubies
-find hidden rubies to buy upgrades, unlock progression gates, and achieve perfect 3-star ratings.
+### Collect Valuable Rubies
+Find hidden rubies to buy upgrades, unlock progression gates, and achieve perfect 3-star ratings.
 
-## features
-* **90 handcrafted levels**: progress through escalations of speed, orbit sizes, and tricky jump layouts.
-* **6 escalating difficulty tiers**: unlock master, legend, nightmare, insane, cosmic, and ultimate stages.
-* **9 unique cosmic visual themes**: experience different background nebula visual variations as you change tiers.
-* **star gates**: collect stars to unlock higher tiers and test your mastery.
-* **daily rewards & streak bonuses**: log in consecutively to claim rubies from your calendar on the menu.
-* **smooth cinematic camera**: camera follows your scooter automatically with a comfortable follow focus.
-* **fast arcade-style level starts**: jump right back into the action instantly after crashing.
-* **colorful cartoon sci-fi visuals**: enjoy gorgeous, bright planetary systems and sci-fi aesthetic.
-* **original energetic soundtrack**: custom soundtrack designed to keep the momentum going.
-* **movie-style end credits**: skip or watch the full scrolling credits list after beat level 90.
-* **windows, linux, macos, and web support**: play natively or in a browser.
+## Features
+* **90 handcrafted levels**
+* **6 escalating difficulty tiers**
+* **9 unique cosmic visual themes**
+* **Star Gates that unlock new challenges**
+* **Daily rewards and streak bonuses**
+* **Smooth cinematic camera system**
+* **Fast arcade-style level starts**
+* **Colorful cartoon sci-fi visuals**
+* **Original energetic soundtrack**
+* **Movie-style end credits**
+* **Windows, Linux, and macOS support** (with web app play online!)
+
+### Can You Become the Ultimate Space Courier?
+Deliver every package safely. Collect every ruby. Earn every star.
+
+Master gravity. Conquer the galaxy. Become the ultimate courier.
+
 
 ---
 
