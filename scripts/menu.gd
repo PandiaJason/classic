@@ -655,6 +655,7 @@ func _show_daily_rewards_popup():
 				
 				claim_btn.visible = false
 				close_btn.text = "awesome!"
+				close_btn.grab_focus()
 				
 				# Rebuild the calendar cards to show claimed state instantly
 				for child in cards_hbox.get_children():
