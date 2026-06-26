@@ -77,19 +77,20 @@ the game features premium, lightweight vibration haptics that play on your gamep
 ## 🚀 quick commands
 
 ### compile for all platforms
-compiles all binary builds and updates the web assets. this command preserves Vercel configuration files:
+compiles all binary builds, packages installers/setups, and updates the web assets. this command preserves Vercel configuration files:
 ```bash
 cd "/Users/admin/Jas Games/ranotot" && \
 mkdir -p exports && \
-/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "macOS" "/Users/admin/Jas Games/ranotot/exports/ranotot.zip" --headless && \
-unzip -qo exports/ranotot.zip -d exports/ && rm -f exports/ranotot.zip && \
+/Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "macOS" "/Users/admin/Jas Games/ranotot/exports/ranotot.dmg" --headless && \
 /Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Windows Desktop" "/Users/admin/Jas Games/ranotot/exports/ranotot.exe" --headless && \
+makensis setup.nsi && \
 /Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Linux" "/Users/admin/Jas Games/ranotot/exports/ranotot_linux.x86_64" --headless && \
+python3 create_linux_installer.py && \
 mkdir -p exports/web && \
 /Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Web" "/Users/admin/Jas Games/ranotot/exports/web/game.html" --headless && \
 mkdir -p exports/ranotot_Web && \
 /Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Web" "/Users/admin/Jas Games/ranotot/exports/ranotot_Web/index.html" --headless && \
-echo "✅ ALL PLATFORM BUILDS COMPILED"
+echo "✅ ALL PLATFORM BUILDS & INSTALLERS COMPILED"
 ```
 
 ### deploy to vercel (web app)
@@ -119,9 +120,9 @@ cd "/Users/admin/godot connector" && python3 generate_levels.py
 
 | Platform | Output File | Path |
 |----------|-------------|------|
-| macOS | `ranotot.app` | `exports/ranotot.app` |
-| Windows | `ranotot.exe` + `ranotot.pck` | `exports/` |
-| Linux | `ranotot_Linux.x86_64` | `exports/` |
+| macOS | `ranotot.dmg` | `exports/ranotot.dmg` |
+| Windows | `ranotot_setup.exe` (Installer) | `exports/ranotot_setup.exe` |
+| Linux | `ranotot_linux_setup.sh` (Self-extracting setup) | `exports/ranotot_linux_setup.sh` |
 | Web (Vercel) | `game.html` + `index.html` | `exports/web/` |
 | Web (Direct) | `index.html` + `index.pck` | `exports/ranotot_Web/` |
 
