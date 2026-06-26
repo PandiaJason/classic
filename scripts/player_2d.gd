@@ -285,9 +285,7 @@ func _physics_process(delta: float) -> void:
 		
 		if on_ground and not was_on_ground:
 			# Player just landed on a planet
-			for joy in Input.get_connected_joypads():
-				Input.start_joy_vibration(joy, 0.5, 0.8, 0.2)
-			Input.start_joy_vibration(0, 0.5, 0.8, 0.2)
+			GameManager.trigger_haptic(0.15, 0.3, 0.15)
 			_glide_used_this_flight = false  # Reset glide for next flight
 			is_speed_buff_active = false     # Reset speed buff on landing
 			SoundManager.play_sfx("landing")
@@ -323,9 +321,7 @@ func _physics_process(delta: float) -> void:
 				has_jumped = true
 				
 				# Jump haptic vibration
-				for joy in Input.get_connected_joypads():
-					Input.start_joy_vibration(joy, 0.3, 0.5, 0.1)
-				Input.start_joy_vibration(0, 0.3, 0.5, 0.1)
+				GameManager.trigger_haptic(0.1, 0.15, 0.08)
 				
 				# Override the vertical velocity entirely to launch upwards
 				var actual_jump = jump_force * (1.25 if is_speed_buff_active else 1.0)
@@ -366,9 +362,7 @@ func _physics_process(delta: float) -> void:
 					SoundManager.start_sfx_loop("thruster")
 					
 					# Glide trigger pulse vibration
-					for joy in Input.get_connected_joypads():
-						Input.start_joy_vibration(joy, 0.4, 0.5, 0.15)
-					Input.start_joy_vibration(0, 0.4, 0.5, 0.15)
+					GameManager.trigger_haptic(0.12, 0.18, 0.12)
 					
 					# Grace timer if triggered by mobile touch tap
 					if _wants_to_jump:
@@ -397,13 +391,8 @@ func _physics_process(delta: float) -> void:
 			else:
 				# Apply thruster force/pull
 				var pull_dir = (_tether_planet.global_position - global_position).normalized()
-				var speed_multiplier = 1.0
-				velocity += pull_dir * 450.0 * speed_multiplier * delta
-				
-				# Subtle continuous rumble while gliding/thruster is active
-				for joy in Input.get_connected_joypads():
-					Input.start_joy_vibration(joy, 0.25, 0.15, 0.08)
-				Input.start_joy_vibration(0, 0.25, 0.15, 0.08)
+				var pull_accel = 1200.0
+				velocity += pull_dir * pull_accel * delta
 				
 				# Enable gas jet plume and orient it away from the planet (action-reaction)
 				if thruster_particles != null:

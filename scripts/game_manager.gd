@@ -82,9 +82,7 @@ func _ensure_key(action: String, keycode: Key):
 
 func take_jump_damage() -> void:
 	if has_box:
-		for joy in Input.get_connected_joypads():
-			Input.start_joy_vibration(joy, 0.5, 0.8, 0.25)
-		Input.start_joy_vibration(0, 0.5, 0.8, 0.25)
+		trigger_haptic(0.15, 0.25, 0.15)
 		box_health -= 3.0
 		box_health = max(0.0, box_health)
 		health_changed.emit(box_health)
@@ -96,9 +94,7 @@ func repair_box(amount: float) -> void:
 
 func take_damage(amount: float, reason: String) -> void:
 	if has_box:
-		for joy in Input.get_connected_joypads():
-			Input.start_joy_vibration(joy, 0.8, 1.0, 0.4)
-		Input.start_joy_vibration(0, 0.8, 1.0, 0.4)
+		trigger_haptic(0.25, 0.4, 0.25)
 		box_health -= amount
 		box_health = max(0.0, box_health)
 		health_changed.emit(box_health)
@@ -160,3 +156,14 @@ func load_next_level() -> void:
 		SceneTransition.transition_to("res://scenes/credits.tscn")
 	else:
 		SceneTransition.transition_to("res://scenes/level_" + str(current_level) + ".tscn")
+
+func trigger_haptic(weak: float, strong: float, duration: float) -> void:
+	# Local platforms
+	for joy in Input.get_connected_joypads():
+		Input.start_joy_vibration(joy, weak, strong, duration)
+	Input.start_joy_vibration(0, weak, strong, duration)
+	
+	# Web platform fallback
+	if OS.has_feature("web"):
+		var js_code = "(function() { var gamepads = navigator.getGamepads(); for (var i = 0; i < gamepads.length; i++) { var gp = gamepads[i]; if (gp && gp.vibrationActuator) { gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: " + str(int(duration * 1000)) + ", weakMagnitude: " + str(weak) + ", strongMagnitude: " + str(strong) + " }).catch(function(e){}); } } })();"
+		JavaScriptBridge.eval(js_code)

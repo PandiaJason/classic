@@ -24,9 +24,7 @@ func _on_body_entered(body: Node2D) -> void:
 		_spawn_sparkle_particles()
 		
 		# Controller haptic vibration
-		for joy in Input.get_connected_joypads():
-			Input.start_joy_vibration(joy, 0.4, 0.6, 0.12)
-		Input.start_joy_vibration(0, 0.4, 0.6, 0.12)
+		GameManager.trigger_haptic(0.08, 0.12, 0.08)
 		
 		var tween = create_tween()
 		tween.tween_property(self, "scale", Vector2.ZERO, 0.2)
