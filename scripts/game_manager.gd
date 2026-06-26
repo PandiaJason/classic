@@ -148,13 +148,20 @@ func load_next_level() -> void:
 	level_rubies_earned = 0
 	has_box = true
 	box_health = 100.0
-	current_level += 1
-	is_gameplay_started = false
-	health_changed.emit(box_health)
 	
-	if current_level > 90:
+	var next_level = current_level + 1
+	if next_level > 90:
+		is_gameplay_started = false
+		health_changed.emit(box_health)
 		SceneTransition.transition_to("res://scenes/credits.tscn")
+	elif not SaveSystem.is_level_unlocked(next_level):
+		is_gameplay_started = false
+		health_changed.emit(box_health)
+		SceneTransition.transition_to("res://scenes/level_select.tscn")
 	else:
+		current_level = next_level
+		is_gameplay_started = false
+		health_changed.emit(box_health)
 		SceneTransition.transition_to("res://scenes/level_" + str(current_level) + ".tscn")
 
 func trigger_haptic(weak: float, strong: float, duration: float) -> void:

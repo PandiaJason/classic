@@ -154,8 +154,12 @@ func _ready():
 	menu_btn.pressed.connect(_on_menu_pressed)
 	hbox.add_child(menu_btn)
 	
-	var btn_text = "finish" if GameManager.current_level >= 90 else "next level"
-	var next_btn = create_glass_button(btn_text, Color(0.2, 1.0, 0.2))
+	var next_level_id = GameManager.current_level + 1
+	var next_level_unlocked = SaveSystem.is_level_unlocked(next_level_id)
+	
+	var btn_text = "finish" if GameManager.current_level >= 90 else ("next level" if next_level_unlocked else "level select")
+	var btn_color = Color(0.2, 1.0, 0.2) if (GameManager.current_level >= 90 or next_level_unlocked) else Color(0.2, 0.6, 1.0)
+	var next_btn = create_glass_button(btn_text, btn_color)
 	next_btn.pressed.connect(_on_next_pressed)
 	hbox.add_child(next_btn)
 	
