@@ -8,8 +8,83 @@ var is_gameplay_started: bool = false
 
 signal health_changed(new_health)
 
+func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_setup_ui_joypad()
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_accept") or (event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A):
+		var focus = get_viewport().gui_get_focus_owner()
+		if focus and focus is BaseButton:
+			focus.pressed.emit()
+			get_viewport().set_input_as_handled()
+
+func _setup_ui_joypad():
+	var mapping = {
+		"ui_left": {"axis": JOY_AXIS_LEFT_X, "dir": -1.0},
+		"ui_right": {"axis": JOY_AXIS_LEFT_X, "dir": 1.0},
+		"ui_up": {"axis": JOY_AXIS_LEFT_Y, "dir": -1.0},
+		"ui_down": {"axis": JOY_AXIS_LEFT_Y, "dir": 1.0}
+	}
+	for action in mapping:
+		if not InputMap.has_action(action): continue
+		var has_stick = false
+		for ev in InputMap.action_get_events(action):
+			if ev is InputEventJoypadMotion and ev.axis == mapping[action].axis and sign(ev.axis_value) == sign(mapping[action].dir):
+				has_stick = true
+				break
+		if not has_stick:
+			var ev = InputEventJoypadMotion.new()
+			ev.axis = mapping[action].axis
+			ev.axis_value = mapping[action].dir
+			InputMap.action_add_event(action, ev)
+			InputMap.action_set_deadzone(action, 0.5)
+
+	# Ensure A and B buttons are mapped to Accept/Cancel
+	_ensure_joy_button("ui_accept", JOY_BUTTON_A)
+	_ensure_joy_button("ui_cancel", JOY_BUTTON_B)
+
+	# Ensure jump and speed actions exist and are mapped correctly
+	if not InputMap.has_action("jump"):
+		InputMap.add_action("jump")
+	_ensure_joy_button("jump", JOY_BUTTON_A)
+	_ensure_key("jump", KEY_SPACE)
+	_ensure_key("jump", KEY_UP)
+
+	if not InputMap.has_action("speed"):
+		InputMap.add_action("speed")
+	_ensure_joy_button("speed", JOY_BUTTON_X)
+	_ensure_key("speed", KEY_SHIFT)
+
+func _ensure_joy_button(action: String, btn_index: JoyButton):
+	if not InputMap.has_action(action): return
+	var has_btn = false
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventJoypadButton and ev.button_index == btn_index:
+			has_btn = true
+			break
+	if not has_btn:
+		var ev = InputEventJoypadButton.new()
+		ev.button_index = btn_index
+		InputMap.action_add_event(action, ev)
+
+func _ensure_key(action: String, keycode: Key):
+	if not InputMap.has_action(action): return
+	var has_key = false
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventKey and ev.keycode == keycode:
+			has_key = true
+			break
+	if not has_key:
+		var ev = InputEventKey.new()
+		ev.keycode = keycode
+		InputMap.action_add_event(action, ev)
+
 func take_jump_damage() -> void:
 	if has_box:
+		for joy in Input.get_connected_joypads():
+			Input.start_joy_vibration(joy, 0.5, 0.8, 0.25)
+		Input.start_joy_vibration(0, 0.5, 0.8, 0.25)
 		box_health -= 3.0
 		box_health = max(0.0, box_health)
 		health_changed.emit(box_health)
@@ -21,6 +96,9 @@ func repair_box(amount: float) -> void:
 
 func take_damage(amount: float, reason: String) -> void:
 	if has_box:
+		for joy in Input.get_connected_joypads():
+			Input.start_joy_vibration(joy, 0.8, 1.0, 0.4)
+		Input.start_joy_vibration(0, 0.8, 1.0, 0.4)
 		box_health -= amount
 		box_health = max(0.0, box_health)
 		health_changed.emit(box_health)

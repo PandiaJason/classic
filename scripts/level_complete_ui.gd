@@ -160,6 +160,9 @@ func _ready():
 	hbox.add_child(next_btn)
 	
 	vbox.add_child(hbox)
+	
+	menu_btn.focus_neighbor_right = next_btn.get_path()
+	next_btn.focus_neighbor_left = menu_btn.get_path()
 	panel.add_child(vbox)
 	
 	var center = CenterContainer.new()
@@ -167,6 +170,8 @@ func _ready():
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	center.add_child(panel)
 	add_child(center)
+	
+	next_btn.grab_focus()
 
 func _on_next_pressed():
 	get_tree().paused = false

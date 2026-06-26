@@ -3,6 +3,10 @@ extends Control
 var _ruby_btn: TextureButton = null
 var _pulse_time: float = 0.0
 var _ruby_label: Label = null
+var tutorial_btn: Button = null
+var reset_btn: Button = null
+var daily_btn: Button = null
+var start_btn: Button = null
 
 func _ready():
 	BgmManager.play_menu_music()
@@ -11,12 +15,12 @@ func _ready():
 	button_vbox.add_theme_constant_override("separation", 16)
 	button_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
-	var start_btn = $VBoxContainer/StartButton
+	start_btn = $VBoxContainer/StartButton
 	$VBoxContainer.remove_child(start_btn)
 	button_vbox.add_child(start_btn)
 	start_btn.pressed.connect(_on_start_pressed)
 	
-	var tutorial_btn = UIFactory.create_glass_button("tutorial", UIFactory.BLUE_COLOR)
+	tutorial_btn = UIFactory.create_glass_button("tutorial", UIFactory.BLUE_COLOR)
 	tutorial_btn.add_theme_font_size_override("font_size", 20)
 	tutorial_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	tutorial_btn.pressed.connect(_on_tutorial_pressed)
@@ -94,7 +98,7 @@ func _ready():
 	music_slider.max_value = 1.0
 	music_slider.step = 0.05
 	music_slider.value = SaveSystem.music_volume
-	music_slider.focus_mode = Control.FOCUS_NONE
+	music_slider.focus_mode = Control.FOCUS_ALL
 	music_slider.value_changed.connect(func(val):
 		SaveSystem.music_volume = val
 		SaveSystem.music_on = val > 0.01
@@ -122,7 +126,7 @@ func _ready():
 	sfx_slider.max_value = 1.0
 	sfx_slider.step = 0.05
 	sfx_slider.value = SaveSystem.sfx_volume
-	sfx_slider.focus_mode = Control.FOCUS_NONE
+	sfx_slider.focus_mode = Control.FOCUS_ALL
 	sfx_slider.value_changed.connect(func(val):
 		SaveSystem.sfx_volume = val
 		SaveSystem.sfx_on = val > 0.01
@@ -186,7 +190,7 @@ func _ready():
 
 	if SaveSystem.unlocked_levels > 90:
 		# Reset Button using UIFactory (Red Style)
-		var reset_btn = UIFactory.create_glass_button("reset", UIFactory.RED_COLOR)
+		reset_btn = UIFactory.create_glass_button("reset", UIFactory.RED_COLOR)
 		var reset_margin = MarginContainer.new()
 		reset_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 		reset_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -213,7 +217,7 @@ func _ready():
 	add_child(copy_margin)
 	
 	# Setup Daily Reward button on the top left, below rate panel
-	var daily_btn = UIFactory.create_glass_button("daily reward", UIFactory.GOLD_COLOR)
+	daily_btn = UIFactory.create_glass_button("daily reward", UIFactory.GOLD_COLOR)
 	daily_btn.add_theme_font_size_override("font_size", 20)
 	daily_btn.pressed.connect(func():
 		_show_daily_rewards_popup()
@@ -226,15 +230,50 @@ func _ready():
 	daily_margin.add_child(daily_btn)
 	add_child(daily_margin)
 	
+	# Focus Networking for controllers
+	start_btn.focus_neighbor_top = daily_btn.get_path()
+	start_btn.focus_neighbor_bottom = tutorial_btn.get_path()
+	start_btn.focus_neighbor_left = daily_btn.get_path()
+	
+	tutorial_btn.focus_neighbor_top = start_btn.get_path()
+	tutorial_btn.focus_neighbor_bottom = music_slider.get_path()
+	
+	daily_btn.focus_neighbor_right = start_btn.get_path()
+	daily_btn.focus_neighbor_bottom = start_btn.get_path()
+	
+	music_slider.focus_neighbor_top = tutorial_btn.get_path()
+	music_slider.focus_neighbor_bottom = sfx_slider.get_path()
+	music_slider.focus_neighbor_right = reset_btn.get_path() if reset_btn else tutorial_btn.get_path()
+	
+	sfx_slider.focus_neighbor_top = music_slider.get_path()
+	sfx_slider.focus_neighbor_right = reset_btn.get_path() if reset_btn else tutorial_btn.get_path()
+	
+	if reset_btn:
+		reset_btn.focus_neighbor_left = sfx_slider.get_path()
+		reset_btn.focus_neighbor_top = tutorial_btn.get_path()
+		tutorial_btn.focus_neighbor_right = reset_btn.get_path()
+		start_btn.focus_neighbor_right = reset_btn.get_path()
+		
+	if is_instance_valid(_ruby_btn):
+		_ruby_btn.focus_mode = Control.FOCUS_ALL
+		_ruby_btn.focus_neighbor_bottom = start_btn.get_path()
+		start_btn.focus_neighbor_top = _ruby_btn.get_path()
+		daily_btn.focus_neighbor_right = _ruby_btn.get_path()
+		_ruby_btn.focus_neighbor_left = daily_btn.get_path()
+	
 	# Auto-open daily reward if available
 	if SaveSystem.is_daily_reward_available():
 		get_tree().create_timer(0.2).timeout.connect(func():
 			_show_daily_rewards_popup()
 		)
+	else:
+		start_btn.grab_focus()
 
 
 
 func _on_start_pressed():
+	if OS.has_feature("web"):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	SceneTransition.transition_to("res://scenes/level_select.tscn")
 
 func _on_tutorial_pressed():
@@ -317,8 +356,11 @@ func _on_tutorial_pressed():
 	close_btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	close_btn.pressed.connect(func():
 		tut_overlay.queue_free()
+		if is_instance_valid(tutorial_btn):
+			tutorial_btn.grab_focus()
 	)
 	vbox.add_child(close_btn)
+	close_btn.grab_focus()
 
 func _on_reset_pressed():
 	var overlay = ColorRect.new()
@@ -359,6 +401,8 @@ func _on_reset_pressed():
 	cancel_btn.pressed.connect(func():
 		overlay.queue_free()
 		dialog.queue_free()
+		if is_instance_valid(reset_btn):
+			reset_btn.grab_focus()
 	)
 
 	var confirm_btn = UIFactory.create_glass_button("yes, reset!", UIFactory.RED_COLOR)
@@ -376,6 +420,10 @@ func _on_reset_pressed():
 	btn_row.add_child(confirm_btn)
 	vbox.add_child(btn_row)
 	dialog.add_child(vbox)
+	
+	cancel_btn.focus_neighbor_right = confirm_btn.get_path()
+	confirm_btn.focus_neighbor_left = cancel_btn.get_path()
+	cancel_btn.grab_focus()
 
 func _process(delta: float):
 	if is_instance_valid(_ruby_btn):
@@ -584,11 +632,14 @@ func _show_daily_rewards_popup():
 	var close_btn = UIFactory.create_glass_button("close", UIFactory.BLUE_COLOR)
 	close_btn.pressed.connect(func():
 		overlay.queue_free()
+		if is_instance_valid(daily_btn):
+			daily_btn.grab_focus()
 	)
 	
+	var claim_btn: Button = null
 	if claim_avail:
 		var target_amount = 300 if today_candidate == 7 else 50
-		var claim_btn = UIFactory.create_glass_button("claim %d rubies!" % target_amount, UIFactory.GOLD_COLOR)
+		claim_btn = UIFactory.create_glass_button("claim %d rubies!" % target_amount, UIFactory.GOLD_COLOR)
 		claim_btn.pressed.connect(func():
 			var res = SaveSystem.claim_daily_reward()
 			if res.get("success", false):
@@ -726,7 +777,15 @@ func _show_daily_rewards_popup():
 		)
 		actions_hbox.add_child(claim_btn)
 		
+		claim_btn.focus_neighbor_right = close_btn.get_path()
+		close_btn.focus_neighbor_left = claim_btn.get_path()
+		
 	actions_hbox.add_child(close_btn)
 	vbox.add_child(actions_hbox)
 	dialog.add_child(vbox)
+	
+	if claim_avail:
+		claim_btn.grab_focus()
+	else:
+		close_btn.grab_focus()
 

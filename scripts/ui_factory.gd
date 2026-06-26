@@ -59,9 +59,17 @@ func create_glass_button(text: String, color: Color = BLUE_COLOR, icon_path: Str
 	var hover_style = style.duplicate()
 	hover_style.bg_color = Color(color.r, color.g, color.b, 0.7)
 	
+	var focus_style = hover_style.duplicate()
+	focus_style.border_color = Color(1.0, 1.0, 1.0, 1.0)
+	focus_style.border_width_left = 4
+	focus_style.border_width_right = 4
+	focus_style.border_width_top = 4
+	focus_style.border_width_bottom = 4
+	
 	btn.add_theme_stylebox_override("normal", style)
 	btn.add_theme_stylebox_override("hover", hover_style)
 	btn.add_theme_stylebox_override("pressed", style)
-	# Click/tap only - don't steal keyboard focus from gameplay
-	btn.focus_mode = Control.FOCUS_NONE
+	btn.add_theme_stylebox_override("focus", focus_style)
+	# By default all generated buttons are focusable for controller navigation
+	btn.focus_mode = Control.FOCUS_ALL
 	return btn

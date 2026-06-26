@@ -35,6 +35,7 @@ func _ready():
 			btn.add_theme_stylebox_override("normal", load_style("unlocked"))
 			btn.add_theme_stylebox_override("hover", load_style("unlocked_hover"))
 			btn.add_theme_stylebox_override("pressed", load_style("unlocked"))
+			btn.add_theme_stylebox_override("focus", load_style("focus"))
 			
 			var stars_earned = SaveSystem.get_stars(i)
 			if stars_earned > 0:
@@ -100,10 +101,18 @@ func _ready():
 			btn.add_theme_stylebox_override("normal", load_style("locked"))
 			btn.add_theme_stylebox_override("hover", load_style("locked"))
 			btn.add_theme_stylebox_override("pressed", load_style("locked"))
+			btn.add_theme_stylebox_override("focus", load_style("locked_focus"))
 			# Don't connect pressed signal, so it's disabled effectively
 			
 		grid.add_child(btn)
 
+	var focused_btn = null
+	for child in grid.get_children():
+		if child is Button and child.text != "":
+			focused_btn = child
+	if focused_btn:
+		focused_btn.grab_focus()
+		
 	# Setup Back Button (using UIFactory to match in-game style)
 	var back_button = UIFactory.create_glass_button("back", UIFactory.RED_COLOR)
 	back_button.pressed.connect(_on_back_pressed)
@@ -199,6 +208,26 @@ func _ready():
 	shop_margin.add_child(shop_hbox)
 	add_child(shop_margin)
 
+	# Setup Focus Navigation explicitly for controllers
+	back_button.focus_neighbor_right = buy_btn.get_path()
+	buy_btn.focus_neighbor_left = back_button.get_path()
+	buy_btn.focus_neighbor_right = buy_speed_btn.get_path()
+	buy_speed_btn.focus_neighbor_left = buy_btn.get_path()
+
+	var last_grid_btn: Button = null
+	for child in grid.get_children():
+		if child is Button:
+			last_grid_btn = child
+			if child.get_index() >= 85:
+				child.focus_neighbor_bottom = buy_speed_btn.get_path()
+			elif child.get_index() >= 80:
+				child.focus_neighbor_bottom = back_button.get_path()
+
+	if last_grid_btn != null:
+		back_button.focus_neighbor_top = last_grid_btn.get_path()
+		buy_btn.focus_neighbor_top = last_grid_btn.get_path()
+		buy_speed_btn.focus_neighbor_top = last_grid_btn.get_path()
+
 func load_style(type: String) -> StyleBoxFlat:
 	var style = StyleBoxFlat.new()
 	style.corner_radius_top_left = 25
@@ -220,6 +249,22 @@ func load_style(type: String) -> StyleBoxFlat:
 		style.border_color = Color(1.0, 0.8, 0.3, 1.0)
 		style.shadow_color = Color(1.0, 0.6, 0.0, 0.6)
 		style.shadow_size = 25
+	elif type == "focus":
+		style.bg_color = Color(0.9, 0.5, 0.1, 1.0)
+		style.border_color = Color(1.0, 1.0, 1.0, 1.0) # White border for focus
+		style.border_width_left = 4
+		style.border_width_right = 4
+		style.border_width_top = 4
+		style.border_width_bottom = 4
+		style.shadow_color = Color(1.0, 0.6, 0.0, 0.6)
+		style.shadow_size = 25
+	elif type == "locked_focus":
+		style.bg_color = Color(0.1, 0.1, 0.1, 0.8)
+		style.border_color = Color(1.0, 1.0, 1.0, 1.0) # White border for focus
+		style.border_width_left = 4
+		style.border_width_right = 4
+		style.border_width_top = 4
+		style.border_width_bottom = 4
 	else:
 		style.bg_color = Color(0.1, 0.1, 0.1, 0.8)
 		style.border_color = Color(0.3, 0.3, 0.3, 0.5)
@@ -301,3 +346,24 @@ func _update_shop_ui() -> void:
 		else:
 			buy_speed_btn.disabled = false
 			buy_speed_btn.modulate.a = 1.0
+
+func _process(delta: float) -> void:
+	# Right joystick (lever) scrolling for the level selection ScrollContainer
+	var right_stick_y = 0.0
+	var right_stick_x = 0.0
+	for joy in Input.get_connected_joypads():
+		var y = Input.get_joy_axis(joy, JOY_AXIS_RIGHT_Y)
+		var x = Input.get_joy_axis(joy, JOY_AXIS_RIGHT_X)
+		if abs(y) > abs(right_stick_y):
+			right_stick_y = y
+		if abs(x) > abs(right_stick_x):
+			right_stick_x = x
+			
+	if has_node("ScrollContainer"):
+		var scroll_container = $ScrollContainer
+		if abs(right_stick_y) > 0.15:
+			var scroll_speed = 800.0
+			scroll_container.scroll_vertical += int(right_stick_y * scroll_speed * delta)
+		if abs(right_stick_x) > 0.15:
+			var scroll_speed = 800.0
+			scroll_container.scroll_horizontal += int(right_stick_x * scroll_speed * delta)

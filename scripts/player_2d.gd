@@ -24,6 +24,7 @@ var _glide_used_this_flight: bool = false
 signal glide_used
 # Speed boost assist
 signal speed_used
+var is_speed_buff_active: bool = false
 var _wants_to_speed: bool = false
 var _shift_was_pressed: bool = false
 var _tether_planet: Node2D = null
@@ -41,8 +42,52 @@ var _wants_to_jump: bool = false
 var trajectory_points: Array[Vector2] = []
 @onready var floor_ray = $RayCast2D
 
+var _joy_jump_pressed: bool = false
+var _joy_jump_just_pressed: bool = false
+var _joy_speed_pressed: bool = false
+var _joy_speed_just_pressed: bool = false
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventJoypadButton:
+		if event.button_index == JOY_BUTTON_A:
+			_joy_jump_pressed = event.pressed
+			if event.pressed:
+				_joy_jump_just_pressed = true
+		elif event.button_index == JOY_BUTTON_X:
+			_joy_speed_pressed = event.pressed
+			if event.pressed:
+				_joy_speed_just_pressed = true
+
 func _ready() -> void:
 	add_to_group("player")
+	
+	# Setup controller inputs dynamically
+	if not InputMap.has_action("speed"):
+		InputMap.add_action("speed")
+		var ev_shift = InputEventKey.new()
+		ev_shift.keycode = KEY_SHIFT
+		InputMap.action_add_event("speed", ev_shift)
+		var ev_joy = InputEventJoypadButton.new()
+		ev_joy.button_index = JOY_BUTTON_X
+		InputMap.action_add_event("speed", ev_joy)
+		
+	# Setup explicit jump for joystick
+	if not InputMap.has_action("jump"):
+		InputMap.add_action("jump")
+		
+		var ev_joy_a = InputEventJoypadButton.new()
+		ev_joy_a.button_index = JOY_BUTTON_A
+		InputMap.action_add_event("jump", ev_joy_a)
+		
+		var ev_joy_up = InputEventJoypadButton.new()
+		ev_joy_up.button_index = JOY_BUTTON_DPAD_UP
+		InputMap.action_add_event("jump", ev_joy_up)
+		
+		var ev_joy_stick = InputEventJoypadMotion.new()
+		ev_joy_stick.axis = JOY_AXIS_LEFT_Y
+		ev_joy_stick.axis_value = -1.0
+		InputMap.action_add_event("jump", ev_joy_stick)
+		
 	current_speed = max_speed
 	
 	# Initialize maneuvering gas thruster particles dynamically
@@ -137,6 +182,27 @@ func _physics_process(delta: float) -> void:
 	# 1. Find the nearest valid gravity source
 	find_gravity_source(on_ground)
 	
+	# Handle speed buff activation
+	if not is_menu_demo and not is_speed_buff_active and SaveSystem.speed_count > 0:
+		var speed_just_pressed = (Input.is_action_pressed("speed") and not _shift_was_pressed) or _wants_to_speed or _joy_speed_just_pressed
+		if speed_just_pressed:
+			if SaveSystem.use_speed():
+				is_speed_buff_active = true
+				speed_used.emit()
+				SoundManager.play_sfx("tether")
+				_doomed = false
+				_doom_timer = 0.0
+				
+				if current_planet == null:
+					# Outer space burst
+					velocity = velocity.normalized() * (velocity.length() * 1.8)
+				elif not on_ground:
+					# Mid-air burst inside gravity
+					velocity = velocity.normalized() * (velocity.length() * 1.5)
+				else:
+					# On-ground immediate speedup
+					current_speed = max_speed * 1.8
+	
 	if current_planet:
 		# Clear any active grapple tether since we are inside gravity
 		_tether_planet = null
@@ -180,8 +246,9 @@ func _physics_process(delta: float) -> void:
 		last_planet = current_planet
 		
 		# 4. Handle auto-drive
-		current_speed += brake_force * 0.5 * delta
-		current_speed = clamp(current_speed, 0.0, max_speed)
+		var actual_max_speed = max_speed * (1.8 if is_speed_buff_active else 1.0)
+		current_speed += brake_force * (1.0 if is_speed_buff_active else 0.5) * delta
+		current_speed = clamp(current_speed, 0.0, actual_max_speed)
 		
 		# Re-evaluate on_ground just to be safe
 		var dist_to_planet = diff.length()
@@ -218,7 +285,11 @@ func _physics_process(delta: float) -> void:
 		
 		if on_ground and not was_on_ground:
 			# Player just landed on a planet
+			for joy in Input.get_connected_joypads():
+				Input.start_joy_vibration(joy, 0.5, 0.8, 0.2)
+			Input.start_joy_vibration(0, 0.5, 0.8, 0.2)
 			_glide_used_this_flight = false  # Reset glide for next flight
+			is_speed_buff_active = false     # Reset speed buff on landing
 			SoundManager.play_sfx("landing")
 			
 			# Trigger subtle camera shake on landing
@@ -246,12 +317,19 @@ func _physics_process(delta: float) -> void:
 				
 			velocity = (surface_right * current_speed * forward_direction) + (surface_up * current_vertical)
 				
-			var jump_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or _wants_to_jump
+			var jump_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or Input.is_action_just_pressed("jump") or _wants_to_jump or _joy_jump_just_pressed
 			if not is_menu_demo and jump_pressed and GameManager.is_gameplay_started:
 				# Real Jump!
 				has_jumped = true
+				
+				# Jump haptic vibration
+				for joy in Input.get_connected_joypads():
+					Input.start_joy_vibration(joy, 0.3, 0.5, 0.1)
+				Input.start_joy_vibration(0, 0.3, 0.5, 0.1)
+				
 				# Override the vertical velocity entirely to launch upwards
-				velocity = (surface_right * current_speed * forward_direction) + (surface_up * -jump_force)
+				var actual_jump = jump_force * (1.25 if is_speed_buff_active else 1.0)
+				velocity = (surface_right * current_speed * forward_direction) + (surface_up * -actual_jump)
 				SoundManager.play_sfx("jump")
 		else:
 			# Add a tiny bit of air control / forward momentum
@@ -273,21 +351,9 @@ func _physics_process(delta: float) -> void:
 		# Player floats in a straight line with their current velocity
 		last_planet = null
 		
-		# Speed boost assist - accelerate player forward in outer space
-		if not is_menu_demo and SaveSystem.speed_count > 0:
-			var speed_just_pressed = (Input.is_key_pressed(KEY_SHIFT) and not _shift_was_pressed) or _wants_to_speed
-			if speed_just_pressed:
-				if SaveSystem.use_speed():
-					velocity = velocity.normalized() * (velocity.length() * 1.8)
-					speed_used.emit()
-					SoundManager.play_sfx("tether")
-					_doomed = false
-					_doom_timer = 0.0
-					_wants_to_speed = false
-
 		# Glide assist - pull toward nearest planet (can use multiple times per flight)
 		if not is_menu_demo and SaveSystem.glide_count > 0:
-			var just_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or _wants_to_jump
+			var just_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or Input.is_action_just_pressed("jump") or _wants_to_jump or _joy_jump_just_pressed
 			if just_pressed:
 				var nearest = _find_nearest_planet()
 				if nearest:
@@ -299,6 +365,11 @@ func _physics_process(delta: float) -> void:
 					_doom_timer = 0.0
 					SoundManager.start_sfx_loop("thruster")
 					
+					# Glide trigger pulse vibration
+					for joy in Input.get_connected_joypads():
+						Input.start_joy_vibration(joy, 0.4, 0.5, 0.15)
+					Input.start_joy_vibration(0, 0.4, 0.5, 0.15)
+					
 					# Grace timer if triggered by mobile touch tap
 					if _wants_to_jump:
 						_tether_time_left = 1.5
@@ -307,7 +378,7 @@ func _physics_process(delta: float) -> void:
 		
 		# Apply tether pull in zero gravity
 		if _tether_planet != null and is_instance_valid(_tether_planet):
-			var is_holding = Input.is_action_pressed("ui_accept") or Input.is_action_pressed("ui_up")
+			var is_holding = Input.is_action_pressed("ui_accept") or Input.is_action_pressed("ui_up") or Input.is_action_pressed("jump") or _joy_jump_pressed
 			var should_release = false
 			
 			if _tether_time_left > 0.0:
@@ -324,9 +395,15 @@ func _physics_process(delta: float) -> void:
 				if thruster_particles != null:
 					thruster_particles.emitting = false
 			else:
+				# Apply thruster force/pull
 				var pull_dir = (_tether_planet.global_position - global_position).normalized()
-				var pull_accel = 1200.0
-				velocity += pull_dir * pull_accel * delta
+				var speed_multiplier = 1.0
+				velocity += pull_dir * 450.0 * speed_multiplier * delta
+				
+				# Subtle continuous rumble while gliding/thruster is active
+				for joy in Input.get_connected_joypads():
+					Input.start_joy_vibration(joy, 0.25, 0.15, 0.08)
+				Input.start_joy_vibration(0, 0.25, 0.15, 0.08)
 				
 				# Enable gas jet plume and orient it away from the planet (action-reaction)
 				if thruster_particles != null:
@@ -410,8 +487,10 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 	
 	_wants_to_jump = false # clear the input queue at the end of the frame
-	_shift_was_pressed = Input.is_key_pressed(KEY_SHIFT)
+	_shift_was_pressed = Input.is_action_pressed("speed")
 	_wants_to_speed = false
+	_joy_jump_just_pressed = false
+	_joy_speed_just_pressed = false
 
 func _draw():
 	if show_trajectory and trajectory_points.size() > 0:

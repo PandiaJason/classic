@@ -28,6 +28,7 @@ var pause_overlay: Control = null
 
 var shake_intensity: float = 0.0
 var shake_duration: float = 0.0
+var _trigger_map_pressed: bool = false
 
 func _ready():
 	add_to_group("in_game_ui")
@@ -140,10 +141,12 @@ func _ready():
 	top_right_hbox.add_theme_constant_override("separation", 15)
 	
 	view_map_btn = UIFactory.create_glass_button("map", UIFactory.BLUE_COLOR)
+	view_map_btn.focus_mode = Control.FOCUS_NONE
 	view_map_btn.pressed.connect(_on_view_map_pressed)
 	top_right_hbox.add_child(view_map_btn)
 	
 	var pause_btn = UIFactory.create_glass_button("pause", UIFactory.GOLD_COLOR)
+	pause_btn.focus_mode = Control.FOCUS_NONE
 	pause_btn.pressed.connect(func():
 		toggle_pause()
 	)
@@ -160,6 +163,7 @@ func _ready():
 	
 	# Setup Hint Button
 	hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
+	hint_button.focus_mode = Control.FOCUS_NONE
 	hint_button.button_down.connect(_on_hint_pressed)
 	hint_button.pressed.connect(_on_hint_pressed)
 	
@@ -191,6 +195,7 @@ func _ready():
 	# Setup Glide Assist Button (only if has glides)
 	if SaveSystem.glide_count > 0:
 		glide_button = UIFactory.create_glass_button("glide x%d" % SaveSystem.glide_count, Color(0.2, 0.6, 1.0))
+		glide_button.focus_mode = Control.FOCUS_NONE
 		glide_button.pressed.connect(_on_glide_pressed)
 		
 		var glide_margin = MarginContainer.new()
@@ -209,6 +214,7 @@ func _ready():
 	# Setup Speed Assist Button (only if has speed charges)
 	if SaveSystem.speed_count > 0:
 		speed_button = UIFactory.create_glass_button("speed x%d" % SaveSystem.speed_count, Color(1.0, 0.4, 0.2))
+		speed_button.focus_mode = Control.FOCUS_NONE
 		speed_button.pressed.connect(_on_speed_pressed)
 		
 		var speed_margin = MarginContainer.new()
@@ -436,7 +442,7 @@ func _on_speed_zone_gui_input(event: InputEvent):
 		player._wants_to_speed = true
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
+	if event.is_action_pressed("ui_cancel") or (event is InputEventJoypadButton and event.button_index == JOY_BUTTON_START and event.pressed):
 		toggle_pause()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventKey and event.pressed and not event.echo:
@@ -446,6 +452,22 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_view_map_pressed()
 		elif event.keycode == KEY_H:
 			_on_hint_pressed()
+	elif event is InputEventJoypadButton and event.pressed:
+		if not GameManager.is_gameplay_started:
+			return
+		if event.button_index == JOY_BUTTON_RIGHT_SHOULDER or event.button_index == JOY_BUTTON_RIGHT_STICK:
+			_on_view_map_pressed()
+		elif event.button_index == JOY_BUTTON_LEFT_SHOULDER:
+			_on_hint_pressed()
+	elif event is InputEventJoypadMotion and event.axis == JOY_AXIS_TRIGGER_RIGHT:
+		if not GameManager.is_gameplay_started:
+			return
+		if event.axis_value > 0.5:
+			if not _trigger_map_pressed:
+				_trigger_map_pressed = true
+				_on_view_map_pressed()
+		else:
+			_trigger_map_pressed = false
 
 func toggle_pause():
 	if is_instance_valid(player) and player.is_game_over:
@@ -521,7 +543,7 @@ func _create_pause_menu():
 	music_slider.max_value = 1.0
 	music_slider.step = 0.05
 	music_slider.value = SaveSystem.music_volume
-	music_slider.focus_mode = Control.FOCUS_NONE
+	music_slider.focus_mode = Control.FOCUS_ALL
 	music_slider.custom_minimum_size = Vector2(200, 0)
 	music_slider.value_changed.connect(func(val):
 		SaveSystem.music_volume = val
@@ -552,7 +574,7 @@ func _create_pause_menu():
 	sfx_slider.max_value = 1.0
 	sfx_slider.step = 0.05
 	sfx_slider.value = SaveSystem.sfx_volume
-	sfx_slider.focus_mode = Control.FOCUS_NONE
+	sfx_slider.focus_mode = Control.FOCUS_ALL
 	sfx_slider.custom_minimum_size = Vector2(200, 0)
 	sfx_slider.value_changed.connect(func(val):
 		SaveSystem.sfx_volume = val
@@ -571,6 +593,26 @@ func _create_pause_menu():
 		SceneTransition.transition_to("res://scenes/menu.tscn")
 	)
 	vbox.add_child(quit_btn)
+
+	resume_btn.focus_neighbor_bottom = retry_btn.get_path()
+	resume_btn.focus_neighbor_top = quit_btn.get_path()
+	
+	retry_btn.focus_neighbor_bottom = levels_btn.get_path()
+	retry_btn.focus_neighbor_top = resume_btn.get_path()
+	
+	levels_btn.focus_neighbor_bottom = music_slider.get_path()
+	levels_btn.focus_neighbor_top = retry_btn.get_path()
+	
+	music_slider.focus_neighbor_bottom = sfx_slider.get_path()
+	music_slider.focus_neighbor_top = levels_btn.get_path()
+	
+	sfx_slider.focus_neighbor_bottom = quit_btn.get_path()
+	sfx_slider.focus_neighbor_top = music_slider.get_path()
+	
+	quit_btn.focus_neighbor_bottom = resume_btn.get_path()
+	quit_btn.focus_neighbor_top = sfx_slider.get_path()
+	
+	resume_btn.grab_focus()
 
 func _on_bgm_finished():
 	# Only loop in-level BGM if music is still enabled
@@ -661,6 +703,7 @@ func show_tutorial():
 		tut_overlay.queue_free()
 	)
 	vbox.add_child(start_btn)
+	start_btn.grab_focus()
 	
 	# Auto-close tutorial after 10 seconds if player does not press start
 	var auto_close_timer = get_tree().create_timer(10.0, true)

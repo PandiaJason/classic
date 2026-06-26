@@ -23,7 +23,11 @@ func _on_body_entered(body: Node2D) -> void:
 		SoundManager.play_sfx("ruby")
 		_spawn_sparkle_particles()
 		
-		# Optional: Add collection sound or effect here
+		# Controller haptic vibration
+		for joy in Input.get_connected_joypads():
+			Input.start_joy_vibration(joy, 0.4, 0.6, 0.12)
+		Input.start_joy_vibration(0, 0.4, 0.6, 0.12)
+		
 		var tween = create_tween()
 		tween.tween_property(self, "scale", Vector2.ZERO, 0.2)
 		tween.tween_callback(queue_free)

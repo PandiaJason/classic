@@ -30,6 +30,13 @@ func _ready():
 
 func load_data():
 	var err = config.load(SAVE_PATH)
+	if OS.has_feature("web") and JavaScriptBridge.get_interface("window"):
+		var js_data = JavaScriptBridge.eval("window.localStorage.getItem('ranotot_save_session');")
+		if js_data != null and typeof(js_data) == TYPE_STRING and js_data.length() > 0:
+			var web_err = config.parse(js_data)
+			if web_err == OK:
+				err = OK
+	
 	if err == OK:
 		unlocked_levels = config.get_value("Progress", "unlocked_levels", 1)
 		global_rubies = config.get_value("Progress", "global_rubies", config.get_value("Progress", "global_score", 0))
@@ -78,6 +85,10 @@ func save_data():
 	for i in level_stars.keys():
 		config.set_value("Stars", str(i), level_stars[i])
 	config.save(SAVE_PATH)
+	
+	if OS.has_feature("web") and JavaScriptBridge.get_interface("window"):
+		var cfg_string = config.encode_to_text()
+		JavaScriptBridge.eval("window.localStorage.setItem('ranotot_save_session', decodeURIComponent('%s'));" % cfg_string.uri_encode())
 
 func complete_level(level_id: int, stars: int):
 	# Update max stars
