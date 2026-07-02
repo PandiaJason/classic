@@ -86,6 +86,8 @@ func take_jump_damage() -> void:
 		box_health -= 3.0
 		box_health = max(0.0, box_health)
 		health_changed.emit(box_health)
+		if box_health <= 0.0:
+			game_over("rough riding destroyed your delivery box!")
 
 func repair_box(amount: float) -> void:
 	if has_box:
