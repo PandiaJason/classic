@@ -1,30 +1,45 @@
 import os
 import time
 import re
+import shutil
 
 workspace_dir = os.path.dirname(os.path.abspath(__file__))
 exports_dir = os.path.join(workspace_dir, "exports")
 timestamp = int(time.time())
 
 ruby_icon_src = os.path.join(workspace_dir, "assets", "ruby.png")
+bg_src = os.path.join(workspace_dir, "assets", "game_bg.jpg")
 
-def generate_icons(target_dir, file_prefix):
+# Ensure game_bg.jpg is generated from PNG if it doesn't exist
+if not os.path.exists(bg_src):
+    png_src = os.path.join(workspace_dir, "assets", "game_bg.png")
+    if os.path.exists(png_src):
+        print("Generating game_bg.jpg background...")
+        os.system(f'sips -s format jpeg -s formatOptions 80 "{png_src}" --out "{bg_src}" >/dev/null 2>&1')
+
+def generate_assets(target_dir, file_prefix):
+    # 1. Generate icons
     png_path = os.path.join(target_dir, f"{file_prefix}.png")
     apple_path = os.path.join(target_dir, f"{file_prefix}.apple-touch-icon.png")
     icon_path = os.path.join(target_dir, f"{file_prefix}.icon.png")
     
-    # Check if source ruby exists
     if os.path.exists(ruby_icon_src):
         print(f"Generating web icons for {file_prefix} in {target_dir}...")
         os.system(f'sips -z 512 512 "{ruby_icon_src}" --out "{png_path}" >/dev/null 2>&1')
         os.system(f'sips -z 180 180 "{ruby_icon_src}" --out "{apple_path}" >/dev/null 2>&1')
         os.system(f'sips -z 256 256 "{ruby_icon_src}" --out "{icon_path}" >/dev/null 2>&1')
 
+    # 2. Copy background image
+    if os.path.exists(bg_src):
+        bg_dest = os.path.join(target_dir, "game_bg.jpg")
+        shutil.copy(bg_src, bg_dest)
+        print(f"Copied game_bg.jpg background to {target_dir}")
+
 # 1. Setup exports/web (Vercel Build)
 web_dir = os.path.join(exports_dir, "web")
 if os.path.exists(web_dir):
-    # Generate icons first
-    generate_icons(web_dir, "game")
+    # Generate assets first
+    generate_assets(web_dir, "game")
 
     # manifest.json
     manifest_content = """{
@@ -71,6 +86,7 @@ const ASSETS = [
   './game.icon.png',
   './game.apple-touch-icon.png',
   './game.png',
+  './game_bg.jpg',
   './manifest.json'
 ];
 
@@ -169,7 +185,7 @@ self.addEventListener('fetch', (event) => {
         with open(index_path, "w") as f:
             f.write(html)
 
-    # game.html scaling modification (Ensure full viewport scaling)
+    # game.html scaling and loading screen background modification
     game_path = os.path.join(web_dir, "game.html")
     if os.path.exists(game_path):
         with open(game_path, "r") as f:
@@ -192,8 +208,21 @@ self.addEventListener('fetch', (event) => {
         if old_style in html:
             html = html.replace(old_style, new_style)
         else:
-            # Fallback regex if formatting differs slightly
             html = re.sub(r'html,\s*body,\s*#canvas\s*\{[^}]*\}', new_style, html, flags=re.IGNORECASE)
+
+        # Inject game background into HTML loading screen (#status background)
+        old_status_bg = """#status {
+	background-color: #242424;"""
+        new_status_bg = """#status {
+	background-image: url('game_bg.jpg');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;"""
+        if old_status_bg in html:
+            html = html.replace(old_status_bg, new_status_bg)
+        else:
+            # Fallback regex if formatting differs slightly
+            html = re.sub(r'#status\s*\{\s*background-color:\s*#242424;', new_status_bg, html, flags=re.IGNORECASE)
 
         with open(game_path, "w") as f:
             f.write(html)
@@ -203,8 +232,8 @@ self.addEventListener('fetch', (event) => {
 # 2. Setup exports/ranotot_Web (Direct Build)
 direct_dir = os.path.join(exports_dir, "ranotot_Web")
 if os.path.exists(direct_dir):
-    # Generate icons first
-    generate_icons(direct_dir, "index")
+    # Generate assets first
+    generate_assets(direct_dir, "index")
 
     # manifest.json
     manifest_content = """{
@@ -250,6 +279,7 @@ const ASSETS = [
   './index.icon.png',
   './index.apple-touch-icon.png',
   './index.png',
+  './game_bg.jpg',
   './manifest.json'
 ];
 
@@ -362,8 +392,21 @@ self.addEventListener('fetch', (event) => {
         if old_style in html:
             html = html.replace(old_style, new_style)
         else:
-            # Fallback regex if formatting differs slightly
             html = re.sub(r'html,\s*body,\s*#canvas\s*\{[^}]*\}', new_style, html, flags=re.IGNORECASE)
+
+        # Inject game background into HTML loading screen (#status background)
+        old_status_bg = """#status {
+	background-color: #242424;"""
+        new_status_bg = """#status {
+	background-image: url('game_bg.jpg');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;"""
+        if old_status_bg in html:
+            html = html.replace(old_status_bg, new_status_bg)
+        else:
+            # Fallback regex if formatting differs slightly
+            html = re.sub(r'#status\s*\{\s*background-color:\s*#242424;', new_status_bg, html, flags=re.IGNORECASE)
 
         with open(index_path, "w") as f:
             f.write(html)
