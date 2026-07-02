@@ -6,16 +6,33 @@ workspace_dir = os.path.dirname(os.path.abspath(__file__))
 exports_dir = os.path.join(workspace_dir, "exports")
 timestamp = int(time.time())
 
+ruby_icon_src = os.path.join(workspace_dir, "assets", "ruby.png")
+
+def generate_icons(target_dir, file_prefix):
+    png_path = os.path.join(target_dir, f"{file_prefix}.png")
+    apple_path = os.path.join(target_dir, f"{file_prefix}.apple-touch-icon.png")
+    icon_path = os.path.join(target_dir, f"{file_prefix}.icon.png")
+    
+    # Check if source ruby exists
+    if os.path.exists(ruby_icon_src):
+        print(f"Generating web icons for {file_prefix} in {target_dir}...")
+        os.system(f'sips -z 512 512 "{ruby_icon_src}" --out "{png_path}" >/dev/null 2>&1')
+        os.system(f'sips -z 180 180 "{ruby_icon_src}" --out "{apple_path}" >/dev/null 2>&1')
+        os.system(f'sips -z 256 256 "{ruby_icon_src}" --out "{icon_path}" >/dev/null 2>&1')
+
 # 1. Setup exports/web (Vercel Build)
 web_dir = os.path.join(exports_dir, "web")
 if os.path.exists(web_dir):
+    # Generate icons first
+    generate_icons(web_dir, "game")
+
     # manifest.json
     manifest_content = """{
   "name": "ranotot",
   "short_name": "ranotot",
   "description": "Hop on your scooter and become the galaxy's craziest delivery driver!",
   "start_url": ".",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "landscape",
@@ -175,13 +192,16 @@ self.addEventListener('fetch', (event) => {
 # 2. Setup exports/ranotot_Web (Direct Build)
 direct_dir = os.path.join(exports_dir, "ranotot_Web")
 if os.path.exists(direct_dir):
+    # Generate icons first
+    generate_icons(direct_dir, "index")
+
     # manifest.json
     manifest_content = """{
   "name": "ranotot",
   "short_name": "ranotot",
   "description": "Hop on your scooter and become the galaxy's craziest delivery driver!",
   "start_url": ".",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "landscape",
