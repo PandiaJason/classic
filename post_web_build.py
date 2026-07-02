@@ -8,14 +8,7 @@ exports_dir = os.path.join(workspace_dir, "exports")
 timestamp = int(time.time())
 
 ruby_icon_src = os.path.join(workspace_dir, "assets", "ruby.png")
-bg_src = os.path.join(workspace_dir, "assets", "game_bg.jpg")
-
-# Ensure game_bg.jpg is generated from PNG if it doesn't exist
-if not os.path.exists(bg_src):
-    png_src = os.path.join(workspace_dir, "assets", "game_bg.png")
-    if os.path.exists(png_src):
-        print("Generating game_bg.jpg background...")
-        os.system(f'sips -s format jpeg -s formatOptions 80 "{png_src}" --out "{bg_src}" >/dev/null 2>&1')
+bg_src = os.path.join(workspace_dir, "assets", "bg_ref.jpg")
 
 def generate_assets(target_dir, file_prefix):
     # 1. Generate icons
