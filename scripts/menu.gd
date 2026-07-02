@@ -426,6 +426,11 @@ func _on_reset_pressed():
 	cancel_btn.grab_focus()
 
 func _process(delta: float):
+	if has_node("BackgroundAction"):
+		var bg_action = $BackgroundAction
+		var vp_size = get_viewport_rect().size
+		bg_action.position = vp_size / 2.0 - Vector2(640, 360)
+
 	if is_instance_valid(_ruby_btn):
 		_pulse_time += delta * 4.0
 		var pulse_scale = 1.0 + sin(_pulse_time) * 0.12
