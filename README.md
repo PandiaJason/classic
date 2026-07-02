@@ -90,6 +90,7 @@ mkdir -p exports/web && \
 /Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Web" "/Users/admin/Jas Games/ranotot/exports/web/game.html" --headless && \
 mkdir -p exports/ranotot_Web && \
 /Users/admin/Downloads/Godot.app/Contents/MacOS/Godot --path "/Users/admin/Jas Games/ranotot" --export-release "Web" "/Users/admin/Jas Games/ranotot/exports/ranotot_Web/index.html" --headless && \
+python3 post_web_build.py && \
 echo "✅ ALL PLATFORM BUILDS & INSTALLERS COMPILED"
 ```
 
