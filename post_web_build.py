@@ -148,7 +148,18 @@ self.addEventListener('fetch', (event) => {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
+                    .then((reg) => {
+                        console.log('Service Worker registered successfully:', reg.scope);
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('New update installed. Reloading...');
+                                    window.location.reload();
+                                }
+                            });
+                        });
+                    })
                     .catch((err) => console.error('Service Worker registration failed:', err));
             });
         }
@@ -316,7 +327,18 @@ self.addEventListener('fetch', (event) => {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
+                    .then((reg) => {
+                        console.log('Service Worker registered successfully:', reg.scope);
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('New update installed. Reloading...');
+                                    window.location.reload();
+                                }
+                            });
+                        });
+                    })
                     .catch((err) => console.error('Service Worker registration failed:', err));
             });
         }
