@@ -222,7 +222,7 @@ func _ready():
 		speed_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 		speed_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 		speed_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
-		speed_margin.add_theme_constant_override("margin_bottom", 140)
+		speed_margin.add_theme_constant_override("margin_bottom", 200)
 		speed_margin.add_theme_constant_override("margin_right", 40)
 		speed_margin.add_child(speed_button)
 		add_child(speed_margin)
