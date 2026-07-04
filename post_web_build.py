@@ -198,6 +198,11 @@ self.addEventListener('fetch', (event) => {
                 frame.focus();
                 frame.addEventListener('load', () => { frame.focus(); });
             }
+            if (navigator.storage && navigator.storage.persist) {
+                navigator.storage.persist().then((persisted) => {
+                    console.log('Persistent storage status:', persisted);
+                });
+            }
         });
         
         // Initial setup
@@ -252,6 +257,9 @@ self.addEventListener('fetch', (event) => {
         else:
             html = re.sub(r'#status\s*\{\s*background-color:\s*#242424;', new_status_bg, html, flags=re.IGNORECASE)
 
+        # Clean up any previously injected canvas focus/vibrate scripts to prevent duplicate/stale tags
+        html = re.sub(r'<script>\s*window\.addEventListener\(\'click\',\s*\(\)\s*=>\s*\{\s*var\s+canvas\s*=\s*document\.getElementById\(\'canvas\'\);[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
+
         # Inject click/touchstart canvas focus logic
         if 'canvas.focus()' not in html:
             focus_script = """<script>
@@ -269,6 +277,11 @@ self.addEventListener('fetch', (event) => {
             if (navigator.vibrate) { navigator.vibrate(20); }
         }
     });
+    if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().then((persisted) => {
+            console.log('Persistent storage status:', persisted);
+        });
+    }
 </script>\n</body>"""
             html = re.sub(r'</body>', focus_script, html, flags=re.IGNORECASE)
 
@@ -455,6 +468,9 @@ self.addEventListener('fetch', (event) => {
         else:
             html = re.sub(r'#status\s*\{\s*background-color:\s*#242424;', new_status_bg, html, flags=re.IGNORECASE)
 
+        # Clean up any previously injected canvas focus/vibrate scripts to prevent duplicate/stale tags
+        html = re.sub(r'<script>\s*window\.addEventListener\(\'click\',\s*\(\)\s*=>\s*\{\s*var\s+canvas\s*=\s*document\.getElementById\(\'canvas\'\);[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
+
         # Inject click/touchstart canvas focus logic
         if 'canvas.focus()' not in html:
             focus_script = """<script>
@@ -472,6 +488,11 @@ self.addEventListener('fetch', (event) => {
             if (navigator.vibrate) { navigator.vibrate(20); }
         }
     });
+    if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().then((persisted) => {
+            console.log('Persistent storage status:', persisted);
+        });
+    }
 </script>\n</body>"""
             html = re.sub(r'</body>', focus_script, html, flags=re.IGNORECASE)
 
