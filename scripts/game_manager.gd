@@ -174,5 +174,5 @@ func trigger_haptic(weak: float, strong: float, duration: float) -> void:
 	
 	# Web platform fallback
 	if OS.has_feature("web"):
-		var js_code = "(function() { var gamepads = navigator.getGamepads(); for (var i = 0; i < gamepads.length; i++) { var gp = gamepads[i]; if (gp) { if (gp.vibrationActuator) { gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: " + str(int(duration * 1000)) + ", weakMagnitude: " + str(weak) + ", strongMagnitude: " + str(strong) + " }).catch(function(e){ console.warn('Haptics playEffect failed:', e); }); } else { console.warn('Gamepad has no vibrationActuator. (Typical macOS Bluetooth controller driver limitation)'); } } } })();"
+		var js_code = "(function() { if (navigator.vibrate) { navigator.vibrate(" + str(int(duration * 1000)) + "); } var gamepads = navigator.getGamepads(); for (var i = 0; i < gamepads.length; i++) { var gp = gamepads[i]; if (gp) { if (gp.vibrationActuator) { gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: " + str(int(duration * 1000)) + ", weakMagnitude: " + str(weak) + ", strongMagnitude: " + str(strong) + " }).catch(function(e){}); } } } })();"
 		JavaScriptBridge.eval(js_code)
