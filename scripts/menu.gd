@@ -277,6 +277,7 @@ func _on_start_pressed():
 	SceneTransition.transition_to("res://scenes/level_select.tscn")
 
 func _on_tutorial_pressed():
+	_set_main_menu_buttons_focusable(false)
 	var tut_overlay = ColorRect.new()
 	tut_overlay.name = "TutorialOverlay"
 	tut_overlay.color = Color(0, 0, 0, 0.8)
@@ -355,21 +356,27 @@ func _on_tutorial_pressed():
 	var close_btn = UIFactory.create_glass_button("close", UIFactory.RED_COLOR)
 	close_btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	close_btn.pressed.connect(func():
+		_set_main_menu_buttons_focusable(true)
 		tut_overlay.queue_free()
 		if is_instance_valid(tutorial_btn):
 			tutorial_btn.grab_focus()
 	)
 	
-	# Trap focus neighborhood
+	# Trap focus neighborhood (directional keys)
 	close_btn.focus_neighbor_left = close_btn.get_path()
 	close_btn.focus_neighbor_right = close_btn.get_path()
 	close_btn.focus_neighbor_top = close_btn.get_path()
 	close_btn.focus_neighbor_bottom = close_btn.get_path()
 	
+	# Trap focus loop (Tab/Shift+Tab keys)
+	close_btn.focus_next = close_btn.get_path()
+	close_btn.focus_previous = close_btn.get_path()
+	
 	vbox.add_child(close_btn)
 	close_btn.grab_focus()
 
 func _on_reset_pressed():
+	_set_main_menu_buttons_focusable(false)
 	var overlay = ColorRect.new()
 	overlay.color = Color(0, 0, 0, 0.75)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -406,6 +413,7 @@ func _on_reset_pressed():
 
 	var cancel_btn = UIFactory.create_glass_button("cancel", UIFactory.BLUE_COLOR)
 	cancel_btn.pressed.connect(func():
+		_set_main_menu_buttons_focusable(true)
 		overlay.queue_free()
 		dialog.queue_free()
 		if is_instance_valid(reset_btn):
@@ -438,6 +446,12 @@ func _on_reset_pressed():
 	confirm_btn.focus_neighbor_top = confirm_btn.get_path()
 	confirm_btn.focus_neighbor_bottom = confirm_btn.get_path()
 	
+	# Trap Tab focus loop
+	cancel_btn.focus_next = confirm_btn.get_path()
+	cancel_btn.focus_previous = confirm_btn.get_path()
+	confirm_btn.focus_next = cancel_btn.get_path()
+	confirm_btn.focus_previous = cancel_btn.get_path()
+	
 	cancel_btn.grab_focus()
 
 func _process(delta: float):
@@ -461,6 +475,7 @@ func _process(delta: float):
 		_ruby_btn.modulate = Color(brightness, brightness, brightness, 1.0)
 
 func _show_daily_rewards_popup():
+	_set_main_menu_buttons_focusable(false)
 	# Create overlay
 	var overlay = ColorRect.new()
 	overlay.color = Color(0, 0, 0, 0.75)
@@ -651,6 +666,7 @@ func _show_daily_rewards_popup():
 	
 	var close_btn = UIFactory.create_glass_button("close", UIFactory.BLUE_COLOR)
 	close_btn.pressed.connect(func():
+		_set_main_menu_buttons_focusable(true)
 		overlay.queue_free()
 		if is_instance_valid(daily_btn):
 			daily_btn.grab_focus()
@@ -798,7 +814,7 @@ func _show_daily_rewards_popup():
 		)
 		actions_hbox.add_child(claim_btn)
 		
-		# Trap focus neighborhood
+		# Trap focus neighborhood (directional keys)
 		claim_btn.focus_neighbor_left = close_btn.get_path()
 		claim_btn.focus_neighbor_right = close_btn.get_path()
 		claim_btn.focus_neighbor_top = claim_btn.get_path()
@@ -808,12 +824,22 @@ func _show_daily_rewards_popup():
 		close_btn.focus_neighbor_right = claim_btn.get_path()
 		close_btn.focus_neighbor_top = close_btn.get_path()
 		close_btn.focus_neighbor_bottom = close_btn.get_path()
+		
+		# Trap Tab focus loop (Tab/Shift+Tab keys)
+		claim_btn.focus_next = close_btn.get_path()
+		claim_btn.focus_previous = close_btn.get_path()
+		close_btn.focus_next = claim_btn.get_path()
+		close_btn.focus_previous = claim_btn.get_path()
 	else:
-		# Trap focus neighborhood for close button alone
+		# Trap focus neighborhood for close button alone (directional keys)
 		close_btn.focus_neighbor_left = close_btn.get_path()
 		close_btn.focus_neighbor_right = close_btn.get_path()
 		close_btn.focus_neighbor_top = close_btn.get_path()
 		close_btn.focus_neighbor_bottom = close_btn.get_path()
+		
+		# Trap Tab focus loop for close button alone
+		close_btn.focus_next = close_btn.get_path()
+		close_btn.focus_previous = close_btn.get_path()
 		
 	actions_hbox.add_child(close_btn)
 	vbox.add_child(actions_hbox)
@@ -823,4 +849,23 @@ func _show_daily_rewards_popup():
 		claim_btn.grab_focus()
 	else:
 		close_btn.grab_focus()
+
+
+func _set_main_menu_buttons_focusable(enabled: bool):
+	var mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
+	if is_instance_valid(start_btn):
+		start_btn.focus_mode = mode
+	if is_instance_valid(tutorial_btn):
+		tutorial_btn.focus_mode = mode
+	if is_instance_valid(daily_btn):
+		daily_btn.focus_mode = mode
+	if is_instance_valid(music_slider):
+		music_slider.focus_mode = mode
+	if is_instance_valid(sfx_slider):
+		sfx_slider.focus_mode = mode
+	if is_instance_valid(reset_btn):
+		reset_btn.focus_mode = mode
+	if is_instance_valid(_ruby_btn):
+		_ruby_btn.focus_mode = mode
+
 
