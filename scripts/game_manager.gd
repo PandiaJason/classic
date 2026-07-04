@@ -11,6 +11,17 @@ signal health_changed(new_health)
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_setup_ui_joypad()
+	get_tree().node_added.connect(_on_node_added)
+
+func _on_node_added(node: Node):
+	if node is BaseButton:
+		node.pressed.connect(func():
+			trigger_haptic(0.06, 0.1, 0.05)
+		)
+	elif node is Slider:
+		node.value_changed.connect(func(_val):
+			trigger_haptic(0.03, 0.05, 0.03)
+		)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept") or (event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A):
