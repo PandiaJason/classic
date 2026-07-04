@@ -180,11 +180,17 @@ self.addEventListener('fetch', (event) => {
             focus_helper = """        // Focus the game frame whenever the user clicks/touches the parent window
         window.addEventListener('click', () => {
             var frame = document.getElementById('gameFrame');
-            if (frame) { frame.focus(); }
+            if (frame) { 
+                frame.focus(); 
+                if (navigator.vibrate) { navigator.vibrate(20); }
+            }
         });
         window.addEventListener('touchstart', () => {
             var frame = document.getElementById('gameFrame');
-            if (frame) { frame.focus(); }
+            if (frame) { 
+                frame.focus(); 
+                if (navigator.vibrate) { navigator.vibrate(20); }
+            }
         });
         window.addEventListener('DOMContentLoaded', () => {
             var frame = document.getElementById('gameFrame');
@@ -251,11 +257,17 @@ self.addEventListener('fetch', (event) => {
             focus_script = """<script>
     window.addEventListener('click', () => {
         var canvas = document.getElementById('canvas');
-        if (canvas) { canvas.focus(); }
+        if (canvas) { 
+            canvas.focus(); 
+            if (navigator.vibrate) { navigator.vibrate(20); }
+        }
     });
     window.addEventListener('touchstart', () => {
         var canvas = document.getElementById('canvas');
-        if (canvas) { canvas.focus(); }
+        if (canvas) { 
+            canvas.focus(); 
+            if (navigator.vibrate) { navigator.vibrate(20); }
+        }
     });
 </script>\n</body>"""
             html = re.sub(r'</body>', focus_script, html, flags=re.IGNORECASE)
@@ -448,11 +460,17 @@ self.addEventListener('fetch', (event) => {
             focus_script = """<script>
     window.addEventListener('click', () => {
         var canvas = document.getElementById('canvas');
-        if (canvas) { canvas.focus(); }
+        if (canvas) { 
+            canvas.focus(); 
+            if (navigator.vibrate) { navigator.vibrate(20); }
+        }
     });
     window.addEventListener('touchstart', () => {
         var canvas = document.getElementById('canvas');
-        if (canvas) { canvas.focus(); }
+        if (canvas) { 
+            canvas.focus(); 
+            if (navigator.vibrate) { navigator.vibrate(20); }
+        }
     });
 </script>\n</body>"""
             html = re.sub(r'</body>', focus_script, html, flags=re.IGNORECASE)
