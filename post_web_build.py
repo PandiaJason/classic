@@ -175,6 +175,32 @@ self.addEventListener('fetch', (event) => {
     </script>\n</head>"""
             html = re.sub(r'\s*</head>', '\n' + sw_register, html, flags=re.IGNORECASE)
 
+        # Focus the game frame whenever the user clicks/touches the parent window (for gamepads/controllers)
+        if 'gameFrame' in html and 'gameFrame.focus()' not in html:
+            focus_helper = """        // Focus the game frame whenever the user clicks/touches the parent window
+        window.addEventListener('click', () => {
+            var frame = document.getElementById('gameFrame');
+            if (frame) { frame.focus(); }
+        });
+        window.addEventListener('touchstart', () => {
+            var frame = document.getElementById('gameFrame');
+            if (frame) { frame.focus(); }
+        });
+        window.addEventListener('DOMContentLoaded', () => {
+            var frame = document.getElementById('gameFrame');
+            if (frame) {
+                frame.focus();
+                frame.addEventListener('load', () => { frame.focus(); });
+            }
+        });
+        
+        // Initial setup
+        resizeIframe();"""
+            if "// Initial setup\n        resizeIframe();" in html:
+                html = html.replace("// Initial setup\n        resizeIframe();", focus_helper)
+            elif "resizeIframe();" in html:
+                html = html.replace("resizeIframe();", focus_helper)
+
         with open(index_path, "w") as f:
             f.write(html)
 
@@ -214,8 +240,21 @@ self.addEventListener('fetch', (event) => {
         if old_status_bg in html:
             html = html.replace(old_status_bg, new_status_bg)
         else:
-            # Fallback regex if formatting differs slightly
             html = re.sub(r'#status\s*\{\s*background-color:\s*#242424;', new_status_bg, html, flags=re.IGNORECASE)
+
+        # Inject click/touchstart canvas focus logic
+        if 'canvas.focus()' not in html:
+            focus_script = """<script>
+    window.addEventListener('click', () => {
+        var canvas = document.getElementById('canvas');
+        if (canvas) { canvas.focus(); }
+    });
+    window.addEventListener('touchstart', () => {
+        var canvas = document.getElementById('canvas');
+        if (canvas) { canvas.focus(); }
+    });
+</script>\n</body>"""
+            html = re.sub(r'</body>', focus_script, html, flags=re.IGNORECASE)
 
         with open(game_path, "w") as f:
             f.write(html)
@@ -398,8 +437,21 @@ self.addEventListener('fetch', (event) => {
         if old_status_bg in html:
             html = html.replace(old_status_bg, new_status_bg)
         else:
-            # Fallback regex if formatting differs slightly
             html = re.sub(r'#status\s*\{\s*background-color:\s*#242424;', new_status_bg, html, flags=re.IGNORECASE)
+
+        # Inject click/touchstart canvas focus logic
+        if 'canvas.focus()' not in html:
+            focus_script = """<script>
+    window.addEventListener('click', () => {
+        var canvas = document.getElementById('canvas');
+        if (canvas) { canvas.focus(); }
+    });
+    window.addEventListener('touchstart', () => {
+        var canvas = document.getElementById('canvas');
+        if (canvas) { canvas.focus(); }
+    });
+</script>\n</body>"""
+            html = re.sub(r'</body>', focus_script, html, flags=re.IGNORECASE)
 
         with open(index_path, "w") as f:
             f.write(html)
