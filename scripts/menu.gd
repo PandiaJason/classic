@@ -7,6 +7,8 @@ var tutorial_btn: Button = null
 var reset_btn: Button = null
 var daily_btn: Button = null
 var start_btn: Button = null
+var music_slider: HSlider = null
+var sfx_slider: HSlider = null
 
 func _ready():
 	BgmManager.play_menu_music()
@@ -93,7 +95,7 @@ func _ready():
 	music_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
 	audio_vbox.add_child(music_label)
 	
-	var music_slider = HSlider.new()
+	music_slider = HSlider.new()
 	music_slider.min_value = 0.0
 	music_slider.max_value = 1.0
 	music_slider.step = 0.05
@@ -121,7 +123,7 @@ func _ready():
 	sfx_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
 	audio_vbox.add_child(sfx_label)
 	
-	var sfx_slider = HSlider.new()
+	sfx_slider = HSlider.new()
 	sfx_slider.min_value = 0.0
 	sfx_slider.max_value = 1.0
 	sfx_slider.step = 0.05
