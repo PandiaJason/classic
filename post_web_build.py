@@ -201,6 +201,10 @@ self.addEventListener('fetch', (event) => {
             elif "resizeIframe();" in html:
                 html = html.replace("resizeIframe();", focus_helper)
 
+        # Allow vibrate inside the iframe
+        if 'gameFrame' in html and 'vibrate' not in html:
+            html = html.replace('allow="autoplay; fullscreen; xr-spatial-tracking; gamepad"', 'allow="autoplay; fullscreen; xr-spatial-tracking; gamepad; vibrate"')
+
         with open(index_path, "w") as f:
             f.write(html)
 
