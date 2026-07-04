@@ -151,6 +151,9 @@ self.addEventListener('fetch', (event) => {
         if 'rel="manifest"' not in html:
             html = re.sub(r'\s*<head>', '<head>\n    <link rel="manifest" href="manifest.json">\n    <meta name="apple-mobile-web-app-capable" content="yes">\n    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n    <link rel="apple-touch-icon" href="game.apple-touch-icon.png">', html, flags=re.IGNORECASE)
 
+        # Clean up any previously injected service worker registration scripts
+        html = re.sub(r'<script>\s*if\s*\(\s*\'serviceWorker\'\s*in\s*navigator\s*\)[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
+
         # Add service worker registration script if not exists (checked via sw.js)
         if 'sw.js' not in html:
             sw_register = """    <script>
@@ -163,8 +166,18 @@ self.addEventListener('fetch', (event) => {
                             const newWorker = reg.installing;
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('New update installed. Reloading...');
-                                    window.location.reload();
+                                    console.log('New update installed. Clearing client caches and reloading...');
+                                    if (window.caches) {
+                                        caches.keys().then((names) => {
+                                            Promise.all(names.map(name => caches.delete(name))).then(() => {
+                                                window.location.reload();
+                                            });
+                                        }).catch(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        window.location.reload();
+                                    }
                                 }
                             });
                         });
@@ -412,6 +425,9 @@ self.addEventListener('fetch', (event) => {
         if 'rel="manifest"' not in html:
             html = re.sub(r'\s*<head>', '<head>\n    <link rel="manifest" href="manifest.json">\n    <meta name="apple-mobile-web-app-capable" content="yes">\n    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n    <link rel="apple-touch-icon" href="index.apple-touch-icon.png">', html, flags=re.IGNORECASE)
 
+        # Clean up any previously injected service worker registration scripts
+        html = re.sub(r'<script>\s*if\s*\(\s*\'serviceWorker\'\s*in\s*navigator\s*\)[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
+
         # Add service worker registration script if not exists (checked via sw.js)
         if 'sw.js' not in html:
             sw_register = """    <script>
@@ -424,8 +440,18 @@ self.addEventListener('fetch', (event) => {
                             const newWorker = reg.installing;
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('New update installed. Reloading...');
-                                    window.location.reload();
+                                    console.log('New update installed. Clearing client caches and reloading...');
+                                    if (window.caches) {
+                                        caches.keys().then((names) => {
+                                            Promise.all(names.map(name => caches.delete(name))).then(() => {
+                                                window.location.reload();
+                                            });
+                                        }).catch(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        window.location.reload();
+                                    }
                                 }
                             });
                         });
