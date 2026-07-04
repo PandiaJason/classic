@@ -359,6 +359,13 @@ func _on_tutorial_pressed():
 		if is_instance_valid(tutorial_btn):
 			tutorial_btn.grab_focus()
 	)
+	
+	# Trap focus neighborhood
+	close_btn.focus_neighbor_left = close_btn.get_path()
+	close_btn.focus_neighbor_right = close_btn.get_path()
+	close_btn.focus_neighbor_top = close_btn.get_path()
+	close_btn.focus_neighbor_bottom = close_btn.get_path()
+	
 	vbox.add_child(close_btn)
 	close_btn.grab_focus()
 
@@ -421,8 +428,16 @@ func _on_reset_pressed():
 	vbox.add_child(btn_row)
 	dialog.add_child(vbox)
 	
+	cancel_btn.focus_neighbor_left = confirm_btn.get_path()
 	cancel_btn.focus_neighbor_right = confirm_btn.get_path()
+	cancel_btn.focus_neighbor_top = cancel_btn.get_path()
+	cancel_btn.focus_neighbor_bottom = cancel_btn.get_path()
+	
 	confirm_btn.focus_neighbor_left = cancel_btn.get_path()
+	confirm_btn.focus_neighbor_right = cancel_btn.get_path()
+	confirm_btn.focus_neighbor_top = confirm_btn.get_path()
+	confirm_btn.focus_neighbor_bottom = confirm_btn.get_path()
+	
 	cancel_btn.grab_focus()
 
 func _process(delta: float):
@@ -783,8 +798,22 @@ func _show_daily_rewards_popup():
 		)
 		actions_hbox.add_child(claim_btn)
 		
+		# Trap focus neighborhood
+		claim_btn.focus_neighbor_left = close_btn.get_path()
 		claim_btn.focus_neighbor_right = close_btn.get_path()
+		claim_btn.focus_neighbor_top = claim_btn.get_path()
+		claim_btn.focus_neighbor_bottom = claim_btn.get_path()
+		
 		close_btn.focus_neighbor_left = claim_btn.get_path()
+		close_btn.focus_neighbor_right = claim_btn.get_path()
+		close_btn.focus_neighbor_top = close_btn.get_path()
+		close_btn.focus_neighbor_bottom = close_btn.get_path()
+	else:
+		# Trap focus neighborhood for close button alone
+		close_btn.focus_neighbor_left = close_btn.get_path()
+		close_btn.focus_neighbor_right = close_btn.get_path()
+		close_btn.focus_neighbor_top = close_btn.get_path()
+		close_btn.focus_neighbor_bottom = close_btn.get_path()
 		
 	actions_hbox.add_child(close_btn)
 	vbox.add_child(actions_hbox)
