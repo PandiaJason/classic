@@ -364,6 +364,8 @@ func _on_tutorial_pressed():
 			tutorial_btn.grab_focus()
 	)
 	
+	vbox.add_child(close_btn)
+	
 	# Trap focus neighborhood (directional keys)
 	close_btn.focus_neighbor_left = close_btn.get_path()
 	close_btn.focus_neighbor_right = close_btn.get_path()
@@ -374,7 +376,6 @@ func _on_tutorial_pressed():
 	close_btn.focus_next = close_btn.get_path()
 	close_btn.focus_previous = close_btn.get_path()
 	
-	vbox.add_child(close_btn)
 	close_btn.grab_focus()
 
 func _on_reset_pressed():
@@ -815,7 +816,12 @@ func _show_daily_rewards_popup():
 					cards_hbox.add_child(card)
 		)
 		actions_hbox.add_child(claim_btn)
-		
+	
+	actions_hbox.add_child(close_btn)
+	vbox.add_child(actions_hbox)
+	dialog.add_child(vbox)
+	
+	if claim_avail:
 		# Trap focus neighborhood (directional keys)
 		claim_btn.focus_neighbor_left = close_btn.get_path()
 		claim_btn.focus_neighbor_right = close_btn.get_path()
@@ -843,10 +849,6 @@ func _show_daily_rewards_popup():
 		close_btn.focus_next = close_btn.get_path()
 		close_btn.focus_previous = close_btn.get_path()
 		
-	actions_hbox.add_child(close_btn)
-	vbox.add_child(actions_hbox)
-	dialog.add_child(vbox)
-	
 	if claim_avail:
 		claim_btn.grab_focus()
 	else:

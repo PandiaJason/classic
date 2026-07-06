@@ -189,13 +189,18 @@ self.addEventListener('fetch', (event) => {
             html = re.sub(r'\s*</head>', '\n' + sw_register, html, flags=re.IGNORECASE)
 
         # Focus the game frame whenever the user clicks/touches the parent window (for gamepads/controllers)
-        if 'gameFrame' in html and 'gameFrame.focus()' not in html:
+        if 'gameFrame' in html and 'resumeAudioContexts' not in html:
             focus_helper = """        // Focus the game frame whenever the user clicks/touches the parent window
         window.addEventListener('click', () => {
             var frame = document.getElementById('gameFrame');
             if (frame) { 
                 frame.focus(); 
                 if (navigator.vibrate) { navigator.vibrate(20); }
+                try {
+                    if (frame.contentWindow && frame.contentWindow.resumeAudioContexts) {
+                        frame.contentWindow.resumeAudioContexts();
+                    }
+                } catch(e) {}
             }
         });
         window.addEventListener('touchstart', () => {
@@ -203,6 +208,11 @@ self.addEventListener('fetch', (event) => {
             if (frame) { 
                 frame.focus(); 
                 if (navigator.vibrate) { navigator.vibrate(20); }
+                try {
+                    if (frame.contentWindow && frame.contentWindow.resumeAudioContexts) {
+                        frame.contentWindow.resumeAudioContexts();
+                    }
+                } catch(e) {}
             }
         });
         window.addEventListener('DOMContentLoaded', () => {
@@ -272,6 +282,44 @@ self.addEventListener('fetch', (event) => {
 
         # Clean up any previously injected canvas focus/vibrate scripts to prevent duplicate/stale tags
         html = re.sub(r'<script>\s*window\.addEventListener\(\'click\',\s*\(\)\s*=>\s*\{\s*var\s+canvas\s*=\s*document\.getElementById\(\'canvas\'\);[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
+        html = re.sub(r'<script>\s*\(function\(\)\s*\{\s*window\._audioContexts[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
+
+        # Inject AudioContext constructor hook right after <head>
+        if 'window._audioContexts' not in html:
+            audio_hook = """<head>
+    <script>
+        (function() {
+            window._audioContexts = [];
+            const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+            if (OriginalAudioContext) {
+                const HookedAudioContext = function(...args) {
+                    const ctx = new OriginalAudioContext(...args);
+                    window._audioContexts.push(ctx);
+                    return ctx;
+                };
+                HookedAudioContext.prototype = OriginalAudioContext.prototype;
+                if (window.AudioContext) { window.AudioContext = HookedAudioContext; }
+                if (window.webkitAudioContext) { window.webkitAudioContext = HookedAudioContext; }
+            }
+            window.resumeAudioContexts = function() {
+                if (window._audioContexts) {
+                    window._audioContexts.forEach(ctx => {
+                        if (ctx && ctx.state === 'suspended') {
+                            ctx.resume().then(() => {
+                                console.log('AudioContext resumed successfully.');
+                            }).catch(err => {
+                                console.warn('Failed to resume AudioContext:', err);
+                            });
+                        }
+                    });
+                }
+            };
+            window.addEventListener('click', window.resumeAudioContexts);
+            window.addEventListener('touchstart', window.resumeAudioContexts);
+            window.addEventListener('keydown', window.resumeAudioContexts);
+        })();
+    </script>"""
+            html = re.sub(r'<head>', audio_hook, html, flags=re.IGNORECASE)
 
         # Inject click/touchstart canvas focus logic
         if 'canvas.focus()' not in html:
@@ -282,6 +330,7 @@ self.addEventListener('fetch', (event) => {
             canvas.focus(); 
             if (navigator.vibrate) { navigator.vibrate(20); }
         }
+        if (window.resumeAudioContexts) { window.resumeAudioContexts(); }
     });
     window.addEventListener('touchstart', () => {
         var canvas = document.getElementById('canvas');
@@ -289,6 +338,7 @@ self.addEventListener('fetch', (event) => {
             canvas.focus(); 
             if (navigator.vibrate) { navigator.vibrate(20); }
         }
+        if (window.resumeAudioContexts) { window.resumeAudioContexts(); }
     });
     if (navigator.storage && navigator.storage.persist) {
         navigator.storage.persist().then((persisted) => {
@@ -496,6 +546,44 @@ self.addEventListener('fetch', (event) => {
 
         # Clean up any previously injected canvas focus/vibrate scripts to prevent duplicate/stale tags
         html = re.sub(r'<script>\s*window\.addEventListener\(\'click\',\s*\(\)\s*=>\s*\{\s*var\s+canvas\s*=\s*document\.getElementById\(\'canvas\'\);[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
+        html = re.sub(r'<script>\s*\(function\(\)\s*\{\s*window\._audioContexts[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
+
+        # Inject AudioContext constructor hook right after <head>
+        if 'window._audioContexts' not in html:
+            audio_hook = """<head>
+    <script>
+        (function() {
+            window._audioContexts = [];
+            const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+            if (OriginalAudioContext) {
+                const HookedAudioContext = function(...args) {
+                    const ctx = new OriginalAudioContext(...args);
+                    window._audioContexts.push(ctx);
+                    return ctx;
+                };
+                HookedAudioContext.prototype = OriginalAudioContext.prototype;
+                if (window.AudioContext) { window.AudioContext = HookedAudioContext; }
+                if (window.webkitAudioContext) { window.webkitAudioContext = HookedAudioContext; }
+            }
+            window.resumeAudioContexts = function() {
+                if (window._audioContexts) {
+                    window._audioContexts.forEach(ctx => {
+                        if (ctx && ctx.state === 'suspended') {
+                            ctx.resume().then(() => {
+                                console.log('AudioContext resumed successfully.');
+                            }).catch(err => {
+                                console.warn('Failed to resume AudioContext:', err);
+                            });
+                        }
+                    });
+                }
+            };
+            window.addEventListener('click', window.resumeAudioContexts);
+            window.addEventListener('touchstart', window.resumeAudioContexts);
+            window.addEventListener('keydown', window.resumeAudioContexts);
+        })();
+    </script>"""
+            html = re.sub(r'<head>', audio_hook, html, flags=re.IGNORECASE)
 
         # Inject click/touchstart canvas focus logic
         if 'canvas.focus()' not in html:
@@ -506,6 +594,7 @@ self.addEventListener('fetch', (event) => {
             canvas.focus(); 
             if (navigator.vibrate) { navigator.vibrate(20); }
         }
+        if (window.resumeAudioContexts) { window.resumeAudioContexts(); }
     });
     window.addEventListener('touchstart', () => {
         var canvas = document.getElementById('canvas');
@@ -513,6 +602,7 @@ self.addEventListener('fetch', (event) => {
             canvas.focus(); 
             if (navigator.vibrate) { navigator.vibrate(20); }
         }
+        if (window.resumeAudioContexts) { window.resumeAudioContexts(); }
     });
     if (navigator.storage && navigator.storage.persist) {
         navigator.storage.persist().then((persisted) => {
