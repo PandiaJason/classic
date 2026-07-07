@@ -185,5 +185,6 @@ func trigger_haptic(weak: float, strong: float, duration: float) -> void:
 	
 	# Web platform fallback
 	if OS.has_feature("web"):
-		var js_code = "(function() { if (navigator.vibrate) { navigator.vibrate(" + str(int(duration * 1000)) + "); } var gamepads = navigator.getGamepads(); for (var i = 0; i < gamepads.length; i++) { var gp = gamepads[i]; if (gp) { if (gp.vibrationActuator) { gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: " + str(int(duration * 1000)) + ", weakMagnitude: " + str(weak) + ", strongMagnitude: " + str(strong) + " }).catch(function(e){}); } } } })();"
+		var duration_ms = int(duration * 1000)
+		var js_code = "(function() { if (navigator.vibrate) { var dur = " + str(duration_ms) + "; var pattern = dur; if (dur === 50) { pattern = [15, 15, 15]; } else if (dur === 30) { pattern = [8]; } else if (dur === 80) { pattern = [20, 25, 20]; } else if (dur === 120) { pattern = [40, 30, 40]; } else if (dur === 150) { pattern = [80, 40, 60]; } else if (dur === 250) { pattern = [120, 60, 120]; } navigator.vibrate(pattern); } var gamepads = navigator.getGamepads(); for (var i = 0; i < gamepads.length; i++) { var gp = gamepads[i]; if (gp) { if (gp.vibrationActuator) { gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: " + str(duration_ms) + ", weakMagnitude: " + str(weak) + ", strongMagnitude: " + str(strong) + " }).catch(function(e){}); } } } })();"
 		JavaScriptBridge.eval(js_code)
