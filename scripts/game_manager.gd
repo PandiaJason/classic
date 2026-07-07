@@ -178,13 +178,17 @@ func load_next_level() -> void:
 		SceneTransition.transition_to("res://scenes/level_" + str(current_level) + ".tscn")
 
 func trigger_haptic(weak: float, strong: float, duration: float) -> void:
+	# Scale active rumble magnitudes dynamically above physical gamepad motor start threshold
+	var adj_weak = 0.22 + weak * 0.78 if weak > 0.01 else 0.0
+	var adj_strong = 0.25 + strong * 0.75 if strong > 0.01 else 0.0
+	
 	# Local platforms
 	for joy in Input.get_connected_joypads():
-		Input.start_joy_vibration(joy, weak, strong, duration)
-	Input.start_joy_vibration(0, weak, strong, duration)
+		Input.start_joy_vibration(joy, adj_weak, adj_strong, duration)
+	Input.start_joy_vibration(0, adj_weak, adj_strong, duration)
 	
 	# Web platform fallback
 	if OS.has_feature("web"):
 		var duration_ms = int(duration * 1000)
-		var js_code = "(function() { if (navigator.vibrate) { var dur = " + str(duration_ms) + "; var pattern = dur; if (dur === 50) { pattern = [15, 15, 15]; } else if (dur === 30) { pattern = [8]; } else if (dur === 80) { pattern = [20, 25, 20]; } else if (dur === 120) { pattern = [40, 30, 40]; } else if (dur === 150) { pattern = [80, 40, 60]; } else if (dur === 250) { pattern = [120, 60, 120]; } navigator.vibrate(pattern); } var gamepads = navigator.getGamepads(); for (var i = 0; i < gamepads.length; i++) { var gp = gamepads[i]; if (gp) { if (gp.vibrationActuator) { gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: " + str(duration_ms) + ", weakMagnitude: " + str(weak) + ", strongMagnitude: " + str(strong) + " }).catch(function(e){}); } } } })();"
+		var js_code = "(function() { if (navigator.vibrate) { var dur = " + str(duration_ms) + "; var pattern = dur; if (dur === 50) { pattern = [15, 15, 15]; } else if (dur === 30) { pattern = [8]; } else if (dur === 80) { pattern = [20, 25, 20]; } else if (dur === 120) { pattern = [40, 30, 40]; } else if (dur === 150) { pattern = [80, 40, 60]; } else if (dur === 250) { pattern = [120, 60, 120]; } navigator.vibrate(pattern); } var gamepads = navigator.getGamepads(); for (var i = 0; i < gamepads.length; i++) { var gp = gamepads[i]; if (gp && gp.vibrationActuator) { console.log('[Ranotot Gamepad Haptics] Rumbling gamepad:', gp.id, 'duration:', " + str(duration_ms) + ", 'weakMagnitude:', " + str(adj_weak) + ", 'strongMagnitude:', " + str(adj_strong) + "); if (gp.vibrationActuator.playEffect) { gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: " + str(duration_ms) + ", weakMagnitude: " + str(adj_weak) + ", strongMagnitude: " + str(adj_strong) + " }).catch(function(e){}); } else if (gp.vibrationActuator.pulse) { gp.vibrationActuator.pulse(" + str(adj_strong) + ", " + str(duration_ms) + "); } } } })();"
 		JavaScriptBridge.eval(js_code)
