@@ -188,8 +188,12 @@ self.addEventListener('fetch', (event) => {
     </script>\n</head>"""
             html = re.sub(r'\s*</head>', '\n' + sw_register, html, flags=re.IGNORECASE)
 
+        # Clean up any previously injected parent window focus helper scripts in index.html to prevent duplicate/stale tags
+        html = re.sub(r'// Focus the game frame whenever the user clicks/touches the parent window[\s\S]*?resizeIframe\(\);', 'resizeIframe();', html)
+        html = re.sub(r'window\.addEventListener\(\'DOMContentLoaded\',\s*\(\)\s*=>\s*\{\s*var\s+frame\s*=\s*document\.getElementById\(\'gameFrame\'\);[\s\S]*?\}\);\s*', '', html)
+
         # Focus the game frame whenever the user clicks/touches the parent window (for gamepads/controllers)
-        if 'gameFrame' in html and 'resumeAudioContexts' not in html:
+        if 'gameFrame' in html:
             focus_helper = """        // Focus the game frame whenever the user clicks/touches the parent window
         window.addEventListener('click', () => {
             var frame = document.getElementById('gameFrame');
