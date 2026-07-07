@@ -12,9 +12,9 @@ func _ready() -> void:
 		target_scale = scale
 	
 	# Start tiny, expand quickly, and fade out
+	# C3: Fixed tween timing — queue_free now waits for the longest animation (0.7s total)
 	scale = Vector2.ZERO
 	var tween = create_tween()
-	tween.set_parallel(true)
 	tween.tween_property(self, "scale", target_scale, 0.3).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "modulate:a", 0.0, 0.5).set_delay(0.2)
-	tween.chain().tween_callback(queue_free)
+	tween.parallel().tween_property(self, "modulate:a", 0.0, 0.5).set_delay(0.2)
+	tween.tween_callback(queue_free).set_delay(0.7)

@@ -11,13 +11,14 @@ func _ready() -> void:
 
 	body_entered.connect(_on_body_entered)
 	
-	# Add a floating animation
+	# Add a floating animation — use absolute positions to prevent FP drift (M4)
+	var base_y = $Sprite2D.position.y
 	var tween = create_tween().set_loops()
-	tween.tween_property($Sprite2D, "position:y", -10.0, 1.0).as_relative().set_trans(Tween.TRANS_SINE)
-	tween.tween_property($Sprite2D, "position:y", 10.0, 1.0).as_relative().set_trans(Tween.TRANS_SINE)
+	tween.tween_property($Sprite2D, "position:y", base_y - 10.0, 1.0).set_trans(Tween.TRANS_SINE)
+	tween.tween_property($Sprite2D, "position:y", base_y + 10.0, 1.0).set_trans(Tween.TRANS_SINE)
 
 func _on_body_entered(body: Node2D) -> void:
-	if body.name == "Player2D":
+	if body is Player2D:
 		GameManager.add_ruby(10)
 		GameManager.repair_box(5.0)
 		SoundManager.play_sfx("ruby")

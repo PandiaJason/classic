@@ -1,34 +1,5 @@
 extends CanvasLayer
 
-func create_glass_button(text: String, color: Color) -> Button:
-	var btn = Button.new()
-	btn.text = text
-	btn.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	btn.add_theme_font_size_override("font_size", 32)
-	
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(color.r, color.g, color.b, 0.5)
-	style.corner_radius_top_left = 15
-	style.corner_radius_top_right = 15
-	style.corner_radius_bottom_right = 15
-	style.corner_radius_bottom_left = 15
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.border_color = color
-	style.content_margin_left = 30
-	style.content_margin_right = 30
-	style.content_margin_top = 15
-	style.content_margin_bottom = 15
-	
-	var hover_style = style.duplicate()
-	hover_style.bg_color = Color(color.r, color.g, color.b, 0.8)
-	
-	btn.add_theme_stylebox_override("normal", style)
-	btn.add_theme_stylebox_override("hover", hover_style)
-	btn.add_theme_stylebox_override("pressed", style)
-	return btn
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -150,7 +121,7 @@ func _ready():
 	hbox.add_theme_constant_override("separation", 30)
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
-	var menu_btn = create_glass_button("menu", Color(0.5, 0.5, 0.5))
+	var menu_btn = UIFactory.create_glass_button("menu", Color(0.5, 0.5, 0.5))
 	menu_btn.pressed.connect(_on_menu_pressed)
 	hbox.add_child(menu_btn)
 	
@@ -159,7 +130,7 @@ func _ready():
 	
 	var btn_text = "finish" if GameManager.current_level >= 90 else ("next level" if next_level_unlocked else "level select")
 	var btn_color = Color(0.2, 1.0, 0.2) if (GameManager.current_level >= 90 or next_level_unlocked) else Color(0.2, 0.6, 1.0)
-	var next_btn = create_glass_button(btn_text, btn_color)
+	var next_btn = UIFactory.create_glass_button(btn_text, btn_color)
 	next_btn.pressed.connect(_on_next_pressed)
 	hbox.add_child(next_btn)
 	

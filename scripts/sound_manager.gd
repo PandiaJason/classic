@@ -44,7 +44,8 @@ func start_sfx_loop(name: String) -> void:
 		
 	var player = AudioStreamPlayer.new()
 	player.process_mode = Node.PROCESS_MODE_ALWAYS
-	player.stream = sfx_library[name]
+	# H4: Duplicate stream to avoid mutating the shared sfx_library resource
+	player.stream = sfx_library[name].duplicate()
 	if player.stream is AudioStreamWAV:
 		player.stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 		player.stream.loop_begin = 0

@@ -24,6 +24,8 @@ var tutorial_complete: bool = false
 # Daily streak system
 var streak_count: int = 0
 var last_claim_day: int = -1
+# H1: Cached total stars to avoid O(n²) recalculation
+var _total_stars_cache: int = 0
 
 func _ready():
 	load_data()
@@ -49,9 +51,10 @@ func load_data():
 		tutorial_complete = config.get_value("Progress", "tutorial_complete", false)
 		streak_count = config.get_value("Progress", "streak_count", 0)
 		last_claim_day = config.get_value("Progress", "last_claim_day", -1)
-		# Load stars for all 30 possible levels
+		# Load stars for all 90 possible levels
 		for i in range(1, 91):
 			level_stars[i] = config.get_value("Stars", str(i), 0)
+		_recalculate_total_stars()
 	else:
 		# Initialize default
 		unlocked_levels = 1
@@ -67,6 +70,7 @@ func load_data():
 		last_claim_day = -1
 		for i in range(1, 91):
 			level_stars[i] = 0
+		_total_stars_cache = 0
 		save_data()
 
 func save_data():
@@ -92,11 +96,13 @@ func save_data():
 
 func complete_level(level_id: int, stars: int):
 	# Update max stars
-	if level_stars.has(level_id):
-		if stars > level_stars[level_id]:
-			level_stars[level_id] = stars
-	else:
+	var old_stars = level_stars.get(level_id, 0)
+	if stars > old_stars:
 		level_stars[level_id] = stars
+		_total_stars_cache += (stars - old_stars)
+	elif not level_stars.has(level_id):
+		level_stars[level_id] = stars
+		_total_stars_cache += stars
 		
 	# Unlock next level
 	if level_id >= unlocked_levels:
@@ -110,10 +116,14 @@ func get_stars(level_id: int) -> int:
 	return 0
 
 func get_total_stars() -> int:
+	return _total_stars_cache
+
+# Recompute cache from scratch (called on load)
+func _recalculate_total_stars() -> void:
 	var total = 0
 	for i in range(1, 91):
 		total += get_stars(i)
-	return total
+	_total_stars_cache = total
 
 func is_level_unlocked(level_id: int) -> bool:
 	if level_id <= 1:

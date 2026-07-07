@@ -150,8 +150,25 @@ func _ready() -> void:
 	
 	# Pre-fetch planets list once to avoid repeated scene tree lookups
 	_planets_list = get_tree().get_nodes_in_group("planets")
+	# M9: Precompute world bounds once instead of every frame
+	_precompute_world_bounds()
 
 var _planets_list: Array = []
+# M9: Cached world bounds for out-of-bounds check
+var _world_min: Vector2 = Vector2.ZERO
+var _world_max: Vector2 = Vector2.ZERO
+
+func _precompute_world_bounds() -> void:
+	var min_x = INF; var max_x = -INF
+	var min_y = INF; var max_y = -INF
+	for p in _planets_list:
+		if is_instance_valid(p):
+			min_x = min(min_x, p.global_position.x)
+			max_x = max(max_x, p.global_position.x)
+			min_y = min(min_y, p.global_position.y)
+			max_y = max(max_y, p.global_position.y)
+	_world_min = Vector2(min_x, min_y)
+	_world_max = Vector2(max_x, max_y)
 
 func _on_gravity_area_entered(area: Area2D) -> void:
 	if area.name == "GravityArea" and not overlapping_gravity_areas.has(area):
@@ -172,12 +189,16 @@ func _physics_process(delta: float) -> void:
 	var on_ground = false
 	if current_planet:
 		var diff = current_planet.global_position - global_position
-		var surface_up = -diff.normalized()
+		# H5/H6: Single sqrt, guard against zero-distance
 		var dist_to_planet = diff.length()
-		var surface_radius = 100.0 * current_planet.scale.x
-		var is_near_surface = dist_to_planet <= surface_radius + 5.0
-		var vertical_speed = velocity.dot(surface_up)
-		on_ground = is_on_floor() or (is_near_surface and vertical_speed <= 10.0)
+		if dist_to_planet < 0.01:
+			on_ground = true
+		else:
+			var surface_up = -diff / dist_to_planet
+			var surface_radius = 100.0 * current_planet.scale.x
+			var is_near_surface = dist_to_planet <= surface_radius + 5.0
+			var vertical_speed = velocity.dot(surface_up)
+			on_ground = is_on_floor() or (is_near_surface and vertical_speed <= 10.0)
 		
 	# 1. Find the nearest valid gravity source
 	find_gravity_source(on_ground)
@@ -194,11 +215,11 @@ func _physics_process(delta: float) -> void:
 				_doom_timer = 0.0
 				
 				if current_planet == null:
-					# Outer space burst
-					velocity = velocity.normalized() * (velocity.length() * 1.8)
+					# Outer space burst — H5: avoid normalize+length, just scale
+					velocity *= 1.8
 				elif not on_ground:
 					# Mid-air burst inside gravity
-					velocity = velocity.normalized() * (velocity.length() * 1.5)
+					velocity *= 1.5
 				else:
 					# On-ground immediate speedup
 					current_speed = max_speed * 1.8
@@ -208,10 +229,18 @@ func _physics_process(delta: float) -> void:
 		_tether_planet = null
 		_tether_time_left = 0.0
 		
-		# 2. Calculate gravity direction
+		# 2. Calculate gravity direction — H5/H6: single sqrt, zero-distance guard
 		var diff = current_planet.global_position - global_position
-		var gravity_dir = diff.normalized()
-		var surface_up = -gravity_dir
+		var dist_to_center = diff.length()
+		var gravity_dir: Vector2
+		var surface_up: Vector2
+		if dist_to_center < 0.01:
+			# Player is exactly at planet center — push outward
+			gravity_dir = Vector2.DOWN
+			surface_up = Vector2.UP
+		else:
+			gravity_dir = diff / dist_to_center
+			surface_up = -gravity_dir
 		
 		# 3. Rotate player to align with gravity
 		var target_rotation = gravity_dir.angle() - PI/2
@@ -250,10 +279,9 @@ func _physics_process(delta: float) -> void:
 		current_speed += brake_force * (1.0 if is_speed_buff_active else 0.5) * delta
 		current_speed = clamp(current_speed, 0.0, actual_max_speed)
 		
-		# Re-evaluate on_ground just to be safe
-		var dist_to_planet = diff.length()
+		# Re-evaluate on_ground using cached dist_to_center from above
 		var surface_radius = 100.0 * current_planet.scale.x
-		var is_near_surface = dist_to_planet <= surface_radius + 5.0
+		var is_near_surface = dist_to_center <= surface_radius + 5.0
 		var vertical_speed = velocity.dot(surface_up)
 		on_ground = is_on_floor() or (is_near_surface and vertical_speed <= 10.0)
 		
@@ -399,8 +427,8 @@ func _physics_process(delta: float) -> void:
 					thruster_particles.emitting = true
 					thruster_particles.global_rotation = (global_position - _tether_planet.global_position).angle()
 				
-				# Slingshot speed cap (600.0) for more momentum
-				if velocity.length() > 600.0:
+				# Slingshot speed cap (600.0) — M10: use length_squared to avoid sqrt on fast path
+				if velocity.length_squared() > 360000.0:
 					velocity = velocity.normalized() * 600.0
 		else:
 			_tether_planet = null
@@ -432,19 +460,9 @@ func _physics_process(delta: float) -> void:
 					GameManager.game_over("lost in space")
 					return
 		
-			# --- EXISTING safety net: hard out-of-bounds fallback ---
+			# --- EXISTING safety net: hard out-of-bounds fallback (M9: use cached bounds) ---
 			var buffer = 1500.0
-			var min_x = INF
-			var max_x = -INF
-			var min_y = INF
-			var max_y = -INF
-			for p in _planets_list:
-				if is_instance_valid(p):
-					min_x = min(min_x, p.global_position.x)
-					max_x = max(max_x, p.global_position.x)
-					min_y = min(min_y, p.global_position.y)
-					max_y = max(max_y, p.global_position.y)
-			if global_position.x < min_x - buffer or global_position.x > max_x + buffer or global_position.y < min_y - buffer or global_position.y > max_y + buffer:
+			if global_position.x < _world_min.x - buffer or global_position.x > _world_max.x + buffer or global_position.y < _world_min.y - buffer or global_position.y > _world_max.y + buffer:
 				is_game_over = true
 				GameManager.game_over("you drifted into deep space!")
 				return
@@ -467,13 +485,15 @@ func _physics_process(delta: float) -> void:
 			
 	# Update flight trail particles (scooter exhaust air)
 	if is_instance_valid(flight_trail_particles):
-		if velocity.length() > 50.0 and not is_game_over:
+		if velocity.length_squared() > 2500.0 and not is_game_over:
 			flight_trail_particles.emitting = true
 		else:
 			flight_trail_particles.emitting = false
 
 	update_sprite_region()
-	queue_redraw()
+	# L6: Only request redraw when trajectory is visible
+	if show_trajectory:
+		queue_redraw()
 	
 	_wants_to_jump = false # clear the input queue at the end of the frame
 	_shift_was_pressed = Input.is_action_pressed("speed")

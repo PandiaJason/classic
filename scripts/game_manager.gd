@@ -5,6 +5,8 @@ var has_box: bool = true
 var box_health: float = 100.0
 var current_level: int = 1
 var is_gameplay_started: bool = false
+var _game_ended: bool = false
+var _save_dirty: bool = false
 
 signal health_changed(new_health)
 
@@ -12,23 +14,54 @@ func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_setup_ui_joypad()
 	get_tree().node_added.connect(_on_node_added)
+	# Pre-register JS haptic function once for web (H3: avoid rebuilding ~600-char string per call)
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("""
+			window._ranotot_haptic = function(w, s, dm, gm) {
+				if (navigator.vibrate) {
+					var pattern = dm;
+					if (dm === 50) { pattern = [15, 15, 15]; }
+					else if (dm === 30) { pattern = [8]; }
+					else if (dm === 80) { pattern = [20, 25, 20]; }
+					else if (dm === 120) { pattern = [40, 30, 40]; }
+					else if (dm === 150) { pattern = [80, 40, 60]; }
+					else if (dm === 250) { pattern = [120, 60, 120]; }
+					navigator.vibrate(pattern);
+				}
+				var gamepads = navigator.getGamepads();
+				for (var i = 0; i < gamepads.length; i++) {
+					var gp = gamepads[i];
+					if (gp && gp.vibrationActuator) {
+						if (gp.vibrationActuator.playEffect) {
+							gp.vibrationActuator.playEffect('dual-rumble', {
+								startDelay: 0, duration: gm,
+								weakMagnitude: w, strongMagnitude: s
+							}).catch(function(e){});
+						} else if (gp.vibrationActuator.pulse) {
+							gp.vibrationActuator.pulse(s, gm);
+						}
+					}
+				}
+			};
+		""")
+
+# C2: Named method to avoid lambda signal leak — can check is_connected
+func _haptic_button_press() -> void:
+	trigger_haptic(0.06, 0.1, 0.05)
+
+func _haptic_slider_tick(_val) -> void:
+	trigger_haptic(0.03, 0.05, 0.03)
 
 func _on_node_added(node: Node):
 	if node is BaseButton:
-		node.pressed.connect(func():
-			trigger_haptic(0.06, 0.1, 0.05)
-		)
+		if not node.pressed.is_connected(_haptic_button_press):
+			node.pressed.connect(_haptic_button_press)
 	elif node is Slider:
-		node.value_changed.connect(func(_val):
-			trigger_haptic(0.03, 0.05, 0.03)
-		)
+		if not node.value_changed.is_connected(_haptic_slider_tick):
+			node.value_changed.connect(_haptic_slider_tick)
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept") or (event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A):
-		var focus = get_viewport().gui_get_focus_owner()
-		if focus and focus is BaseButton:
-			focus.pressed.emit()
-			get_viewport().set_input_as_handled()
+# C1: Removed manual ui_accept → pressed.emit() — Godot handles this natively.
+# The _input override for double-fire has been deleted entirely.
 
 func _setup_ui_joypad():
 	var mapping = {
@@ -114,7 +147,12 @@ func take_damage(amount: float, reason: String) -> void:
 		if box_health <= 0.0:
 			game_over(reason)
 
+# H7: Guard against double game-over/level-complete UI from multi-hit in same frame
 func game_over(reason: String) -> void:
+	if _game_ended:
+		return
+	_game_ended = true
+	_flush_save()
 	await get_tree().process_frame
 
 	var player = get_tree().get_first_node_in_group("player")
@@ -129,6 +167,10 @@ func game_over(reason: String) -> void:
 		get_tree().root.add_child(ui)
 
 func level_complete() -> void:
+	if _game_ended:
+		return
+	_game_ended = true
+	_flush_save()
 	await get_tree().process_frame
 	var ui_scene = ResourceManager.get_scene("res://scenes/level_complete_ui.tscn")
 	if ui_scene:
@@ -138,13 +180,20 @@ func level_complete() -> void:
 var level_rubies: int = 0
 var level_rubies_earned: int = 0
 
+# H2: Mark dirty instead of saving to disk on every ruby pickup
 func add_ruby(points: int) -> void:
 	current_rubies += points
 	level_rubies_earned += points
 	if points == 10:
 		level_rubies += 1
 	SaveSystem.global_rubies += points
-	SaveSystem.save_data()
+	_save_dirty = true
+
+# Flush pending save to disk (called at level end / game over)
+func _flush_save() -> void:
+	if _save_dirty:
+		SaveSystem.save_data()
+		_save_dirty = false
 
 func reset_rubies() -> void:
 	current_rubies = 0
@@ -153,6 +202,7 @@ func reset_rubies() -> void:
 	has_box = true
 	box_health = 100.0
 	is_gameplay_started = false
+	_game_ended = false
 	health_changed.emit(box_health)
 
 func load_next_level() -> void:
@@ -161,6 +211,7 @@ func load_next_level() -> void:
 	level_rubies_earned = 0
 	has_box = true
 	box_health = 100.0
+	_game_ended = false
 	
 	var next_level = current_level + 1
 	if next_level > 90:
@@ -184,15 +235,12 @@ func trigger_haptic(weak: float, strong: float, duration: float) -> void:
 	# Gamepad motors need ~200ms minimum spin-up time to be felt
 	var gp_duration = maxf(duration, 0.2)
 	
-	# Local platforms (native gamepad rumble)
+	# Local platforms (native gamepad rumble) — H12: loop covers all connected pads including 0
 	for joy in Input.get_connected_joypads():
 		Input.start_joy_vibration(joy, adj_weak, adj_strong, gp_duration)
-	Input.start_joy_vibration(0, adj_weak, adj_strong, gp_duration)
 	
-	# Web platform fallback
+	# Web platform: call pre-registered JS function (H3)
 	if OS.has_feature("web"):
 		var duration_ms = int(duration * 1000)
 		var gp_duration_ms = int(gp_duration * 1000)
-		var js_code = "(function() { if (navigator.vibrate) { var dur = " + str(duration_ms) + "; var pattern = dur; if (dur === 50) { pattern = [15, 15, 15]; } else if (dur === 30) { pattern = [8]; } else if (dur === 80) { pattern = [20, 25, 20]; } else if (dur === 120) { pattern = [40, 30, 40]; } else if (dur === 150) { pattern = [80, 40, 60]; } else if (dur === 250) { pattern = [120, 60, 120]; } navigator.vibrate(pattern); } var gamepads = navigator.getGamepads(); for (var i = 0; i < gamepads.length; i++) { var gp = gamepads[i]; if (gp && gp.vibrationActuator) { if (gp.vibrationActuator.playEffect) { gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: " + str(gp_duration_ms) + ", weakMagnitude: " + str(adj_weak) + ", strongMagnitude: " + str(adj_strong) + " }).catch(function(e){}); } else if (gp.vibrationActuator.pulse) { gp.vibrationActuator.pulse(" + str(adj_strong) + ", " + str(gp_duration_ms) + "); } } } })();"
-		JavaScriptBridge.eval(js_code)
-
+		JavaScriptBridge.eval("window._ranotot_haptic(%s,%s,%s,%s)" % [adj_weak, adj_strong, duration_ms, gp_duration_ms])

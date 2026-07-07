@@ -16,19 +16,21 @@ func _physics_process(delta: float) -> void:
 		velocity = direction * speed
 
 	if velocity != Vector2.ZERO:
-		# Apply planet gravity pull
+		# Apply planet gravity pull — optimized: single sqrt per planet (H5)
 		for p in _planets_list:
 			if not is_instance_valid(p):
 				continue
 			var p_diff = p.global_position - global_position
 			var dist = p_diff.length()
+			if dist < 0.01:
+				continue
 			var grav_radius = 500.0
 			var grav_shape = p.get_node_or_null("GravityArea/CollisionShape2D")
 			if grav_shape and grav_shape.shape is CircleShape2D:
 				grav_radius = grav_shape.shape.radius * p.scale.x
 			
 			if dist < grav_radius:
-				var g_dir = p_diff.normalized()
+				var g_dir = p_diff / dist  # reuse dist instead of second sqrt via normalized()
 				var planet_gravity = 600.0
 				if "gravity_area" in p and p.gravity_area:
 					planet_gravity = p.gravity_area.gravity
@@ -66,8 +68,10 @@ func _on_body_entered(body: Node2D) -> void:
 		queue_free()
 		
 	# Asteroid destroys itself and explodes if it hits a planet
-	elif body.name.begins_with("Planet"):
-		var explosion = load("res://scenes/explosion.tscn").instantiate()
+	elif body.is_in_group("planets"):
+		var explosion_scene = ResourceManager.get_scene("res://scenes/explosion.tscn")
+		if not explosion_scene: queue_free(); return
+		var explosion = explosion_scene.instantiate()
 		explosion.global_position = global_position
 		get_tree().root.call_deferred("add_child", explosion)
 		SoundManager.play_sfx("explosion")
