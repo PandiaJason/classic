@@ -64,29 +64,17 @@ func _ready() -> void:
 	# Setup controller inputs dynamically
 	if not InputMap.has_action("speed"):
 		InputMap.add_action("speed")
-		var ev_shift = InputEventKey.new()
-		ev_shift.keycode = KEY_SHIFT
-		InputMap.action_add_event("speed", ev_shift)
-		var ev_joy = InputEventJoypadButton.new()
-		ev_joy.button_index = JOY_BUTTON_X
-		InputMap.action_add_event("speed", ev_joy)
+	_ensure_key("speed", KEY_SHIFT)
+	_ensure_joy_button("speed", JOY_BUTTON_X)
 		
 	# Setup explicit jump for joystick
 	if not InputMap.has_action("jump"):
 		InputMap.add_action("jump")
-		
-		var ev_joy_a = InputEventJoypadButton.new()
-		ev_joy_a.button_index = JOY_BUTTON_A
-		InputMap.action_add_event("jump", ev_joy_a)
-		
-		var ev_joy_up = InputEventJoypadButton.new()
-		ev_joy_up.button_index = JOY_BUTTON_DPAD_UP
-		InputMap.action_add_event("jump", ev_joy_up)
-		
-		var ev_joy_stick = InputEventJoypadMotion.new()
-		ev_joy_stick.axis = JOY_AXIS_LEFT_Y
-		ev_joy_stick.axis_value = -1.0
-		InputMap.action_add_event("jump", ev_joy_stick)
+	_ensure_joy_button("jump", JOY_BUTTON_A)
+	_ensure_joy_button("jump", JOY_BUTTON_DPAD_UP)
+	_ensure_joy_axis("jump", JOY_AXIS_LEFT_Y, -1.0)
+	_ensure_key("jump", KEY_SPACE)
+	_ensure_key("jump", KEY_UP)
 		
 	current_speed = max_speed
 	
@@ -632,3 +620,41 @@ func _find_nearest_planet() -> Node2D:
 				min_dist = dist
 				nearest = p
 	return nearest
+
+func _ensure_joy_button(action: String, btn_index: JoyButton):
+	if not InputMap.has_action(action): return
+	var has_btn = false
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventJoypadButton and ev.button_index == btn_index:
+			has_btn = true
+			break
+	if not has_btn:
+		var ev = InputEventJoypadButton.new()
+		ev.button_index = btn_index
+		InputMap.action_add_event(action, ev)
+
+func _ensure_joy_axis(action: String, axis: JoyAxis, dir: float):
+	if not InputMap.has_action(action): return
+	var has_axis = false
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventJoypadMotion and ev.axis == axis and sign(ev.axis_value) == sign(dir):
+			has_axis = true
+			break
+	if not has_axis:
+		var ev = InputEventJoypadMotion.new()
+		ev.axis = axis
+		ev.axis_value = dir
+		InputMap.action_add_event(action, ev)
+
+func _ensure_key(action: String, keycode: Key):
+	if not InputMap.has_action(action): return
+	var has_key = false
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventKey and ev.keycode == keycode:
+			has_key = true
+			break
+	if not has_key:
+		var ev = InputEventKey.new()
+		ev.keycode = keycode
+		InputMap.action_add_event(action, ev)
+

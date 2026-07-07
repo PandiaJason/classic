@@ -7,6 +7,7 @@ var current_level: int = 1
 var is_gameplay_started: bool = false
 var _game_ended: bool = false
 var _save_dirty: bool = false
+var _last_button_press_time: Dictionary = {}
 
 signal health_changed(new_health)
 
@@ -14,6 +15,23 @@ func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_setup_ui_joypad()
 	get_tree().node_added.connect(_on_node_added)
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventJoypadButton and event.pressed:
+		if event.button_index == JOY_BUTTON_A or event.button_index == JOY_BUTTON_B:
+			var focus = get_viewport().gui_get_focus_owner()
+			if focus and focus is BaseButton:
+				var now = Time.get_ticks_msec()
+				var btn_id = focus.get_instance_id()
+				if not _last_button_press_time.has(btn_id) or now - _last_button_press_time[btn_id] > 150:
+					_last_button_press_time[btn_id] = now
+					if event.button_index == JOY_BUTTON_A:
+						focus.pressed.emit()
+					elif event.button_index == JOY_BUTTON_B:
+						# B button triggers back if the button matches cancel actions
+						if focus.name.to_lower().contains("back") or focus.name.to_lower().contains("close") or focus.name.to_lower().contains("cancel") or focus.name.to_lower().contains("menu"):
+							focus.pressed.emit()
+					get_viewport().set_input_as_handled()
 	# Pre-register JS haptic function once for web (H3: avoid rebuilding ~600-char string per call)
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("""
