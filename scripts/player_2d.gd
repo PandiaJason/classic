@@ -300,8 +300,8 @@ func _physics_process(delta: float) -> void:
 		velocity += gravity_dir * applied_gravity * delta
 		
 		if on_ground and not was_on_ground:
-			# Player just landed on a planet
-			GameManager.trigger_haptic(0.08, 0.12, 0.08)
+			# Player just landed on a planet — heavier haptics
+			GameManager.trigger_haptic(0.18, 0.30, 0.15)
 			_glide_used_this_flight = false  # Reset glide for next flight
 			is_speed_buff_active = false     # Reset speed buff on landing
 			SoundManager.play_sfx("landing")
