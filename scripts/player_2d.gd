@@ -480,10 +480,8 @@ func _physics_process(delta: float) -> void:
 			flight_trail_particles.emitting = false
 
 	update_sprite_region()
-	# L6: Request redraw when trajectory is visible, or in the frame it is hidden to clear it
-	if show_trajectory or _was_showing_trajectory:
-		queue_redraw()
-	_was_showing_trajectory = show_trajectory
+	# L6: Call queue_redraw() every frame to guarantee trajectory drawing is cleared immediately
+	queue_redraw()
 	
 	_wants_to_jump = false # clear the input queue at the end of the frame
 	_shift_was_pressed = Input.is_action_pressed("speed")

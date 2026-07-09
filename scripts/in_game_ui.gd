@@ -34,6 +34,11 @@ func _ready():
 	add_to_group("in_game_ui")
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
+	# Clean up editor-designed UI nodes before constructing dynamic ones to avoid naming conflicts (queue_free)
+	if has_node("HealthMargin"): $HealthMargin.queue_free()
+	if has_node("ViewMapMargin"): $ViewMapMargin.queue_free()
+	if has_node("HintMargin"): $HintMargin.queue_free()
+	
 	# Dynamically set background color modulation based on current level (every 10 levels gets a unique theme)
 	var bg_rect = get_node_or_null("../Background/TextureRect")
 	if bg_rect:
@@ -261,9 +266,7 @@ func _ready():
 	
 
 	
-	if has_node("HealthMargin"): $HealthMargin.queue_free()
-	if has_node("ViewMapMargin"): $ViewMapMargin.queue_free()
-	if has_node("HintMargin"): $HintMargin.queue_free()
+
 	
 	# Auto-start with Map View and run countdown immediately
 	is_viewing_map = true
