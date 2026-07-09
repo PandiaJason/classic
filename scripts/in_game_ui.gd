@@ -164,10 +164,10 @@ func _ready():
 	# Setup Hint Button
 	hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
 	hint_button.focus_mode = Control.FOCUS_NONE
-	hint_button.button_down.connect(_on_hint_pressed)
 	hint_button.pressed.connect(_on_hint_pressed)
 	
 	var hint_margin = MarginContainer.new()
+	hint_margin.name = "HintMargin"
 	hint_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hint_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	hint_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN

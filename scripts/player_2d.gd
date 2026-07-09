@@ -18,6 +18,7 @@ var has_jumped: bool = false
 var show_trajectory: bool = false
 var overlapping_gravity_areas: Array = []
 var was_on_ground: bool = true
+var _was_showing_trajectory: bool = false
 
 # Glide assist (resets each flight — use one per zero-gravity segment)
 var _glide_used_this_flight: bool = false
@@ -479,9 +480,10 @@ func _physics_process(delta: float) -> void:
 			flight_trail_particles.emitting = false
 
 	update_sprite_region()
-	# L6: Only request redraw when trajectory is visible
-	if show_trajectory:
+	# L6: Request redraw when trajectory is visible, or in the frame it is hidden to clear it
+	if show_trajectory or _was_showing_trajectory:
 		queue_redraw()
+	_was_showing_trajectory = show_trajectory
 	
 	_wants_to_jump = false # clear the input queue at the end of the frame
 	_shift_was_pressed = Input.is_action_pressed("speed")
