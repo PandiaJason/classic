@@ -29,6 +29,35 @@ var pause_overlay: Control = null
 var shake_intensity: float = 0.0
 var shake_duration: float = 0.0
 var _trigger_map_pressed: bool = false
+var _touch_start_pos: Dictionary = {}
+var _touch_start_time: Dictionary = {}
+
+func _input(event: InputEvent) -> void:
+	if not GameManager.is_gameplay_started:
+		return
+	if is_paused:
+		return
+		
+	# Swipe gesture recognition for speed boost (Left to Right)
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_touch_start_pos[event.index] = event.position
+			_touch_start_time[event.index] = Time.get_ticks_msec()
+		else:
+			_touch_start_pos.erase(event.index)
+			_touch_start_time.erase(event.index)
+			
+	elif event is InputEventScreenDrag:
+		if _touch_start_pos.has(event.index):
+			var start_pos = _touch_start_pos[event.index]
+			var diff = event.position - start_pos
+			# Swipe from Left to Right: diff.x is positive, large enough, and diff.y is relatively horizontal
+			if diff.x > 80.0 and abs(diff.y) < 100.0:
+				if is_instance_valid(player):
+					player._wants_to_speed = true
+				# Clean up tracking for this touch event to avoid double-activation during the same swipe drag
+				_touch_start_pos.erase(event.index)
+				_touch_start_time.erase(event.index)
 
 func _ready():
 	add_to_group("in_game_ui")
