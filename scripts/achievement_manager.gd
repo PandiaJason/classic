@@ -28,39 +28,39 @@ func _ready():
 
 func _register_achievements():
 	# Ruby Achievements
-	_def("ruby_rookie", "ruby rookie", "collect 100 total rubies", "💎", 25, 100, "rubies")
-	_def("ruby_hunter", "ruby hunter", "collect 500 total rubies", "💎", 50, 500, "rubies")
-	_def("ruby_master", "ruby master", "collect 1000 total rubies", "💎", 100, 1000, "rubies")
-	_def("ruby_king", "ruby king", "collect 5000 total rubies", "💎", 250, 5000, "rubies")
+	_def("ruby_rookie", "ruby rookie", "collect 100 total rubies", "res://assets/ruby.png", 25, 100, "rubies")
+	_def("ruby_hunter", "ruby hunter", "collect 500 total rubies", "res://assets/ruby.png", 50, 500, "rubies")
+	_def("ruby_master", "ruby master", "collect 1000 total rubies", "res://assets/ruby.png", 100, 1000, "rubies")
+	_def("ruby_king", "ruby king", "collect 5000 total rubies", "res://assets/ruby.png", 250, 5000, "rubies")
 
 	# Survival Achievements
-	_def("space_wanderer", "space wanderer", "get lost in space 5 times", "🌌", 30, 5, "survival")
-	_def("asteroid_magnet", "asteroid magnet", "get hit by 10 asteroids", "☄️", 30, 10, "survival")
-	_def("tough_delivery", "tough delivery", "complete a level with under 25% box health", "📦", 40, 1, "survival")
-	_def("perfect_delivery", "perfect delivery", "complete a level with 100% box health", "⭐", 50, 1, "survival")
-	_def("iron_frog", "iron frog", "complete 5 levels with 100% box health", "🛡️", 100, 5, "survival")
+	_def("space_wanderer", "space wanderer", "get lost in space 5 times", "res://assets/game_over_skeleton.png", 30, 5, "survival")
+	_def("asteroid_magnet", "asteroid magnet", "get hit by 10 asteroids", "res://assets/asteroid.png", 30, 10, "survival")
+	_def("tough_delivery", "tough delivery", "complete a level with under 25% box health", "res://assets/delivery_box.png", 40, 1, "survival")
+	_def("perfect_delivery", "perfect delivery", "complete a level with 100% box health", "res://assets/delivery_box.png", 50, 1, "survival")
+	_def("iron_frog", "iron frog", "complete 5 levels with 100% box health", "res://assets/delivery_box.png", 100, 5, "survival")
 
 	# Progress Achievements
-	_def("first_delivery", "first delivery", "complete your first level", "🚀", 20, 1, "progress")
-	_def("rising_star", "rising star", "earn your first 3-star rating", "⭐", 30, 1, "progress")
-	_def("star_collector", "star collector", "earn 50 total stars", "🌟", 50, 50, "progress")
-	_def("star_master", "star master", "earn 150 total stars", "🌟", 100, 150, "progress")
-	_def("completionist", "completionist", "earn all 270 stars", "👑", 500, 270, "progress")
-	_def("halfway", "halfway there", "complete level 45", "🏁", 50, 45, "progress")
-	_def("final_frontier", "final frontier", "complete level 90", "🏆", 200, 90, "progress")
+	_def("first_delivery", "first delivery", "complete your first level", "res://assets/flag.png", 20, 1, "progress")
+	_def("rising_star", "rising star", "earn your first 3-star rating", "res://assets/star.png", 30, 1, "progress")
+	_def("star_collector", "star collector", "earn 50 total stars", "res://assets/star.png", 50, 50, "progress")
+	_def("star_master", "star master", "earn 150 total stars", "res://assets/star.png", 100, 150, "progress")
+	_def("completionist", "completionist", "earn all 270 stars", "res://assets/star.png", 500, 270, "progress")
+	_def("halfway", "halfway there", "complete level 45", "res://assets/planet_3.png", 50, 45, "progress")
+	_def("final_frontier", "final frontier", "complete level 90", "res://assets/planet_5.png", 200, 90, "progress")
 
 	# Skill Achievements
-	_def("glide_master", "glide master", "use glide assist 20 times", "🪂", 40, 20, "skill")
-	_def("speed_demon", "speed demon", "use speed boost 20 times", "⚡", 40, 20, "skill")
-	_def("first_jump", "first jump", "make your very first jump", "🐸", 10, 1, "skill")
-	_def("bounce_king", "bounce king", "jump 500 times total", "👑", 100, 500, "skill")
+	_def("glide_master", "glide master", "use glide assist 20 times", "res://assets/custom_player.png", 40, 20, "skill")
+	_def("speed_demon", "speed demon", "use speed boost 20 times", "res://assets/custom_player.png", 40, 20, "skill")
+	_def("first_jump", "first jump", "make your very first jump", "res://assets/custom_player.png", 10, 1, "skill")
+	_def("bounce_king", "bounce king", "jump 500 times total", "res://assets/custom_player.png", 100, 500, "skill")
 
 	# Special Achievements
-	_def("daily_devotee", "daily devotee", "claim daily reward 7 days in a row", "📅", 100, 7, "special")
-	_def("big_spender", "big spender", "spend 500 rubies in the shop", "🛒", 50, 500, "special")
-	_def("level_10", "tier 1 complete", "complete all 10 levels in tier 1", "🏅", 40, 10, "special")
-	_def("level_30", "tier 3 complete", "complete 30 levels", "🏅", 60, 30, "special")
-	_def("level_60", "tier 6 complete", "complete 60 levels", "🏅", 100, 60, "special")
+	_def("daily_devotee", "daily devotee", "claim daily reward 7 days in a row", "res://assets/star.png", 100, 7, "special")
+	_def("big_spender", "big spender", "spend 500 rubies in the shop", "res://assets/ruby.png", 50, 500, "special")
+	_def("level_10", "tier 1 complete", "complete all 10 levels in tier 1", "res://assets/planet_1.png", 40, 10, "special")
+	_def("level_30", "tier 3 complete", "complete 30 levels", "res://assets/planet_2.png", 60, 30, "special")
+	_def("level_60", "tier 6 complete", "complete 60 levels", "res://assets/planet_4.png", 100, 60, "special")
 
 func _def(id: String, display_name: String, desc: String, icon: String, reward: int, target: int, category: String):
 	_defs[id] = {
@@ -296,11 +296,14 @@ func _show_next_toast() -> void:
 	hbox.add_theme_constant_override("separation", 14)
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
-	# Trophy icon
-	var icon_label = Label.new()
-	icon_label.text = "🏆"
-	icon_label.add_theme_font_size_override("font_size", 36)
-	hbox.add_child(icon_label)
+	# Achievement texture icon
+	var icon_rect = TextureRect.new()
+	icon_rect.texture = load(def.icon)
+	icon_rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_rect.custom_minimum_size = Vector2(54, 54)
+	hbox.add_child(icon_rect)
 	
 	var vbox = VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 2)
@@ -314,7 +317,7 @@ func _show_next_toast() -> void:
 	vbox.add_child(title_lbl)
 	
 	var name_lbl = Label.new()
-	name_lbl.text = def.icon + " " + def.name
+	name_lbl.text = def.name
 	name_lbl.add_theme_font_size_override("font_size", 24)
 	name_lbl.add_theme_color_override("font_color", Color(1, 1, 1))
 	if ResourceLoader.exists("res://assets/game_font.ttf"):

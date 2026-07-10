@@ -986,12 +986,16 @@ func _on_achievements_pressed():
 		var row_hbox = HBoxContainer.new()
 		row_hbox.add_theme_constant_override("separation", 12)
 		
-		# Icon
-		var icon_lbl = Label.new()
-		icon_lbl.text = ach.icon if ach.unlocked else "🔒"
-		icon_lbl.add_theme_font_size_override("font_size", 28)
-		icon_lbl.custom_minimum_size = Vector2(40, 0)
-		row_hbox.add_child(icon_lbl)
+		# Texture Icon
+		var icon_rect = TextureRect.new()
+		icon_rect.texture = load(ach.icon)
+		icon_rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon_rect.custom_minimum_size = Vector2(48, 48)
+		if not ach.unlocked:
+			icon_rect.modulate = Color(0.18, 0.18, 0.22, 0.8) # dark/locked silhouette
+		row_hbox.add_child(icon_rect)
 		
 		# Name + Description
 		var info_vbox = VBoxContainer.new()

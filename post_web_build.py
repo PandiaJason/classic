@@ -65,6 +65,55 @@ if os.path.exists(web_dir):
     with open(os.path.join(web_dir, "manifest.json"), "w") as f:
         f.write(manifest_content)
 
+    # vercel.json
+    vercel_content = """{
+  "name": "ranotot",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/game.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ]
+}"""
+    with open(os.path.join(web_dir, "vercel.json"), "w") as f:
+        f.write(vercel_content)
+
     # sw.js
     sw_content = """const CACHE_NAME = 'ranotot-vercel-cache-v__VERSION__';
 const ASSETS = [
