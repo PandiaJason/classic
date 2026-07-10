@@ -381,3 +381,9 @@ func get_all_achievements() -> Array:
 				entry["progress"] = get_progress(id)
 				result.append(entry)
 	return result
+
+func write_to_config(config: ConfigFile) -> void:
+	for id in _unlocked:
+		config.set_value("Achievements", id, _unlocked[id])
+	for stat in _stats:
+		config.set_value("AchievementStats", stat, _stats[stat])

@@ -88,6 +88,12 @@ func save_data():
 	config.set_value("Progress", "last_claim_day", last_claim_day)
 	for i in level_stars.keys():
 		config.set_value("Stars", str(i), level_stars[i])
+		
+	# Hook to write achievements and stats before saving
+	var am = get_node_or_null("/root/AchievementManager")
+	if am and am.has_method("write_to_config"):
+		am.write_to_config(config)
+		
 	config.save(SAVE_PATH)
 	
 	if OS.has_feature("web") and JavaScriptBridge.get_interface("window"):
