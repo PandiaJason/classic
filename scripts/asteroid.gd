@@ -51,6 +51,7 @@ func _on_body_entered(body: Node2D) -> void:
 		
 		# Take 35% package damage instead of instant death
 		GameManager.take_damage(35.0, "an asteroid destroyed your delivery box!")
+		AchievementManager.on_asteroid_hit()
 		
 		# Shake camera strongly
 		var ui = get_tree().get_first_node_in_group("in_game_ui")

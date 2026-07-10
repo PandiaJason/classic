@@ -145,6 +145,7 @@ func _ensure_key(action: String, keycode: Key):
 func take_jump_damage() -> void:
 	if has_box:
 		trigger_haptic(0.15, 0.25, 0.15)
+		AchievementManager.on_jump()
 		box_health -= 3.0
 		box_health = max(0.0, box_health)
 		health_changed.emit(box_health)
@@ -171,6 +172,9 @@ func game_over(reason: String) -> void:
 		return
 	_game_ended = true
 	_flush_save()
+	# Track "lost in space" achievement
+	if reason.contains("lost in space"):
+		AchievementManager.on_lost_in_space()
 	await get_tree().process_frame
 
 	var player = get_tree().get_first_node_in_group("player")
@@ -206,6 +210,7 @@ func add_ruby(points: int) -> void:
 		level_rubies += 1
 	SaveSystem.global_rubies += points
 	_save_dirty = true
+	AchievementManager.on_ruby_collected(points)
 
 # Flush pending save to disk (called at level end / game over)
 func _flush_save() -> void:

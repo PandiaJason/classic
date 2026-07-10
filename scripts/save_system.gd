@@ -162,6 +162,7 @@ func purchase_glide() -> bool:
 		global_rubies -= 10
 		glide_count += 1
 		save_data()
+		AchievementManager.on_rubies_spent(10)
 		return true
 	return false
 
@@ -169,6 +170,7 @@ func use_glide() -> bool:
 	if glide_count > 0:
 		glide_count -= 1
 		save_data()
+		AchievementManager.on_glide_used()
 		return true
 	return false
 
@@ -177,6 +179,7 @@ func purchase_speed() -> bool:
 		global_rubies -= 10
 		speed_count += 1
 		save_data()
+		AchievementManager.on_rubies_spent(10)
 		return true
 	return false
 
@@ -184,6 +187,7 @@ func use_speed() -> bool:
 	if speed_count > 0:
 		speed_count -= 1
 		save_data()
+		AchievementManager.on_speed_used()
 		return true
 	return false
 
@@ -224,5 +228,6 @@ func claim_daily_reward() -> Dictionary:
 	last_claim_day = today
 	global_rubies += amount
 	save_data()
+	AchievementManager.on_daily_streak(streak_count)
 	
 	return {"success": true, "amount": amount, "streak": streak_count}

@@ -4,6 +4,7 @@ var _ruby_btn: TextureButton = null
 var _pulse_time: float = 0.0
 var _ruby_label: Label = null
 var tutorial_btn: Button = null
+var achievements_btn: Button = null
 var reset_btn: Button = null
 var daily_btn: Button = null
 var start_btn: Button = null
@@ -27,6 +28,12 @@ func _ready():
 	tutorial_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	tutorial_btn.pressed.connect(_on_tutorial_pressed)
 	button_vbox.add_child(tutorial_btn)
+	
+	achievements_btn = UIFactory.create_glass_button("achievements  %d/%d" % [AchievementManager.get_unlocked_count(), AchievementManager.get_total_count()], UIFactory.GOLD_COLOR)
+	achievements_btn.add_theme_font_size_override("font_size", 20)
+	achievements_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	achievements_btn.pressed.connect(_on_achievements_pressed)
+	button_vbox.add_child(achievements_btn)
 	
 	if SaveSystem.unlocked_levels > 90:
 		var ruby_btn = TextureButton.new()
@@ -238,22 +245,25 @@ func _ready():
 	start_btn.focus_neighbor_left = daily_btn.get_path()
 	
 	tutorial_btn.focus_neighbor_top = start_btn.get_path()
-	tutorial_btn.focus_neighbor_bottom = music_slider.get_path()
+	tutorial_btn.focus_neighbor_bottom = achievements_btn.get_path()
+	
+	achievements_btn.focus_neighbor_top = tutorial_btn.get_path()
+	achievements_btn.focus_neighbor_bottom = music_slider.get_path()
 	
 	daily_btn.focus_neighbor_right = start_btn.get_path()
 	daily_btn.focus_neighbor_bottom = start_btn.get_path()
 	
-	music_slider.focus_neighbor_top = tutorial_btn.get_path()
+	music_slider.focus_neighbor_top = achievements_btn.get_path()
 	music_slider.focus_neighbor_bottom = sfx_slider.get_path()
-	music_slider.focus_neighbor_right = reset_btn.get_path() if reset_btn else tutorial_btn.get_path()
+	music_slider.focus_neighbor_right = reset_btn.get_path() if reset_btn else achievements_btn.get_path()
 	
 	sfx_slider.focus_neighbor_top = music_slider.get_path()
-	sfx_slider.focus_neighbor_right = reset_btn.get_path() if reset_btn else tutorial_btn.get_path()
+	sfx_slider.focus_neighbor_right = reset_btn.get_path() if reset_btn else achievements_btn.get_path()
 	
 	if reset_btn:
 		reset_btn.focus_neighbor_left = sfx_slider.get_path()
-		reset_btn.focus_neighbor_top = tutorial_btn.get_path()
-		tutorial_btn.focus_neighbor_right = reset_btn.get_path()
+		reset_btn.focus_neighbor_top = achievements_btn.get_path()
+		achievements_btn.focus_neighbor_right = reset_btn.get_path()
 		start_btn.focus_neighbor_right = reset_btn.get_path()
 		
 	if is_instance_valid(_ruby_btn):
@@ -861,6 +871,8 @@ func _set_main_menu_buttons_focusable(enabled: bool):
 		start_btn.focus_mode = mode
 	if is_instance_valid(tutorial_btn):
 		tutorial_btn.focus_mode = mode
+	if is_instance_valid(achievements_btn):
+		achievements_btn.focus_mode = mode
 	if is_instance_valid(daily_btn):
 		daily_btn.focus_mode = mode
 	if is_instance_valid(music_slider):
@@ -871,5 +883,201 @@ func _set_main_menu_buttons_focusable(enabled: bool):
 		reset_btn.focus_mode = mode
 	if is_instance_valid(_ruby_btn):
 		_ruby_btn.focus_mode = mode
+
+func _on_achievements_pressed():
+	_set_main_menu_buttons_focusable(false)
+	var overlay = ColorRect.new()
+	overlay.name = "AchievementsOverlay"
+	overlay.color = Color(0, 0, 0, 0.85)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+	
+	var center = CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
+	
+	var panel = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.03, 0.1, 0.92)
+	style.corner_radius_top_left = 25
+	style.corner_radius_top_right = 25
+	style.corner_radius_bottom_right = 25
+	style.corner_radius_bottom_left = 25
+	style.border_width_left = 3
+	style.border_width_top = 3
+	style.border_width_right = 3
+	style.border_width_bottom = 3
+	style.border_color = Color(1, 0.85, 0.2, 0.9)
+	style.content_margin_left = 30
+	style.content_margin_right = 30
+	style.content_margin_top = 20
+	style.content_margin_bottom = 20
+	panel.add_theme_stylebox_override("panel", style)
+	center.add_child(panel)
+	
+	var outer_vbox = VBoxContainer.new()
+	outer_vbox.add_theme_constant_override("separation", 14)
+	outer_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	# Title
+	var title = Label.new()
+	title.text = "achievements  %d / %d" % [AchievementManager.get_unlocked_count(), AchievementManager.get_total_count()]
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+	title.add_theme_font_size_override("font_size", 32)
+	title.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
+	title.add_theme_constant_override("outline_size", 6)
+	title.add_theme_color_override("font_outline_color", Color.BLACK)
+	outer_vbox.add_child(title)
+	
+	# Scrollable container for achievements
+	var scroll = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(700, 400)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	
+	var grid = VBoxContainer.new()
+	grid.add_theme_constant_override("separation", 8)
+	
+	var achievements = AchievementManager.get_all_achievements()
+	var current_cat = ""
+	
+	for ach in achievements:
+		# Category header
+		if ach.category != current_cat:
+			current_cat = ach.category
+			var cat_lbl = Label.new()
+			cat_lbl.text = "— " + current_cat + " —"
+			cat_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			cat_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+			cat_lbl.add_theme_font_size_override("font_size", 20)
+			cat_lbl.add_theme_color_override("font_color", Color(0.6, 0.5, 0.8))
+			grid.add_child(cat_lbl)
+		
+		# Achievement row
+		var row_panel = PanelContainer.new()
+		var row_style = StyleBoxFlat.new()
+		row_style.corner_radius_top_left = 12
+		row_style.corner_radius_top_right = 12
+		row_style.corner_radius_bottom_right = 12
+		row_style.corner_radius_bottom_left = 12
+		row_style.content_margin_left = 15
+		row_style.content_margin_right = 15
+		row_style.content_margin_top = 8
+		row_style.content_margin_bottom = 8
+		
+		if ach.unlocked:
+			row_style.bg_color = Color(0.15, 0.25, 0.1, 0.6)
+			row_style.border_width_left = 2
+			row_style.border_width_top = 2
+			row_style.border_width_right = 2
+			row_style.border_width_bottom = 2
+			row_style.border_color = Color(0.3, 0.8, 0.2, 0.6)
+		else:
+			row_style.bg_color = Color(0.1, 0.1, 0.12, 0.4)
+			row_style.border_width_left = 1
+			row_style.border_width_top = 1
+			row_style.border_width_right = 1
+			row_style.border_width_bottom = 1
+			row_style.border_color = Color(0.3, 0.3, 0.35, 0.3)
+		
+		row_panel.add_theme_stylebox_override("panel", row_style)
+		
+		var row_hbox = HBoxContainer.new()
+		row_hbox.add_theme_constant_override("separation", 12)
+		
+		# Icon
+		var icon_lbl = Label.new()
+		icon_lbl.text = ach.icon if ach.unlocked else "🔒"
+		icon_lbl.add_theme_font_size_override("font_size", 28)
+		icon_lbl.custom_minimum_size = Vector2(40, 0)
+		row_hbox.add_child(icon_lbl)
+		
+		# Name + Description
+		var info_vbox = VBoxContainer.new()
+		info_vbox.add_theme_constant_override("separation", 2)
+		info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		
+		var name_lbl = Label.new()
+		name_lbl.text = ach.name
+		name_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		name_lbl.add_theme_font_size_override("font_size", 22)
+		if ach.unlocked:
+			name_lbl.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
+		else:
+			name_lbl.add_theme_color_override("font_color", Color(0.65, 0.65, 0.65))
+		info_vbox.add_child(name_lbl)
+		
+		var desc_lbl = Label.new()
+		desc_lbl.text = ach.desc
+		desc_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		desc_lbl.add_theme_font_size_override("font_size", 16)
+		desc_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		info_vbox.add_child(desc_lbl)
+		
+		row_hbox.add_child(info_vbox)
+		
+		# Progress / Status
+		var progress = ach.progress
+		var status_vbox = VBoxContainer.new()
+		status_vbox.add_theme_constant_override("separation", 2)
+		status_vbox.custom_minimum_size = Vector2(120, 0)
+		
+		if ach.unlocked:
+			var done_lbl = Label.new()
+			done_lbl.text = "unlocked!"
+			done_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			done_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+			done_lbl.add_theme_font_size_override("font_size", 18)
+			done_lbl.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+			status_vbox.add_child(done_lbl)
+		else:
+			var prog_lbl = Label.new()
+			prog_lbl.text = "%d / %d" % [progress.current, progress.target]
+			prog_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			prog_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+			prog_lbl.add_theme_font_size_override("font_size", 18)
+			prog_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+			status_vbox.add_child(prog_lbl)
+		
+		# Reward
+		var reward_lbl = Label.new()
+		reward_lbl.text = "+%d rubies" % ach.reward
+		reward_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		reward_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		reward_lbl.add_theme_font_size_override("font_size", 14)
+		if ach.unlocked:
+			reward_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.3, 0.7))
+		else:
+			reward_lbl.add_theme_color_override("font_color", Color(1, 0.8, 0.2, 0.5))
+		status_vbox.add_child(reward_lbl)
+		
+		row_hbox.add_child(status_vbox)
+		row_panel.add_child(row_hbox)
+		grid.add_child(row_panel)
+	
+	scroll.add_child(grid)
+	outer_vbox.add_child(scroll)
+	
+	# Close button
+	var close_btn = UIFactory.create_glass_button("close", UIFactory.RED_COLOR)
+	close_btn.pressed.connect(func():
+		_set_main_menu_buttons_focusable(true)
+		overlay.queue_free()
+		if is_instance_valid(achievements_btn):
+			achievements_btn.grab_focus()
+	)
+	outer_vbox.add_child(close_btn)
+	
+	# Trap focus
+	close_btn.focus_neighbor_left = close_btn.get_path()
+	close_btn.focus_neighbor_right = close_btn.get_path()
+	close_btn.focus_neighbor_top = close_btn.get_path()
+	close_btn.focus_neighbor_bottom = close_btn.get_path()
+	close_btn.focus_next = close_btn.get_path()
+	close_btn.focus_previous = close_btn.get_path()
+	
+	panel.add_child(outer_vbox)
+	close_btn.grab_focus()
 
 

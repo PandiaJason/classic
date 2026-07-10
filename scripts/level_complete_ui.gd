@@ -15,6 +15,7 @@ func _ready():
 		star_count = 1
 		
 	SaveSystem.complete_level(GameManager.current_level, star_count)
+	AchievementManager.on_level_complete(GameManager.current_level, star_count, health)
 	
 	# Delete original simple UI
 	if has_node("VBoxContainer"): $VBoxContainer.queue_free()
