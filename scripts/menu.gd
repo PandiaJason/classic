@@ -17,19 +17,22 @@ func _ready():
 	BgmManager.play_menu_music()
 	# Group buttons inside a VBox for tight vertical stacking
 	var button_vbox = VBoxContainer.new()
-	var endless_title = "endless mode ♾️"
-	if SaveSystem.endless_high_score > 0:
-		endless_title += "  (best: %d)" % SaveSystem.endless_high_score
-	var endless_btn = UIFactory.create_glass_button(endless_title, UIFactory.PURPLE_COLOR)
-	endless_btn.add_theme_font_size_override("font_size", 22)
-	endless_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	endless_btn.pressed.connect(_on_endless_pressed)
-	button_vbox.add_child(endless_btn)
+	button_vbox.add_theme_constant_override("separation", 12)
+	button_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
 	start_btn = $VBoxContainer/StartButton
 	$VBoxContainer.remove_child(start_btn)
 	button_vbox.add_child(start_btn)
 	start_btn.pressed.connect(_on_start_pressed)
+	
+	var endless_title = "endless mode ♾️"
+	if SaveSystem.endless_high_score > 0:
+		endless_title += "  (best: %d)" % SaveSystem.endless_high_score
+	var endless_btn = UIFactory.create_glass_button(endless_title, UIFactory.PURPLE_COLOR)
+	endless_btn.add_theme_font_size_override("font_size", 20)
+	endless_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	endless_btn.pressed.connect(_on_endless_pressed)
+	button_vbox.add_child(endless_btn)
 	
 	tutorial_btn = UIFactory.create_glass_button("tutorial", UIFactory.BLUE_COLOR)
 	tutorial_btn.add_theme_font_size_override("font_size", 20)
@@ -90,6 +93,21 @@ func _ready():
 	ruby_margin.add_theme_constant_override("margin_right", 30)
 	ruby_margin.add_child(ruby_panel)
 	add_child(ruby_margin)
+	
+	# Top Center Endless Mode Button
+	var top_endless_title = "endless mode ♾️"
+	if SaveSystem.endless_high_score > 0:
+		top_endless_title += " (%d)" % SaveSystem.endless_high_score
+	var top_endless_btn = UIFactory.create_glass_button(top_endless_title, UIFactory.PURPLE_COLOR)
+	top_endless_btn.add_theme_font_size_override("font_size", 22)
+	top_endless_btn.pressed.connect(_on_endless_pressed)
+	
+	var top_endless_margin = MarginContainer.new()
+	top_endless_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_CENTER)
+	top_endless_margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	top_endless_margin.add_theme_constant_override("margin_top", 30)
+	top_endless_margin.add_child(top_endless_btn)
+	add_child(top_endless_margin)
 	
 	# Unmute Master bus to ensure sound effects always work
 	var bus_idx = AudioServer.get_bus_index("Master")
