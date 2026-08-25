@@ -36,19 +36,20 @@ if os.path.exists(web_dir):
 
     # manifest.json
     manifest_content = """{
-  "name": "ranotot",
-  "short_name": "ranotot",
+  "name": "Ranotot - Space Courier",
+  "short_name": "Ranotot",
   "description": "Hop on your scooter and become the galaxy's craziest delivery driver!",
-  "start_url": ".",
-  "display": "fullscreen",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d0d1a",
+  "theme_color": "#FFD700",
   "orientation": "landscape",
   "icons": [
     {
       "src": "game.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "game.icon.png",
@@ -446,19 +447,20 @@ if os.path.exists(direct_dir):
 
     # manifest.json
     manifest_content = """{
-  "name": "ranotot",
-  "short_name": "ranotot",
+  "name": "Ranotot - Space Courier",
+  "short_name": "Ranotot",
   "description": "Hop on your scooter and become the galaxy's craziest delivery driver!",
-  "start_url": ".",
-  "display": "fullscreen",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d0d1a",
+  "theme_color": "#FFD700",
   "orientation": "landscape",
   "icons": [
     {
       "src": "index.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "index.icon.png",
