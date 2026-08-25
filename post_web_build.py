@@ -322,10 +322,41 @@ self.addEventListener('fetch', (event) => {
         else:
             html = re.sub(r'html,\s*body,\s*#canvas\s*\{[^}]*\}', new_style, html, flags=re.IGNORECASE)
 
-        # Inject game background into HTML loading screen (#status background)
+        # Inject game background into HTML loading screen (#status background & styled progress bar)
         old_status_bg = """#status {
 	background-color: #242424;"""
-        new_status_bg = """#status {
+        new_status_bg = """#status-progress {
+	position: absolute !important;
+	bottom: 12% !important;
+	left: 25% !important;
+	width: 50% !important;
+	height: 24px !important;
+	border-radius: 12px !important;
+	border: 2px solid #FFD700 !important;
+	background-color: rgba(0, 0, 0, 0.8) !important;
+	overflow: hidden !important;
+	box-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
+}
+#status-progress::-webkit-progress-bar {
+	background-color: rgba(0, 0, 0, 0.8) !important;
+	border-radius: 12px !important;
+}
+#status-progress::-webkit-progress-value {
+	background: linear-gradient(90deg, #3a7bd5, #3ae5b5) !important;
+	border-radius: 12px !important;
+}
+#status-progress::-moz-progress-bar {
+	background: linear-gradient(90deg, #3a7bd5, #3ae5b5) !important;
+	border-radius: 12px !important;
+}
+#status-notice {
+	font-family: Arial, sans-serif !important;
+	font-size: 20px !important;
+	color: #FFD700 !important;
+	text-shadow: 0 2px 6px rgba(0,0,0,0.9) !important;
+	font-weight: bold !important;
+}
+#status {
 	background-image: url('game_bg.jpg');
 	background-size: cover;
 	background-position: center;
