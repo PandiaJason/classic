@@ -78,11 +78,7 @@ func _on_score_changed(score: int, _deliveries: int) -> void:
 			best_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
 
 func _process(_delta: float) -> void:
-	if is_instance_valid(player) and is_instance_valid(camera):
-		# Fast camera follow ahead of player (0.35 lerp speed)
-		var target_pos = player.global_position + Vector2(280, 0)
-		camera.global_position = camera.global_position.lerp(target_pos, 0.35)
-		
+	if is_instance_valid(player):
 		# Continuously track distance traveled in meters
 		var current_m = max(0, int((player.global_position.x - 200.0) / 10.0))
 		if current_m > max_distance_reached:

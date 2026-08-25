@@ -38,9 +38,9 @@ func setup_planet():
 			tex_path = "res://assets/planet_2.png"
 		PlanetType.SMALL:
 			size_scale = 0.9
-			grav = 800.0
-			planet_speed = 240.0
-			planet_jump_force = -480.0
+			grav = 980.0
+			planet_speed = 280.0
+			planet_jump_force = -550.0
 			tex_path = "res://assets/planet_3.png"
 		PlanetType.CHALLENGE:
 			size_scale = 0.7
@@ -50,7 +50,7 @@ func setup_planet():
 			tex_path = "res://assets/planet_4.png"
 			
 	# Dynamically calculate the required gravity radius.
-	var surface_radius = (68.0 if type == PlanetType.SMALL else 100.0) * size_scale
+	var surface_radius = 100.0 * size_scale
 	var max_jump_height = 0.5 * grav * pow(abs(planet_jump_force) / grav, 2.0)
 	var required_world_radius = surface_radius + (max_jump_height * 0.85)
 	var grav_radius = required_world_radius / size_scale
@@ -91,13 +91,10 @@ func setup_planet():
 			
 	scale = Vector2(size_scale, size_scale)
 	
-	# Match collision shape to exact visual surface of each planet
+	# All planets use exact standard 100.0 radius collision shape
 	if collision_shape and collision_shape.shape is CircleShape2D:
 		collision_shape.shape = collision_shape.shape.duplicate()
-		if type == PlanetType.SMALL:
-			collision_shape.shape.radius = 68.0 # Small planet visual yellow circle radius
-		else:
-			collision_shape.shape.radius = 100.0
+		collision_shape.shape.radius = 100.0
 	
 	if custom_gravity > 0:
 		grav = custom_gravity

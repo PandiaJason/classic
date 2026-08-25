@@ -174,11 +174,10 @@ func _ready():
 	var top_right_hbox = HBoxContainer.new()
 	top_right_hbox.add_theme_constant_override("separation", 15)
 	
-	if not GameManager.is_endless_mode:
-		view_map_btn = UIFactory.create_glass_button("map", UIFactory.BLUE_COLOR)
-		view_map_btn.focus_mode = Control.FOCUS_NONE
-		view_map_btn.pressed.connect(_on_view_map_pressed)
-		top_right_hbox.add_child(view_map_btn)
+	view_map_btn = UIFactory.create_glass_button("map", UIFactory.BLUE_COLOR)
+	view_map_btn.focus_mode = Control.FOCUS_NONE
+	view_map_btn.pressed.connect(_on_view_map_pressed)
+	top_right_hbox.add_child(view_map_btn)
 	
 	var pause_btn = UIFactory.create_glass_button("pause", UIFactory.GOLD_COLOR)
 	pause_btn.focus_mode = Control.FOCUS_NONE
@@ -375,7 +374,9 @@ func _process(delta: float):
 	if is_instance_valid(level_camera):
 		var base_pos = level_camera.global_position
 		if is_viewing_map:
-			# Zoom out to show full level
+			if GameManager.is_endless_mode and is_instance_valid(player):
+				level_center_pos = player.global_position + Vector2(400, 0)
+			# Zoom out to show level overview
 			level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
 			base_pos = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
 		else:
