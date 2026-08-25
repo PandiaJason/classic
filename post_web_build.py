@@ -323,47 +323,80 @@ self.addEventListener('fetch', (event) => {
         else:
             html = re.sub(r'html,\s*body,\s*#canvas\s*\{[^}]*\}', new_style, html, flags=re.IGNORECASE)
 
-        # Inject game background and progress bar CSS into HTML loading screen
-        if 'background-image: url(\'game_bg.jpg\')' not in html:
-            status_css = """<style>
+        # Inject game background and progress bar CSS into HTML loading screen (Centered across all screen ratios)
+        # Always overwrite or inject status_css
+        status_css = """<style>
 #status {
+	position: absolute !important;
+	top: 0 !important;
+	left: 0 !important;
+	width: 100vw !important;
+	height: 100vh !important;
+	display: flex !important;
+	flex-direction: column !important;
+	justify-content: center !important;
+	align-items: center !important;
 	background-image: url('game_bg.jpg') !important;
 	background-size: cover !important;
 	background-position: center !important;
 	background-repeat: no-repeat !important;
+	z-index: 9999 !important;
+	box-sizing: border-box !important;
+	padding: 20px !important;
+	margin: 0 !important;
+}
+#status-splash {
+	max-width: min(240px, 40vw) !important;
+	max-height: min(240px, 30vh) !important;
+	object-fit: contain !important;
+	margin-bottom: 20px !important;
+	filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4)) !important;
 }
 #status-progress {
-	position: absolute !important;
-	bottom: 12% !important;
-	left: 25% !important;
-	width: 50% !important;
-	height: 24px !important;
-	border-radius: 12px !important;
+	position: relative !important;
+	top: auto !important;
+	left: auto !important;
+	bottom: auto !important;
+	right: auto !important;
+	width: min(380px, 80vw) !important;
+	height: 22px !important;
+	border-radius: 11px !important;
 	border: 2px solid #FFD700 !important;
 	background-color: rgba(0, 0, 0, 0.8) !important;
 	overflow: hidden !important;
-	box-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
+	box-shadow: 0 0 25px rgba(255, 215, 0, 0.5) !important;
+	margin: 10px 0 !important;
 }
 #status-progress::-webkit-progress-bar {
 	background-color: rgba(0, 0, 0, 0.8) !important;
-	border-radius: 12px !important;
+	border-radius: 11px !important;
 }
 #status-progress::-webkit-progress-value {
 	background: linear-gradient(90deg, #3a7bd5, #3ae5b5) !important;
-	border-radius: 12px !important;
+	border-radius: 11px !important;
 }
 #status-progress::-moz-progress-bar {
 	background: linear-gradient(90deg, #3a7bd5, #3ae5b5) !important;
-	border-radius: 12px !important;
+	border-radius: 11px !important;
 }
 #status-notice {
+	position: relative !important;
+	top: auto !important;
+	left: auto !important;
+	bottom: auto !important;
+	right: auto !important;
 	font-family: Arial, sans-serif !important;
-	font-size: 20px !important;
+	font-size: clamp(14px, 4vw, 20px) !important;
 	color: #FFD700 !important;
-	text-shadow: 0 2px 6px rgba(0,0,0,0.9) !important;
+	text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
 	font-weight: bold !important;
+	text-align: center !important;
+	margin-top: 6px !important;
 }
 </style>"""
+        if '<style>\n#status {' in html:
+            html = re.sub(r'<style>\s*#status[\s\S]*?</style>', status_css, html, flags=re.IGNORECASE)
+        else:
             html = re.sub(r'</head>', status_css + '\n</head>', html, count=1, flags=re.IGNORECASE)
 
         # Clean up any previously injected canvas focus/vibrate scripts to prevent duplicate/stale tags
