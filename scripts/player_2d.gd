@@ -274,7 +274,7 @@ func _physics_process(delta: float) -> void:
 		var vertical_speed = velocity.dot(surface_up)
 		on_ground = is_on_floor() or (is_near_surface and vertical_speed <= 10.0)
 		
-		if not is_menu_demo and on_ground and current_planet != null and "type" in current_planet:
+		if not is_menu_demo and not GameManager.is_endless_mode and on_ground and current_planet != null and "type" in current_planet:
 			if current_planet.type == 3: # PlanetType.CHALLENGE
 				is_game_over = true
 				if GameManager.has_box:
@@ -284,7 +284,7 @@ func _physics_process(delta: float) -> void:
 				return
 		
 		# Check game over condition
-		if not is_menu_demo and current_speed <= 0.0 and on_ground:
+		if not is_menu_demo and not GameManager.is_endless_mode and current_speed <= 0.0 and on_ground:
 			is_game_over = true
 			GameManager.game_over("your bike stopped!")
 			return
@@ -449,12 +449,18 @@ func _physics_process(delta: float) -> void:
 					GameManager.game_over("lost in space")
 					return
 		
-			# --- EXISTING safety net: hard out-of-bounds fallback (M9: use cached bounds) ---
-			var buffer = 1500.0
-			if global_position.x < _world_min.x - buffer or global_position.x > _world_max.x + buffer or global_position.y < _world_min.y - buffer or global_position.y > _world_max.y + buffer:
-				is_game_over = true
-				GameManager.game_over("you drifted into deep space!")
-				return
+			# --- Safety net: out-of-bounds fallback ---
+			if GameManager.is_endless_mode:
+				if global_position.y < -3000.0 or global_position.y > 3000.0 or global_position.x < -1000.0:
+					is_game_over = true
+					GameManager.game_over("you drifted into deep space!")
+					return
+			else:
+				var buffer = 1500.0
+				if global_position.x < _world_min.x - buffer or global_position.x > _world_max.x + buffer or global_position.y < _world_min.y - buffer or global_position.y > _world_max.y + buffer:
+					is_game_over = true
+					GameManager.game_over("you drifted into deep space!")
+					return
 			
 	if show_trajectory and not is_menu_demo:
 		if current_planet != null and on_ground:
