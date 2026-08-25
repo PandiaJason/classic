@@ -38,9 +38,9 @@ func setup_planet():
 			tex_path = "res://assets/planet_2.png"
 		PlanetType.SMALL:
 			size_scale = 0.9
-			grav = 1400.0
-			planet_speed = 280.0
-			planet_jump_force = -550.0
+			grav = 800.0
+			planet_speed = 240.0
+			planet_jump_force = -480.0
 			tex_path = "res://assets/planet_3.png"
 		PlanetType.CHALLENGE:
 			size_scale = 0.7
@@ -52,7 +52,7 @@ func setup_planet():
 	# Dynamically calculate the required gravity radius.
 	var surface_radius = (68.0 if type == PlanetType.SMALL else 100.0) * size_scale
 	var max_jump_height = 0.5 * grav * pow(abs(planet_jump_force) / grav, 2.0)
-	var required_world_radius = max(surface_radius + (max_jump_height * 0.85), surface_radius + 180.0)
+	var required_world_radius = surface_radius + (max_jump_height * 0.85)
 	var grav_radius = required_world_radius / size_scale
 			
 	if has_node("Visuals/Sprite2D"):
