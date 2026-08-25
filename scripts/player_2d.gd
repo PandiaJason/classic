@@ -364,7 +364,7 @@ func _physics_process(delta: float) -> void:
 		# Player floats in a straight line with their current velocity
 		last_planet = null
 		
-		# Glide assist - pull toward nearest planet (can use multiple times per flight)
+		# Glide assist - pull toward nearest planet
 		if not is_menu_demo and (GameManager.is_endless_mode or SaveSystem.glide_count > 0):
 			var just_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or Input.is_action_just_pressed("jump") or _wants_to_jump or _joy_jump_just_pressed
 			if just_pressed:
@@ -377,9 +377,12 @@ func _physics_process(delta: float) -> void:
 					glide_used.emit()
 					_doomed = false
 					_doom_timer = 0.0
-					SoundManager.start_sfx_loop("thruster")
 					
-					# Glide trigger pulse vibration
+					# Apply active thruster impulse towards nearest target planet
+					var pull_dir = (nearest.global_position - global_position).normalized()
+					velocity += pull_dir * 450.0
+					
+					SoundManager.start_sfx_loop("thruster")
 					GameManager.trigger_haptic(0.12, 0.18, 0.12)
 					
 					# Grace timer if triggered by mobile touch tap
@@ -620,7 +623,8 @@ func calculate_trajectory():
 func _find_nearest_planet() -> Node2D:
 	var nearest: Node2D = null
 	var min_dist: float = INF
-	for p in _planets_list:
+	var live_planets = get_tree().get_nodes_in_group("planets")
+	for p in live_planets:
 		if is_instance_valid(p):
 			var dist = global_position.distance_to(p.global_position)
 			if dist < min_dist:
