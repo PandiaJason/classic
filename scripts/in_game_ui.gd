@@ -195,22 +195,21 @@ func _ready():
 	map_margin.add_child(top_right_hbox)
 	add_child(map_margin)
 	
-	# Setup Hint Button (only in level mode)
-	if not GameManager.is_endless_mode:
-		hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
-		hint_button.focus_mode = Control.FOCUS_NONE
-		hint_button.pressed.connect(_on_hint_pressed)
-		
-		var hint_margin = MarginContainer.new()
-		hint_margin.name = "HintMargin"
-		hint_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hint_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-		hint_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-		hint_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
-		hint_margin.add_theme_constant_override("margin_bottom", 20)
-		hint_margin.add_theme_constant_override("margin_right", 40)
-		hint_margin.add_child(hint_button)
-		add_child(hint_margin)
+	# Setup Hint Button (available in all modes)
+	hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
+	hint_button.focus_mode = Control.FOCUS_NONE
+	hint_button.pressed.connect(_on_hint_pressed)
+	
+	var hint_margin = MarginContainer.new()
+	hint_margin.name = "HintMargin"
+	hint_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	hint_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	hint_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hint_margin.add_theme_constant_override("margin_bottom", 20)
+	hint_margin.add_theme_constant_override("margin_right", 40)
+	hint_margin.add_child(hint_button)
+	add_child(hint_margin)
 	
 	# Setup Level Indicator
 	if not GameManager.is_endless_mode:

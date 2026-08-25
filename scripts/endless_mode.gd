@@ -36,6 +36,7 @@ func _setup_hud() -> void:
 	add_child(hud_layer)
 	
 	var margin = MarginContainer.new()
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	margin.add_theme_constant_override("margin_left", 20)
 	margin.add_theme_constant_override("margin_top", 20)
