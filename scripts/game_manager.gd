@@ -13,6 +13,7 @@ signal health_changed(new_health)
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	Engine.max_fps = 60
 	_setup_ui_joypad()
 	get_tree().node_added.connect(_on_node_added)
 
