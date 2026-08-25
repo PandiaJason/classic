@@ -20,6 +20,7 @@ var best_label: Label
 
 func _ready() -> void:
 	GameManager.is_endless_mode = true
+	GameManager.is_gameplay_started = true
 	GameManager.endless_score = 0
 	GameManager.endless_deliveries = 0
 	GameManager.has_box = true
