@@ -263,9 +263,10 @@ func _physics_process(delta: float) -> void:
 				
 		last_planet = current_planet
 		
-		# 4. Handle auto-drive
-		var actual_max_speed = max_speed * (1.8 if is_speed_buff_active else 1.0)
-		current_speed += brake_force * (1.0 if is_speed_buff_active else 0.5) * delta
+		# 4. Handle auto-drive (speed scales with distance in Endless Mode)
+		var endless_speed_bonus = (1.0 + min(float(GameManager.endless_score) / 1000.0 * 0.4, 1.2)) if GameManager.is_endless_mode else 1.0
+		var actual_max_speed = max_speed * endless_speed_bonus * (1.8 if is_speed_buff_active else 1.0)
+		current_speed += brake_force * endless_speed_bonus * (1.0 if is_speed_buff_active else 0.5) * delta
 		current_speed = clamp(current_speed, 0.0, actual_max_speed)
 		
 		# Re-evaluate on_ground using cached dist_to_center from above

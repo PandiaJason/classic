@@ -174,10 +174,11 @@ func _ready():
 	var top_right_hbox = HBoxContainer.new()
 	top_right_hbox.add_theme_constant_override("separation", 15)
 	
-	view_map_btn = UIFactory.create_glass_button("map", UIFactory.BLUE_COLOR)
-	view_map_btn.focus_mode = Control.FOCUS_NONE
-	view_map_btn.pressed.connect(_on_view_map_pressed)
-	top_right_hbox.add_child(view_map_btn)
+	if not GameManager.is_endless_mode:
+		view_map_btn = UIFactory.create_glass_button("map", UIFactory.BLUE_COLOR)
+		view_map_btn.focus_mode = Control.FOCUS_NONE
+		view_map_btn.pressed.connect(_on_view_map_pressed)
+		top_right_hbox.add_child(view_map_btn)
 	
 	var pause_btn = UIFactory.create_glass_button("pause", UIFactory.GOLD_COLOR)
 	pause_btn.focus_mode = Control.FOCUS_NONE
@@ -195,21 +196,22 @@ func _ready():
 	map_margin.add_child(top_right_hbox)
 	add_child(map_margin)
 	
-	# Setup Hint Button
-	hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
-	hint_button.focus_mode = Control.FOCUS_NONE
-	hint_button.pressed.connect(_on_hint_pressed)
-	
-	var hint_margin = MarginContainer.new()
-	hint_margin.name = "HintMargin"
-	hint_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hint_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	hint_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	hint_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	hint_margin.add_theme_constant_override("margin_bottom", 20)
-	hint_margin.add_theme_constant_override("margin_right", 40)
-	hint_margin.add_child(hint_button)
-	add_child(hint_margin)
+	# Setup Hint Button (only in level mode)
+	if not GameManager.is_endless_mode:
+		hint_button = UIFactory.create_glass_button("hint", UIFactory.GOLD_COLOR)
+		hint_button.focus_mode = Control.FOCUS_NONE
+		hint_button.pressed.connect(_on_hint_pressed)
+		
+		var hint_margin = MarginContainer.new()
+		hint_margin.name = "HintMargin"
+		hint_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hint_margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		hint_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		hint_margin.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		hint_margin.add_theme_constant_override("margin_bottom", 20)
+		hint_margin.add_theme_constant_override("margin_right", 40)
+		hint_margin.add_child(hint_button)
+		add_child(hint_margin)
 	
 	# Setup Level Indicator
 	if not GameManager.is_endless_mode:
@@ -562,10 +564,15 @@ func _create_pause_menu():
 	)
 	vbox.add_child(retry_btn)
 	
-	var levels_btn = UIFactory.create_glass_button("levels", UIFactory.GOLD_COLOR)
+	var menu_btn_label = "main menu" if GameManager.is_endless_mode else "levels"
+	var levels_btn = UIFactory.create_glass_button(menu_btn_label, UIFactory.GOLD_COLOR)
 	levels_btn.pressed.connect(func():
 		toggle_pause()
-		SceneTransition.transition_to("res://scenes/level_select.tscn")
+		if GameManager.is_endless_mode:
+			GameManager.is_endless_mode = false
+			SceneTransition.transition_to("res://scenes/menu.tscn")
+		else:
+			SceneTransition.transition_to("res://scenes/level_select.tscn")
 	)
 	vbox.add_child(levels_btn)
 	

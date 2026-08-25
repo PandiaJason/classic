@@ -79,9 +79,9 @@ func _on_score_changed(score: int, _deliveries: int) -> void:
 
 func _process(_delta: float) -> void:
 	if is_instance_valid(player) and is_instance_valid(camera):
-		# Smooth camera follow ahead of player
-		var target_pos = player.global_position + Vector2(200, 0)
-		camera.global_position = camera.global_position.lerp(target_pos, 0.08)
+		# Fast camera follow ahead of player (0.35 lerp speed)
+		var target_pos = player.global_position + Vector2(280, 0)
+		camera.global_position = camera.global_position.lerp(target_pos, 0.35)
 		
 		# Continuously track distance traveled in meters
 		var current_m = max(0, int((player.global_position.x - 200.0) / 10.0))
