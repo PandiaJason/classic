@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://c8e9n4d2l3s5"]
+
+[ext_resource type="Script" path="res://scripts/endless_mode.gd" id="1_endless"]
+[ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="2_planet"]
+[ext_resource type="PackedScene" path="res://scenes/player_2d.tscn" id="3_player"]
+[ext_resource type="Texture2D" path="res://assets/bg_ref.jpg" id="4_bg"]
+[ext_resource type="AudioStream" path="res://Slow_Clockwork_Sun.mp3" id="5_bgm"]
+[ext_resource type="Script" path="res://scripts/in_game_ui.gd" id="6_ui"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_endless")
+
+[node name="Background" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="TextureRect" type="TextureRect" parent="Background"]
+modulate = Color(0.4, 0.4, 0.4, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Planets" type="Node2D" parent="."]
+
+[node name="Player2D" parent="." instance=ExtResource("3_player")]
+position = Vector2(200, 260)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(400, 450)
+zoom = Vector2(0.6, 0.6)
+
+[node name="BGM" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_bgm")
+
+[node name="InGameUI" type="CanvasLayer" parent="."]
+layer = 5
+script = ExtResource("6_ui")

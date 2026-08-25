@@ -9,7 +9,12 @@ var _game_ended: bool = false
 var _save_dirty: bool = false
 var _last_button_press_time: Dictionary = {}
 
+var is_endless_mode: bool = false
+var endless_score: int = 0
+var endless_deliveries: int = 0
+
 signal health_changed(new_health)
+signal endless_score_changed(new_score, deliveries)
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -268,3 +273,19 @@ func trigger_haptic(weak: float, strong: float, duration: float) -> void:
 		var duration_ms = int(duration * 1000)
 		var gp_duration_ms = int(gp_duration * 1000)
 		JavaScriptBridge.eval("window._ranotot_haptic(%s,%s,%s,%s)" % [adj_weak, adj_strong, duration_ms, gp_duration_ms])
+
+func start_endless_mode():
+	is_endless_mode = true
+	endless_score = 0
+	endless_deliveries = 0
+	current_rubies = 0
+	level_rubies_earned = 0
+	has_box = true
+	box_health = 100.0
+	_game_ended = false
+	is_gameplay_started = false
+	SceneTransition.transition_to("res://scenes/level_endless.tscn")
+
+func add_endless_score(pts: int):
+	endless_score += pts
+	endless_score_changed.emit(endless_score, endless_deliveries)

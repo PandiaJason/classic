@@ -61,10 +61,19 @@ func _ready():
 	vbox.add_child(skeleton_icon)
 	
 	var subtitle = Label.new()
-	subtitle.text = game_over_reason
+	if GameManager.is_endless_mode:
+		var is_new_record = SaveSystem.save_endless_score(GameManager.endless_score)
+		if is_new_record:
+			subtitle.text = "NEW HIGH SCORE: %d! 🏆\n(DELIVERIES: %d)" % [GameManager.endless_score, GameManager.endless_deliveries]
+			subtitle.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
+		else:
+			subtitle.text = "SCORE: %d | DELIVERIES: %d\n(BEST: %d)" % [GameManager.endless_score, GameManager.endless_deliveries, SaveSystem.endless_high_score]
+			subtitle.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	else:
+		subtitle.text = game_over_reason
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	subtitle.add_theme_font_size_override("font_size", 30)
+	subtitle.add_theme_font_size_override("font_size", 24)
 	vbox.add_child(subtitle)
 	
 	var hbox = HBoxContainer.new()

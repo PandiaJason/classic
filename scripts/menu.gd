@@ -17,8 +17,14 @@ func _ready():
 	BgmManager.play_menu_music()
 	# Group buttons inside a VBox for tight vertical stacking
 	var button_vbox = VBoxContainer.new()
-	button_vbox.add_theme_constant_override("separation", 16)
-	button_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	var endless_title = "endless mode ♾️"
+	if SaveSystem.endless_high_score > 0:
+		endless_title += "  (best: %d)" % SaveSystem.endless_high_score
+	var endless_btn = UIFactory.create_glass_button(endless_title, UIFactory.PURPLE_COLOR)
+	endless_btn.add_theme_font_size_override("font_size", 22)
+	endless_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	endless_btn.pressed.connect(_on_endless_pressed)
+	button_vbox.add_child(endless_btn)
 	
 	start_btn = $VBoxContainer/StartButton
 	$VBoxContainer.remove_child(start_btn)
@@ -284,6 +290,11 @@ func _ready():
 		start_btn.grab_focus()
 
 
+
+func _on_endless_pressed():
+	if OS.has_feature("web"):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	GameManager.start_endless_mode()
 
 func _on_start_pressed():
 	if OS.has_feature("web"):

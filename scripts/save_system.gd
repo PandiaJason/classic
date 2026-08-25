@@ -24,6 +24,8 @@ var tutorial_complete: bool = false
 # Daily streak system
 var streak_count: int = 0
 var last_claim_day: int = -1
+# Endless Mode High Score
+var endless_high_score: int = 0
 # H1: Cached total stars to avoid O(n²) recalculation
 var _total_stars_cache: int = 0
 
@@ -51,6 +53,7 @@ func load_data():
 		tutorial_complete = config.get_value("Progress", "tutorial_complete", false)
 		streak_count = config.get_value("Progress", "streak_count", 0)
 		last_claim_day = config.get_value("Progress", "last_claim_day", -1)
+		endless_high_score = config.get_value("Progress", "endless_high_score", 0)
 		# Load stars for all 90 possible levels
 		for i in range(1, 91):
 			level_stars[i] = config.get_value("Stars", str(i), 0)
@@ -86,6 +89,7 @@ func save_data():
 	config.set_value("Progress", "tutorial_complete", tutorial_complete)
 	config.set_value("Progress", "streak_count", streak_count)
 	config.set_value("Progress", "last_claim_day", last_claim_day)
+	config.set_value("Progress", "endless_high_score", endless_high_score)
 	for i in level_stars.keys():
 		config.set_value("Stars", str(i), level_stars[i])
 		
@@ -99,6 +103,13 @@ func save_data():
 	if OS.has_feature("web") and JavaScriptBridge.get_interface("window"):
 		var cfg_string = config.encode_to_text()
 		JavaScriptBridge.eval("window.localStorage.setItem('ranotot_save_session', decodeURIComponent('%s'));" % cfg_string.uri_encode())
+
+func save_endless_score(score: int) -> bool:
+	if score > endless_high_score:
+		endless_high_score = score
+		save_data()
+		return true # New high score!
+	return false
 
 func complete_level(level_id: int, stars: int):
 	# Update max stars
