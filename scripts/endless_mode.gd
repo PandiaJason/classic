@@ -119,46 +119,59 @@ func _generate_initial_world() -> void:
 	player.global_position = Vector2(200, 260)
 	next_spawn_x = 200.0
 	
-	# Spawn First Constellation Section with 650px open space gaps
-	_spawn_next_target_section()
+	# Spawn Initial Random Planet Constellation
+	for i in range(4):
+		_spawn_next_target_section()
 
 func _spawn_next_target_section() -> void:
-	# Open space gap between planets (600px - 750px between each planet center)
-	var gap_1 = randf_range(600.0, 750.0)
-	var gap_2 = randf_range(650.0, 800.0)
+	# Generate 2 random non-overlapping planets with guaranteed minimum 550px separation
+	var count_to_spawn = randi_range(1, 2)
+	for k in range(count_to_spawn):
+		var valid_pos = Vector2.ZERO
+		var found_valid = false
+		
+		# Try up to 30 random positions to find a clean non-overlapping spot
+		for attempt in range(30):
+			var cand_x = next_spawn_x + randf_range(520.0, 780.0)
+			var cand_y = randf_range(150.0, 680.0)
+			var cand_pos = Vector2(cand_x, cand_y)
+			
+			var is_overlap = false
+			for p in active_planets:
+				if is_instance_valid(p):
+					if cand_pos.distance_to(p.global_position) < 550.0:
+						is_overlap = true
+						break
+			
+			if not is_overlap:
+				valid_pos = cand_pos
+				found_valid = true
+				break
+		
+		if found_valid:
+			_instantiate_planet(valid_pos, randi() % 3)
+			next_spawn_x = max(next_spawn_x, valid_pos.x)
+			
+func _instantiate_planet(pos: Vector2, p_type: int) -> void:
+	var p = planet_scene.instantiate()
+	p.global_position = pos
+	p.type = p_type # Types 0, 1, 2 only (NO RED PLANET)
+	planets_node.add_child(p)
+	p.add_to_group("planets")
+	active_planets.append(p)
 	
-	# Intermediate planet in open space (Types 0, 1, 2 only — NO RED PLANET)
-	var inter_p = planet_scene.instantiate()
-	var inter_x = next_spawn_x + gap_1
-	var inter_y = randf_range(180.0, 680.0)
-	inter_p.global_position = Vector2(inter_x, inter_y)
-	inter_p.type = randi() % 3 # Types 0, 1, 2 only (NO RED PLANET)
-	planets_node.add_child(inter_p)
-	inter_p.add_to_group("planets")
-	active_planets.append(inter_p)
-	
-	# Spawn rubies in space near intermediate planet
-	if randf() > 0.3:
-		_spawn_ruby_cluster(Vector2(inter_x, inter_y))
+	# Spawn rubies scaled to planet surface radius
+	if randf() > 0.35:
+		var p_scale = 1.5 if p_type == 0 else (1.2 if p_type == 1 else 0.9)
+		_spawn_ruby_cluster(pos, p_scale)
 
-	# Target Constellation Planet across open space (Types 0, 1, 2 only — NO RED PLANET)
-	next_spawn_x = inter_x + gap_2
-	var target_y = randf_range(200.0, 640.0)
-	var target_p = planet_scene.instantiate()
-	target_p.global_position = Vector2(next_spawn_x, target_y)
-	target_p.type = randi() % 3 # Types 0, 1, 2 only (NO RED PLANET)
-	planets_node.add_child(target_p)
-	target_p.add_to_group("planets")
-	active_planets.append(target_p)
-	
-	_cleanup_distant_objects()
-
-func _spawn_ruby_cluster(center: Vector2) -> void:
+func _spawn_ruby_cluster(center: Vector2, planet_scale: float = 1.0) -> void:
+	var surface_r = 100.0 * planet_scale
 	var count = randi_range(2, 4)
 	for i in range(count):
 		var ruby = ruby_scene.instantiate()
 		var angle = (float(i) / count) * TAU
-		var offset = Vector2(cos(angle), sin(angle)) * randf_range(160.0, 220.0)
+		var offset = Vector2(cos(angle), sin(angle)) * (surface_r + randf_range(35.0, 75.0))
 		ruby.global_position = center + offset
 		add_child(ruby)
 		active_rubies.append(ruby)

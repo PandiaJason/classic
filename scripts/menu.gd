@@ -88,7 +88,7 @@ func _ready():
 	# Top Center Endless Mode Button
 	var top_endless_title = "endless mode"
 	if SaveSystem.endless_high_score > 0:
-		top_endless_title += " (%d)" % SaveSystem.endless_high_score
+		top_endless_title += " (%dm)" % SaveSystem.endless_high_score
 	var top_endless_btn = UIFactory.create_glass_button(top_endless_title, UIFactory.PURPLE_COLOR)
 	top_endless_btn.add_theme_font_size_override("font_size", 22)
 	top_endless_btn.pressed.connect(_on_endless_pressed)

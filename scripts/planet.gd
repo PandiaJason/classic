@@ -26,21 +26,21 @@ func setup_planet():
 	match type:
 		PlanetType.BASIC:
 			size_scale = 1.5
-			grav = 1500.0
-			planet_speed = 350.0
-			planet_jump_force = -700.0
+			grav = 1800.0
+			planet_speed = 320.0
+			planet_jump_force = -720.0
 			tex_path = "res://assets/planet_1.png"
 		PlanetType.MEDIUM:
 			size_scale = 1.2
-			grav = 980.0
-			planet_speed = 280.0
-			planet_jump_force = -550.0
+			grav = 1450.0
+			planet_speed = 250.0
+			planet_jump_force = -580.0
 			tex_path = "res://assets/planet_2.png"
 		PlanetType.SMALL:
 			size_scale = 0.9
-			grav = 980.0
-			planet_speed = 280.0
-			planet_jump_force = -550.0
+			grav = 1450.0
+			planet_speed = 210.0
+			planet_jump_force = -520.0
 			tex_path = "res://assets/planet_3.png"
 		PlanetType.CHALLENGE:
 			size_scale = 0.7
