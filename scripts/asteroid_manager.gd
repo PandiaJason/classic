@@ -27,31 +27,25 @@ func _on_spawn_timer_timeout() -> void:
 	if not GameManager.is_gameplay_started:
 		return
 		
-	# Only spawn in Level 4 and above
-	if GameManager.current_level < 4:
+	# Only spawn in Level 4 and above, or in Endless Mode
+	if not GameManager.is_endless_mode and GameManager.current_level < 4:
 		return
 	
-	_update_timer_for_level()
+	if not GameManager.is_endless_mode:
+		_update_timer_for_level()
+	else:
+		spawn_timer.wait_time = clamp(3.0 - (GameManager.endless_deliveries * 0.1), 1.2, 3.0)
 		
 	# Find the player to know where to spawn relative to them
 	var player = get_tree().get_first_node_in_group("player")
 	if not is_instance_valid(player):
 		return
 	
-	# Spawn chance increases with level
-	# Level 4-5: 30%, Level 10: 50%, Level 20: 75%, Level 30: 90%
-	var level = GameManager.current_level
-	var spawn_chance = clamp(0.2 + (level * 0.025), 0.3, 0.9)
+	var spawn_chance = 0.8 if GameManager.is_endless_mode else clamp(0.2 + (GameManager.current_level * 0.025), 0.3, 0.9)
 	if randf() > spawn_chance:
 		return
 	
-	# Number of asteroids per spawn increases with level
-	# Level 4-9: 1, Level 10-19: 1-2, Level 20-29: 1-3, Level 30: 2-3
-	var max_count = 1
-	if level >= 10:
-		max_count = 2
-	if level >= 20:
-		max_count = 3
+	var max_count = clamp(1 + int(GameManager.endless_deliveries / 5), 1, 3) if GameManager.is_endless_mode else (3 if GameManager.current_level >= 20 else (2 if GameManager.current_level >= 10 else 1))
 	
 	var count = randi_range(1, max_count)
 	for i in count:

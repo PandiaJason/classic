@@ -227,9 +227,10 @@ func _ready():
 		level_margin.add_child(level_panel)
 		add_child(level_margin)
 	
-	# Setup Glide Assist Button (only if has glides)
-	if SaveSystem.glide_count > 0:
-		glide_button = UIFactory.create_glass_button("glide x%d" % SaveSystem.glide_count, Color(0.2, 0.6, 1.0))
+	# Setup Glide Assist Button
+	if SaveSystem.glide_count > 0 or GameManager.is_endless_mode:
+		var glide_txt = "glide" if GameManager.is_endless_mode else ("glide x%d" % SaveSystem.glide_count)
+		glide_button = UIFactory.create_glass_button(glide_txt, Color(0.2, 0.6, 1.0))
 		glide_button.focus_mode = Control.FOCUS_NONE
 		glide_button.pressed.connect(_on_glide_pressed)
 		
@@ -427,18 +428,24 @@ func _on_view_map_pressed():
 	is_viewing_map = !is_viewing_map
 
 func _on_glide_pressed():
-	if is_instance_valid(player) and player.current_planet == null and SaveSystem.glide_count > 0:
-		player._wants_to_jump = true
+	if is_instance_valid(player) and player.current_planet == null:
+		if GameManager.is_endless_mode or SaveSystem.glide_count > 0:
+			player._wants_to_jump = true
 
 func _on_player_glide_used():
 	if is_instance_valid(glide_button):
-		glide_button.text = "glide x%d" % SaveSystem.glide_count
-		if SaveSystem.glide_count > 0:
+		if GameManager.is_endless_mode:
+			glide_button.text = "glide"
 			glide_button.disabled = false
 			glide_button.modulate.a = 1.0
 		else:
-			glide_button.disabled = true
-			glide_button.modulate.a = 0.3
+			glide_button.text = "glide x%d" % SaveSystem.glide_count
+			if SaveSystem.glide_count > 0:
+				glide_button.disabled = false
+				glide_button.modulate.a = 1.0
+			else:
+				glide_button.disabled = true
+				glide_button.modulate.a = 0.3
 
 func _on_speed_pressed():
 	if is_instance_valid(player) and player.current_planet == null and SaveSystem.speed_count > 0:

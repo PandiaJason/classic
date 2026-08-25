@@ -132,14 +132,14 @@ func _generate_initial_world() -> void:
 func _spawn_next_target_section() -> void:
 	var del_count = GameManager.endless_deliveries
 	
-	# Tight, nearby spacing between planets (320.0 to 420.0) so planets are close!
-	var step_distance = randf_range(320.0, 420.0)
-	var spawn_y = randf_range(380.0, 520.0)
+	# Challenging spacing between planets (480.0 to 720.0) requiring skill and glide timing!
+	var step_distance = randf_range(480.0, 720.0) + min(del_count * 15.0, 300.0)
+	var spawn_y = randf_range(220.0, 650.0)
 	
-	# Spawn 1 nearby intermediate planet (Types 0, 1, 2 only — NO RED PLANET)
+	# Spawn 1-2 intermediate gravity planets (Types 0, 1, 2 only — NO RED PLANET)
 	var inter_p = planet_scene.instantiate()
 	var inter_x = next_spawn_x + (step_distance * 0.5)
-	var inter_y = randf_range(360.0, 540.0)
+	var inter_y = randf_range(250.0, 620.0)
 	inter_p.global_position = Vector2(inter_x, inter_y)
 	inter_p.type = randi() % 3 # Types 0, 1, 2 only (NO RED)
 	planets_node.add_child(inter_p)
@@ -147,7 +147,7 @@ func _spawn_next_target_section() -> void:
 	active_planets.append(inter_p)
 	
 	# Spawn rubies orbiting intermediate planet
-	if randf() > 0.4:
+	if randf() > 0.3:
 		_spawn_ruby_cluster(Vector2(inter_x, inter_y))
 
 	# Spawn Target Planet (Types 0, 1, 2 only — NO RED PLANET)

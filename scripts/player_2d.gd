@@ -365,14 +365,15 @@ func _physics_process(delta: float) -> void:
 		last_planet = null
 		
 		# Glide assist - pull toward nearest planet (can use multiple times per flight)
-		if not is_menu_demo and SaveSystem.glide_count > 0:
+		if not is_menu_demo and (GameManager.is_endless_mode or SaveSystem.glide_count > 0):
 			var just_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or Input.is_action_just_pressed("jump") or _wants_to_jump or _joy_jump_just_pressed
 			if just_pressed:
 				var nearest = _find_nearest_planet()
 				if nearest:
 					_tether_planet = nearest
 					_glide_used_this_flight = true
-					SaveSystem.use_glide()
+					if not GameManager.is_endless_mode:
+						SaveSystem.use_glide()
 					glide_used.emit()
 					_doomed = false
 					_doom_timer = 0.0
