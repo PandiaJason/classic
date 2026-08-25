@@ -322,10 +322,16 @@ self.addEventListener('fetch', (event) => {
         else:
             html = re.sub(r'html,\s*body,\s*#canvas\s*\{[^}]*\}', new_style, html, flags=re.IGNORECASE)
 
-        # Inject game background into HTML loading screen (#status background & styled progress bar)
-        old_status_bg = """#status {
-	background-color: #242424;"""
-        new_status_bg = """#status-progress {
+        # Inject game background and progress bar CSS into HTML loading screen
+        if 'background-image: url(\'game_bg.jpg\')' not in html:
+            status_css = """<style>
+#status {
+	background-image: url('game_bg.jpg') !important;
+	background-size: cover !important;
+	background-position: center !important;
+	background-repeat: no-repeat !important;
+}
+#status-progress {
 	position: absolute !important;
 	bottom: 12% !important;
 	left: 25% !important;
@@ -356,15 +362,8 @@ self.addEventListener('fetch', (event) => {
 	text-shadow: 0 2px 6px rgba(0,0,0,0.9) !important;
 	font-weight: bold !important;
 }
-#status {
-	background-image: url('game_bg.jpg');
-	background-size: cover;
-	background-position: center;
-	background-repeat: no-repeat;"""
-        if old_status_bg in html:
-            html = html.replace(old_status_bg, new_status_bg)
-        else:
-            html = re.sub(r'#status\s*\{\s*background-color:\s*#242424;', new_status_bg, html, flags=re.IGNORECASE)
+</style>"""
+            html = re.sub(r'</head>', status_css + '\n</head>', html, count=1, flags=re.IGNORECASE)
 
         # Clean up any previously injected canvas focus/vibrate scripts to prevent duplicate/stale tags
         html = re.sub(r'<script>\s*window\.addEventListener\(\'click\',\s*\(\)\s*=>\s*\{\s*var\s+canvas\s*=\s*document\.getElementById\(\'canvas\'\);[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)

@@ -2,6 +2,11 @@ extends Control
 
 @onready var grid = $ScrollContainer/MarginContainer/GridContainer
 
+const GAME_FONT = preload("res://assets/game_font.ttf")
+const LOCK_TEX = preload("res://assets/lock_icon.png")
+const STAR_TEX = preload("res://assets/star.png")
+const BLUR_SHADER = preload("res://shaders/blur.gdshader")
+
 var total_levels = 90
 
 var ruby_label: Label
@@ -10,13 +15,15 @@ var buy_btn: Button
 var speed_count_label: Label
 var buy_speed_btn: Button
 
+var _style_cache: Dictionary = {}
+
 func _ready():
 	BgmManager.play_menu_music()
 	# Add Blur Background
 	var blur = ColorRect.new()
 	blur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var mat = ShaderMaterial.new()
-	mat.shader = load("res://shaders/blur.gdshader")
+	mat.shader = BLUR_SHADER
 	blur.material = mat
 	add_child(blur)
 	move_child(blur, 1) # Move it behind the scroll container
@@ -25,7 +32,7 @@ func _ready():
 	for i in range(1, total_levels + 1):
 		var btn = Button.new()
 		btn.custom_minimum_size = Vector2(130, 130)
-		btn.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		btn.add_theme_font_override("font", GAME_FONT)
 		btn.add_theme_font_size_override("font_size", 60)
 		
 		var is_unlocked = SaveSystem.is_level_unlocked(i)
@@ -59,7 +66,7 @@ func _ready():
 			elif i >= 11: req_stars = 15
 			elif i >= 6: req_stars = 5
 			
-			var lock_tex = load("res://assets/lock_icon.png")
+			var lock_tex = LOCK_TEX
 			if lock_tex:
 				var lock_icon = TextureRect.new()
 				lock_icon.texture = lock_tex
@@ -82,12 +89,12 @@ func _ready():
 				
 				var req_label = Label.new()
 				req_label.text = str(req_stars)
-				req_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+				req_label.add_theme_font_override("font", GAME_FONT)
 				req_label.add_theme_font_size_override("font_size", 20)
 				req_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
 				
 				var req_star_icon = TextureRect.new()
-				req_star_icon.texture = load("res://assets/star.png")
+				req_star_icon.texture = STAR_TEX
 				req_star_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 				req_star_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				req_star_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -229,6 +236,8 @@ func _ready():
 		buy_speed_btn.focus_neighbor_top = last_grid_btn.get_path()
 
 func load_style(type: String) -> StyleBoxFlat:
+	if _style_cache.has(type):
+		return _style_cache[type]
 	var style = StyleBoxFlat.new()
 	style.corner_radius_top_left = 25
 	style.corner_radius_top_right = 25
@@ -269,6 +278,7 @@ func load_style(type: String) -> StyleBoxFlat:
 		style.bg_color = Color(0.1, 0.1, 0.1, 0.8)
 		style.border_color = Color(0.3, 0.3, 0.3, 0.5)
 		
+	_style_cache[type] = style
 	return style
 
 func add_stars(parent: Control, star_count: int):

@@ -1,5 +1,7 @@
 extends Control
 
+const GAME_FONT = preload("res://assets/game_font.ttf")
+
 var _ruby_btn: TextureButton = null
 var _pulse_time: float = 0.0
 var _ruby_label: Label = null
@@ -949,7 +951,7 @@ func _on_achievements_pressed():
 			var cat_lbl = Label.new()
 			cat_lbl.text = "— " + current_cat + " —"
 			cat_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			cat_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+			cat_lbl.add_theme_font_override("font", GAME_FONT)
 			cat_lbl.add_theme_font_size_override("font_size", 20)
 			cat_lbl.add_theme_color_override("font_color", Color(0.6, 0.5, 0.8))
 			grid.add_child(cat_lbl)
@@ -1004,7 +1006,7 @@ func _on_achievements_pressed():
 		
 		var name_lbl = Label.new()
 		name_lbl.text = ach.name
-		name_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		name_lbl.add_theme_font_override("font", GAME_FONT)
 		name_lbl.add_theme_font_size_override("font_size", 22)
 		if ach.unlocked:
 			name_lbl.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
@@ -1014,7 +1016,7 @@ func _on_achievements_pressed():
 		
 		var desc_lbl = Label.new()
 		desc_lbl.text = ach.desc
-		desc_lbl.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		desc_lbl.add_theme_font_override("font", GAME_FONT)
 		desc_lbl.add_theme_font_size_override("font_size", 16)
 		desc_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 		info_vbox.add_child(desc_lbl)
