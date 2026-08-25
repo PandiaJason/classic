@@ -46,26 +46,34 @@ func sort_f32(arr: Array) -> Array:
 
 # ─── 2. Object & Spatial Morton Sorting for Game Entities ────────────────
 
-# Sorts game nodes or objects by a numeric property (e.g. distance, z-index, star score)
+# Sorts game nodes, objects, or dictionaries by a numeric key/property (e.g. distance, z-index, star score, sort_rank)
 func sort_objects_by_key(objects: Array, key_property: String, ascending: bool = true) -> Array:
 	if objects.size() <= 1:
 		return objects
 		
 	# Create index-value pair tuples
 	var pairs: Array = []
-	for obj in objects:
-		if is_instance_valid(obj) and key_property in obj:
-			var val = float(obj.get(key_property))
-			pairs.append({"val": val, "obj": obj})
+	for item in objects:
+		var has_key = false
+		var val: float = 0.0
+		if item is Dictionary and item.has(key_property):
+			has_key = true
+			val = float(item[key_property])
+		elif typeof(item) == TYPE_OBJECT and is_instance_valid(item) and key_property in item:
+			has_key = true
+			val = float(item.get(key_property))
 			
-	# Sort pairs using Radix-16 key mapping
+		if has_key:
+			pairs.append({"val": val, "item": item})
+			
+	# Sort pairs using key values
 	pairs.sort_custom(func(a, b):
 		return a.val < b.val if ascending else a.val > b.val
 	)
 	
 	var sorted_result: Array = []
 	for pair in pairs:
-		sorted_result.append(pair.obj)
+		sorted_result.append(pair.item)
 	return sorted_result
 
 # Spatial 2D Morton Z-Order Curve Encoder for Fast Broadphase & Depth Sorting
