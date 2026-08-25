@@ -103,7 +103,7 @@ func _ready():
 	top_endless_btn.pressed.connect(_on_endless_pressed)
 	
 	var top_endless_margin = MarginContainer.new()
-	top_endless_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_CENTER)
+	top_endless_margin.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	top_endless_margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	top_endless_margin.add_theme_constant_override("margin_top", 30)
 	top_endless_margin.add_child(top_endless_btn)
