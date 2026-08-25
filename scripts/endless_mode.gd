@@ -7,9 +7,9 @@ extends Node2D
 var planet_scene = preload("res://scenes/planet.tscn")
 var ruby_scene = preload("res://scenes/ruby.tscn")
 
-var current_target_planet: Node2D = null
 var next_spawn_x: float = 600.0
 var max_distance_reached: int = 0
+var last_milestone_shown: int = 0
 
 var active_planets: Array = []
 var active_rubies: Array = []
@@ -17,7 +17,6 @@ var active_rubies: Array = []
 # HUD Labels
 var score_label: Label
 var best_label: Label
-var delivery_label: Label
 
 func _ready() -> void:
 	GameManager.is_endless_mode = true
@@ -68,23 +67,11 @@ func _setup_hud() -> void:
 	best_panel.add_child(best_label)
 	hbox.add_child(best_panel)
 	
-	# Deliveries Panel
-	var del_panel = UIFactory.create_glass_panel(UIFactory.BLUE_COLOR)
-	delivery_label = Label.new()
-	delivery_label.text = "DELIVERIES: 0"
-	delivery_label.add_theme_font_override("font", preload("res://assets/game_font.ttf"))
-	delivery_label.add_theme_font_size_override("font_size", 20)
-	delivery_label.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0))
-	del_panel.add_child(delivery_label)
-	hbox.add_child(del_panel)
-	
 	GameManager.endless_score_changed.connect(_on_score_changed)
 
-func _on_score_changed(score: int, deliveries: int) -> void:
+func _on_score_changed(score: int, _deliveries: int) -> void:
 	if is_instance_valid(score_label):
 		score_label.text = "DISTANCE: %dm" % score
-	if is_instance_valid(delivery_label):
-		delivery_label.text = "DELIVERIES: %d" % deliveries
 	if score > SaveSystem.endless_high_score:
 		if is_instance_valid(best_label):
 			best_label.text = "BEST: %dm" % score
@@ -101,15 +88,16 @@ func _process(_delta: float) -> void:
 		if current_m > max_distance_reached:
 			max_distance_reached = current_m
 			GameManager.endless_score = max_distance_reached
-			GameManager.endless_score_changed.emit(max_distance_reached, GameManager.endless_deliveries)
+			GameManager.endless_score_changed.emit(max_distance_reached, 0)
 			SaveSystem.save_endless_score(max_distance_reached)
-		
-		# Check target planet delivery collision distance
-		if is_instance_valid(current_target_planet):
-			var target_radius = 110.0 * current_target_planet.scale.x
-			var dist = player.global_position.distance_to(current_target_planet.global_position)
-			if dist <= target_radius + 35.0:
-				_on_package_delivered()
+			
+			# Distance Milestone celebration popup every 500 meters!
+			var milestone = (max_distance_reached / 500) * 500
+			if milestone >= 500 and milestone > last_milestone_shown:
+				last_milestone_shown = milestone
+				_show_floating_popup("+%dm DISTANCE MILESTONE!" % milestone, player.global_position)
+				SoundManager.play_sfx("ruby")
+				GameManager.trigger_haptic(0.3, 0.6, 0.2)
 		
 		# Infinite Procedural Planet Generation as player travels forward
 		if player.global_position.x + 2200.0 > next_spawn_x:
@@ -135,13 +123,11 @@ func _generate_initial_world() -> void:
 	player.global_position = Vector2(200, 260)
 	next_spawn_x = 200.0
 	
-	# Spawn First Target Section with 650px open space gaps
+	# Spawn First Constellation Section with 650px open space gaps
 	_spawn_next_target_section()
 
 func _spawn_next_target_section() -> void:
-	var del_count = GameManager.endless_deliveries
-	
-	# Open space gap between planets (650px between each planet center)
+	# Open space gap between planets (600px - 750px between each planet center)
 	var gap_1 = randf_range(600.0, 750.0)
 	var gap_2 = randf_range(650.0, 800.0)
 	
@@ -159,16 +145,15 @@ func _spawn_next_target_section() -> void:
 	if randf() > 0.3:
 		_spawn_ruby_cluster(Vector2(inter_x, inter_y))
 
-	# Target Delivery Planet across open space
+	# Target Constellation Planet across open space (Types 0, 1, 2 only — NO RED PLANET)
 	next_spawn_x = inter_x + gap_2
 	var target_y = randf_range(200.0, 640.0)
 	var target_p = planet_scene.instantiate()
 	target_p.global_position = Vector2(next_spawn_x, target_y)
-	target_p.type = (del_count % 3) # Types 0, 1, 2 only (NO RED PLANET)
+	target_p.type = randi() % 3 # Types 0, 1, 2 only (NO RED PLANET)
 	planets_node.add_child(target_p)
 	target_p.add_to_group("planets")
 	active_planets.append(target_p)
-	current_target_planet = target_p
 	
 	_cleanup_distant_objects()
 
@@ -182,36 +167,18 @@ func _spawn_ruby_cluster(center: Vector2) -> void:
 		add_child(ruby)
 		active_rubies.append(ruby)
 
-func _on_package_delivered() -> void:
-	SoundManager.play_sfx("ruby")
-	GameManager.trigger_haptic(0.4, 0.8, 0.3)
-	
-	# Points & Repair Box
-	GameManager.endless_deliveries += 1
-	var bonus_points = 100 + (GameManager.endless_deliveries * 25)
-	GameManager.box_health = clamp(GameManager.box_health + 30.0, 0.0, 100.0)
-	GameManager.health_changed.emit(GameManager.box_health)
-	
-	# Floating Score Indicator
-	if is_instance_valid(current_target_planet):
-		_show_floating_popup("+%d DELIVERED!" % bonus_points, current_target_planet.global_position)
-		current_target_planet = null # Reset until next section target is reached
-	
-	# Generate next target section
-	_spawn_next_target_section()
-
 func _show_floating_popup(msg: String, pos: Vector2) -> void:
 	var lbl = Label.new()
 	lbl.text = msg
 	lbl.add_theme_font_override("font", preload("res://assets/game_font.ttf"))
 	lbl.add_theme_font_size_override("font_size", 28)
 	lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
-	lbl.global_position = pos + Vector2(-80, -100)
+	lbl.global_position = pos + Vector2(-100, -100)
 	add_child(lbl)
 	
 	var tween = create_tween()
-	tween.tween_property(lbl, "global_position:y", pos.y - 180, 1.0)
-	tween.parallel().tween_property(lbl, "modulate:a", 0.0, 1.0)
+	tween.tween_property(lbl, "global_position:y", pos.y - 180, 1.2)
+	tween.parallel().tween_property(lbl, "modulate:a", 0.0, 1.2)
 	tween.tween_callback(lbl.queue_free)
 
 func _cleanup_distant_objects() -> void:

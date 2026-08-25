@@ -34,18 +34,20 @@ func _on_spawn_timer_timeout() -> void:
 	if not GameManager.is_endless_mode:
 		_update_timer_for_level()
 	else:
-		spawn_timer.wait_time = clamp(3.0 - (GameManager.endless_deliveries * 0.1), 1.2, 3.0)
+		var dist_m = GameManager.endless_score
+		spawn_timer.wait_time = clamp(3.0 - (float(dist_m) / 1000.0), 0.8, 3.0)
 		
 	# Find the player to know where to spawn relative to them
 	var player = get_tree().get_first_node_in_group("player")
 	if not is_instance_valid(player):
 		return
 	
-	var spawn_chance = 0.8 if GameManager.is_endless_mode else clamp(0.2 + (GameManager.current_level * 0.025), 0.3, 0.9)
+	var spawn_chance = clamp(0.6 + (float(GameManager.endless_score) / 3000.0), 0.6, 0.95) if GameManager.is_endless_mode else clamp(0.2 + (GameManager.current_level * 0.025), 0.3, 0.9)
 	if randf() > spawn_chance:
 		return
 	
-	var max_count = clamp(1 + int(GameManager.endless_deliveries / 5), 1, 3) if GameManager.is_endless_mode else (3 if GameManager.current_level >= 20 else (2 if GameManager.current_level >= 10 else 1))
+	var dist_m = GameManager.endless_score
+	var max_count = clamp(1 + int(dist_m / 600), 1, 4) if GameManager.is_endless_mode else (3 if GameManager.current_level >= 20 else (2 if GameManager.current_level >= 10 else 1))
 	
 	var count = randi_range(1, max_count)
 	for i in count:

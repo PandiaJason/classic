@@ -64,10 +64,10 @@ func _ready():
 	if GameManager.is_endless_mode:
 		var is_new_record = SaveSystem.save_endless_score(GameManager.endless_score)
 		if is_new_record:
-			subtitle.text = "NEW DISTANCE RECORD: %dm!\n(DELIVERIES: %d)" % [GameManager.endless_score, GameManager.endless_deliveries]
+			subtitle.text = "NEW DISTANCE RECORD: %dm!" % GameManager.endless_score
 			subtitle.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 		else:
-			subtitle.text = "DISTANCE: %dm | DELIVERIES: %d\n(BEST: %dm)" % [GameManager.endless_score, GameManager.endless_deliveries, SaveSystem.endless_high_score]
+			subtitle.text = "DISTANCE: %dm\n(BEST RECORD: %dm)" % [GameManager.endless_score, SaveSystem.endless_high_score]
 			subtitle.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	else:
 		subtitle.text = game_over_reason
