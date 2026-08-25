@@ -6,10 +6,8 @@ extends Node2D
 
 var planet_scene = preload("res://scenes/planet.tscn")
 var ruby_scene = preload("res://scenes/ruby.tscn")
-var delivery_box_scene = preload("res://scenes/delivery_box.tscn")
 
 var current_target_planet: Node2D = null
-var current_target_box: Node2D = null
 var next_spawn_x: float = 600.0
 
 var active_planets: Array = []
@@ -97,8 +95,15 @@ func _process(_delta: float) -> void:
 		var target_pos = player.global_position + Vector2(200, 0)
 		camera.global_position = camera.global_position.lerp(target_pos, 0.08)
 		
+		# Check target planet delivery collision distance
+		if is_instance_valid(current_target_planet):
+			var target_radius = 110.0 * current_target_planet.scale.x
+			var dist = player.global_position.distance_to(current_target_planet.global_position)
+			if dist <= target_radius + 35.0:
+				_on_package_delivered()
+		
 		# Infinite Procedural Planet Generation as player travels forward
-		if player.global_position.x + 1800.0 > next_spawn_x:
+		if player.global_position.x + 1600.0 > next_spawn_x:
 			_spawn_next_target_section()
 
 func _generate_initial_world() -> void:
@@ -109,69 +114,61 @@ func _generate_initial_world() -> void:
 	active_planets.clear()
 	active_rubies.clear()
 		
-	# Spawn Starting Home Planet
+	# Spawn Starting Home Planet (Green / Blue, NO RED)
 	var home_p = planet_scene.instantiate()
 	home_p.global_position = Vector2(200, 450)
-	home_p.type = 0 # Big Planet
+	home_p.type = 0 # PlanetType.BASIC (Green/Blue, never Red)
 	planets_node.add_child(home_p)
 	home_p.add_to_group("planets")
 	active_planets.append(home_p)
 	
 	# Position Player on Home Planet
 	player.global_position = Vector2(200, 260)
-	next_spawn_x = 700.0
+	next_spawn_x = 550.0
 	
-	# Spawn First Delivery Target Planet
+	# Spawn First Nearby Target Section
 	_spawn_next_target_section()
 
 func _spawn_next_target_section() -> void:
 	var del_count = GameManager.endless_deliveries
 	
-	# Distance & variation grows smoothly with progression
-	var step_distance = randf_range(650.0, 950.0) + min(del_count * 15.0, 400.0)
-	var spawn_y = randf_range(250.0, 650.0)
+	# Tight, nearby spacing between planets (320.0 to 420.0) so planets are close!
+	var step_distance = randf_range(320.0, 420.0)
+	var spawn_y = randf_range(380.0, 520.0)
 	
-	# Spawn 1-2 intermediate gravity obstacle planets
-	var intermediate_count = randi_range(1, 3)
-	for i in range(intermediate_count):
-		var inter_p = planet_scene.instantiate()
-		var inter_x = next_spawn_x + (step_distance / (intermediate_count + 1)) * (i + 1)
-		var inter_y = randf_range(180.0, 720.0)
-		inter_p.global_position = Vector2(inter_x, inter_y)
-		inter_p.type = randi() % 4
-		planets_node.add_child(inter_p)
-		inter_p.add_to_group("planets")
-		active_planets.append(inter_p)
-		
-		# Spawn rubies orbiting intermediate planets
-		if randf() > 0.3:
-			_spawn_ruby_cluster(Vector2(inter_x, inter_y))
+	# Spawn 1 nearby intermediate planet (Types 0, 1, 2 only — NO RED PLANET)
+	var inter_p = planet_scene.instantiate()
+	var inter_x = next_spawn_x + (step_distance * 0.5)
+	var inter_y = randf_range(360.0, 540.0)
+	inter_p.global_position = Vector2(inter_x, inter_y)
+	inter_p.type = randi() % 3 # Types 0, 1, 2 only (NO RED)
+	planets_node.add_child(inter_p)
+	inter_p.add_to_group("planets")
+	active_planets.append(inter_p)
+	
+	# Spawn rubies orbiting intermediate planet
+	if randf() > 0.4:
+		_spawn_ruby_cluster(Vector2(inter_x, inter_y))
 
-	# Spawn Target Planet
+	# Spawn Target Planet (Types 0, 1, 2 only — NO RED PLANET)
 	next_spawn_x += step_distance
 	var target_p = planet_scene.instantiate()
 	target_p.global_position = Vector2(next_spawn_x, spawn_y)
-	target_p.type = (del_count + 1) % 4
+	target_p.type = (del_count % 3) # Types 0, 1, 2 only (NO RED)
 	planets_node.add_child(target_p)
 	target_p.add_to_group("planets")
 	active_planets.append(target_p)
 	current_target_planet = target_p
 	
-	# Connect Delivery Trigger on Target Planet entry
-	target_p.body_entered.connect(func(body):
-		if body == player and target_p == current_target_planet:
-			_on_package_delivered()
-	)
-		
 	# Cleanup old planets far behind player to preserve 60 FPS
 	_cleanup_distant_objects()
 
 func _spawn_ruby_cluster(center: Vector2) -> void:
-	var count = randi_range(2, 4)
+	var count = randi_range(2, 3)
 	for i in range(count):
 		var ruby = ruby_scene.instantiate()
 		var angle = (float(i) / count) * TAU
-		var offset = Vector2(cos(angle), sin(angle)) * randf_range(160.0, 220.0)
+		var offset = Vector2(cos(angle), sin(angle)) * randf_range(140.0, 180.0)
 		ruby.global_position = center + offset
 		add_child(ruby)
 		active_rubies.append(ruby)
@@ -190,15 +187,12 @@ func _on_package_delivered() -> void:
 	# Floating Score Indicator
 	if is_instance_valid(current_target_planet):
 		_show_floating_popup("+%d DELIVERED!" % bonus_points, current_target_planet.global_position)
+		current_target_planet = null # Reset until next section target is reached
 	
 	# Check High Score
 	SaveSystem.save_endless_score(GameManager.endless_score)
 	
-	# Despawn completed box
-	if is_instance_valid(current_target_box):
-		current_target_box.queue_free()
-		
-	# Generate next target section
+	# Generate next nearby target section
 	_spawn_next_target_section()
 
 func _show_floating_popup(msg: String, pos: Vector2) -> void:
