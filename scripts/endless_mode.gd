@@ -33,7 +33,7 @@ func _ready() -> void:
 
 func _setup_hud() -> void:
 	var hud_layer = CanvasLayer.new()
-	hud_layer.layer = 10
+	hud_layer.layer = 2 # Behind InGameUI (layer = 20)
 	add_child(hud_layer)
 	
 	var margin = MarginContainer.new()
@@ -45,13 +45,16 @@ func _setup_hud() -> void:
 	hud_layer.add_child(margin)
 	
 	var hbox = HBoxContainer.new()
+	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.add_theme_constant_override("separation", 25)
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	margin.add_child(hbox)
 	
 	# Distance Panel (Score = Distance in meters)
 	var score_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
+	score_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	score_label = Label.new()
+	score_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	score_label.text = "DISTANCE: 0m"
 	score_label.add_theme_font_override("font", preload("res://assets/game_font.ttf"))
 	score_label.add_theme_font_size_override("font_size", 24)
@@ -61,7 +64,9 @@ func _setup_hud() -> void:
 	
 	# Best Distance Panel
 	var best_panel = UIFactory.create_glass_panel(UIFactory.PURPLE_COLOR)
+	best_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	best_label = Label.new()
+	best_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	best_label.text = "BEST: %dm" % SaveSystem.endless_high_score
 	best_label.add_theme_font_override("font", preload("res://assets/game_font.ttf"))
 	best_label.add_theme_font_size_override("font_size", 20)

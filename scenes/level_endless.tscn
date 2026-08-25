@@ -37,5 +37,5 @@ zoom = Vector2(0.6, 0.6)
 stream = ExtResource("5_bgm")
 
 [node name="InGameUI" type="CanvasLayer" parent="."]
-layer = 5
+layer = 20
 script = ExtResource("6_ui")
