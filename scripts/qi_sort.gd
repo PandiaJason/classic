@@ -138,28 +138,29 @@ func _radix16_sort_u32(arr: Array) -> Array:
 	var dst: Array = []
 	dst.resize(n)
 	
-	# 2 Passes of 16-bit Radix (Radix-65536)
-	for pass_num in range(2):
-		var shift = pass_num * 16
-		var count: Array = []
-		count.resize(65536)
+	# 4 Passes of 8-bit Radix (Radix-256) — Ultra lightweight 256-bin histogram
+	var count: Array = []
+	count.resize(256)
+	
+	for pass_num in range(4):
+		var shift = pass_num * 8
 		count.fill(0)
 		
-		# Build histograms
+		# Build histogram
 		for i in range(n):
-			var key = (src[i] >> shift) & 0xFFFF
+			var key = (src[i] >> shift) & 0xFF
 			count[key] += 1
 			
 		# Prefix sums
 		var total = 0
-		for i in range(65536):
+		for i in range(256):
 			var c = count[i]
 			count[i] = total
 			total += c
 			
 		# Scatter out-of-place
 		for i in range(n):
-			var key = (src[i] >> shift) & 0xFFFF
+			var key = (src[i] >> shift) & 0xFF
 			dst[count[key]] = src[i]
 			count[key] += 1
 			
