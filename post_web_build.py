@@ -211,27 +211,29 @@ self.addEventListener('fetch', (event) => {
                 navigator.serviceWorker.register('./sw.js')
                     .then((reg) => {
                         console.log('Service Worker registered successfully:', reg.scope);
+                        reg.update();
                         reg.addEventListener('updatefound', () => {
                             const newWorker = reg.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('New update installed. Clearing client caches and reloading...');
-                                    if (window.caches) {
-                                        caches.keys().then((names) => {
-                                            Promise.all(names.map(name => caches.delete(name))).then(() => {
-                                                window.location.reload();
-                                            });
-                                        }).catch(() => {
-                                            window.location.reload();
-                                        });
-                                    } else {
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        console.log('New update installed. Auto-reloading page...');
                                         window.location.reload();
                                     }
-                                }
-                            });
+                                });
+                            }
                         });
                     })
                     .catch((err) => console.error('Service Worker registration failed:', err));
+                    
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        console.log('Controller changed. Auto-reloading live application...');
+                        window.location.reload();
+                    }
+                });
             });
         }
     </script>\n</head>"""
