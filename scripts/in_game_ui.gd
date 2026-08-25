@@ -212,19 +212,20 @@ func _ready():
 	add_child(hint_margin)
 	
 	# Setup Level Indicator
-	var level_panel = UIFactory.create_glass_panel()
-	var level_label = Label.new()
-	level_label.text = "level %d" % GameManager.current_level
-	level_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
-	level_label.add_theme_font_size_override("font_size", 40)
-	level_panel.add_child(level_label)
-	
-	var level_margin = MarginContainer.new()
-	level_margin.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	level_margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	level_margin.add_theme_constant_override("margin_top", 20)
-	level_margin.add_child(level_panel)
-	add_child(level_margin)
+	if not GameManager.is_endless_mode:
+		var level_panel = UIFactory.create_glass_panel()
+		var level_label = Label.new()
+		level_label.text = "level %d" % GameManager.current_level
+		level_label.add_theme_font_override("font", load("res://assets/game_font.ttf"))
+		level_label.add_theme_font_size_override("font_size", 40)
+		level_panel.add_child(level_label)
+		
+		var level_margin = MarginContainer.new()
+		level_margin.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+		level_margin.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		level_margin.add_theme_constant_override("margin_top", 20)
+		level_margin.add_child(level_panel)
+		add_child(level_margin)
 	
 	# Setup Glide Assist Button (only if has glides)
 	if SaveSystem.glide_count > 0:
