@@ -135,34 +135,33 @@ func _generate_initial_world() -> void:
 	player.global_position = Vector2(200, 260)
 	next_spawn_x = 200.0
 	
-	# Spawn First Constellation Section with Level 21 style open space layout
+	# Spawn First Target Section with 650px open space gaps
 	_spawn_next_target_section()
 
 func _spawn_next_target_section() -> void:
 	var del_count = GameManager.endless_deliveries
 	
-	# Level 21 constellation style challenging spacing (650px - 950px step distance)
-	var step_distance = randf_range(650.0, 950.0)
-	var target_y = randf_range(180.0, 680.0)
+	# Open space gap between planets (650px between each planet center)
+	var gap_1 = randf_range(600.0, 750.0)
+	var gap_2 = randf_range(650.0, 800.0)
 	
-	# Spawn 2-3 constellation planets at different Y heights (140px to 700px)
-	var cluster_count = randi_range(2, 3)
-	for i in range(cluster_count):
-		var p = planet_scene.instantiate()
-		var px = next_spawn_x + (step_distance * (float(i + 1) / (cluster_count + 1)))
-		var py = randf_range(140.0, 700.0)
-		p.global_position = Vector2(px, py)
-		p.type = randi() % 3 # Types 0, 1, 2 only (NO RED PLANET)
-		planets_node.add_child(p)
-		p.add_to_group("planets")
-		active_planets.append(p)
-		
-		# Spawn rubies in space
-		if randf() > 0.35:
-			_spawn_ruby_cluster(Vector2(px, py))
+	# Intermediate planet in open space (Types 0, 1, 2 only — NO RED PLANET)
+	var inter_p = planet_scene.instantiate()
+	var inter_x = next_spawn_x + gap_1
+	var inter_y = randf_range(180.0, 680.0)
+	inter_p.global_position = Vector2(inter_x, inter_y)
+	inter_p.type = randi() % 3 # Types 0, 1, 2 only (NO RED PLANET)
+	planets_node.add_child(inter_p)
+	inter_p.add_to_group("planets")
+	active_planets.append(inter_p)
+	
+	# Spawn rubies in space near intermediate planet
+	if randf() > 0.3:
+		_spawn_ruby_cluster(Vector2(inter_x, inter_y))
 
-	# Spawn Target Delivery Planet across open space
-	next_spawn_x += step_distance
+	# Target Delivery Planet across open space
+	next_spawn_x = inter_x + gap_2
+	var target_y = randf_range(200.0, 640.0)
 	var target_p = planet_scene.instantiate()
 	target_p.global_position = Vector2(next_spawn_x, target_y)
 	target_p.type = (del_count % 3) # Types 0, 1, 2 only (NO RED PLANET)
