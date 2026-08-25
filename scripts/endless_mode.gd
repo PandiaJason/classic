@@ -103,7 +103,7 @@ func _process(_delta: float) -> void:
 				_on_package_delivered()
 		
 		# Infinite Procedural Planet Generation as player travels forward
-		if player.global_position.x + 1600.0 > next_spawn_x:
+		if player.global_position.x + 2200.0 > next_spawn_x:
 			_spawn_next_target_section()
 
 func _generate_initial_world() -> void:
@@ -124,33 +124,33 @@ func _generate_initial_world() -> void:
 	
 	# Position Player on Home Planet
 	player.global_position = Vector2(200, 260)
-	next_spawn_x = 550.0
+	next_spawn_x = 200.0
 	
-	# Spawn First Nearby Target Section
+	# Spawn First Target Section with real space gaps
 	_spawn_next_target_section()
 
 func _spawn_next_target_section() -> void:
 	var del_count = GameManager.endless_deliveries
 	
-	# Challenging spacing between planets (480.0 to 720.0) requiring skill and glide timing!
-	var step_distance = randf_range(480.0, 720.0) + min(del_count * 15.0, 300.0)
-	var spawn_y = randf_range(220.0, 650.0)
+	# Wide, challenging space gap between planet gravity fields (900px to 1300px)
+	var step_distance = randf_range(900.0, 1300.0) + min(del_count * 20.0, 400.0)
+	var spawn_y = randf_range(250.0, 620.0)
 	
-	# Spawn 1-2 intermediate gravity planets (Types 0, 1, 2 only — NO RED PLANET)
+	# Spawn 1 intermediate gravity planet in open space (Types 0, 1, 2 only — NO RED PLANET)
 	var inter_p = planet_scene.instantiate()
 	var inter_x = next_spawn_x + (step_distance * 0.5)
-	var inter_y = randf_range(250.0, 620.0)
+	var inter_y = randf_range(280.0, 580.0)
 	inter_p.global_position = Vector2(inter_x, inter_y)
 	inter_p.type = randi() % 3 # Types 0, 1, 2 only (NO RED)
 	planets_node.add_child(inter_p)
 	inter_p.add_to_group("planets")
 	active_planets.append(inter_p)
 	
-	# Spawn rubies orbiting intermediate planet
+	# Spawn rubies orbiting intermediate planet in space
 	if randf() > 0.3:
 		_spawn_ruby_cluster(Vector2(inter_x, inter_y))
 
-	# Spawn Target Planet (Types 0, 1, 2 only — NO RED PLANET)
+	# Spawn Target Planet across open space (Types 0, 1, 2 only — NO RED PLANET)
 	next_spawn_x += step_distance
 	var target_p = planet_scene.instantiate()
 	target_p.global_position = Vector2(next_spawn_x, spawn_y)
@@ -164,11 +164,11 @@ func _spawn_next_target_section() -> void:
 	_cleanup_distant_objects()
 
 func _spawn_ruby_cluster(center: Vector2) -> void:
-	var count = randi_range(2, 3)
+	var count = randi_range(2, 4)
 	for i in range(count):
 		var ruby = ruby_scene.instantiate()
 		var angle = (float(i) / count) * TAU
-		var offset = Vector2(cos(angle), sin(angle)) * randf_range(140.0, 180.0)
+		var offset = Vector2(cos(angle), sin(angle)) * randf_range(160.0, 220.0)
 		ruby.global_position = center + offset
 		add_child(ruby)
 		active_rubies.append(ruby)
@@ -192,7 +192,7 @@ func _on_package_delivered() -> void:
 	# Check High Score
 	SaveSystem.save_endless_score(GameManager.endless_score)
 	
-	# Generate next nearby target section
+	# Generate next target section
 	_spawn_next_target_section()
 
 func _show_floating_popup(msg: String, pos: Vector2) -> void:
