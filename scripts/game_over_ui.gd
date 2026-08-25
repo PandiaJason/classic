@@ -64,7 +64,7 @@ func _ready():
 	if GameManager.is_endless_mode:
 		var is_new_record = SaveSystem.save_endless_score(GameManager.endless_score)
 		if is_new_record:
-			subtitle.text = "NEW HIGH SCORE: %d! 🏆\n(DELIVERIES: %d)" % [GameManager.endless_score, GameManager.endless_deliveries]
+			subtitle.text = "NEW HIGH SCORE: %d!\n(DELIVERIES: %d)" % [GameManager.endless_score, GameManager.endless_deliveries]
 			subtitle.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 		else:
 			subtitle.text = "SCORE: %d | DELIVERIES: %d\n(BEST: %d)" % [GameManager.endless_score, GameManager.endless_deliveries, SaveSystem.endless_high_score]
@@ -90,8 +90,6 @@ func _ready():
 	
 	vbox.add_child(hbox)
 	
-	menu_btn.focus_neighbor_right = retry_btn.get_path()
-	retry_btn.focus_neighbor_left = menu_btn.get_path()
 	panel.add_child(vbox)
 	
 	var center = CenterContainer.new()
@@ -100,6 +98,8 @@ func _ready():
 	center.add_child(panel)
 	add_child(center)
 	
+	menu_btn.focus_neighbor_right = retry_btn.get_path()
+	retry_btn.focus_neighbor_left = menu_btn.get_path()
 	retry_btn.grab_focus()
 
 func _on_retry_pressed():

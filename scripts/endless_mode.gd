@@ -96,11 +96,18 @@ func _process(_delta: float) -> void:
 		# Smooth camera follow ahead of player
 		var target_pos = player.global_position + Vector2(200, 0)
 		camera.global_position = camera.global_position.lerp(target_pos, 0.08)
+		
+		# Infinite Procedural Planet Generation as player travels forward
+		if player.global_position.x + 1800.0 > next_spawn_x:
+			_spawn_next_target_section()
 
 func _generate_initial_world() -> void:
 	# Clear existing
 	for child in planets_node.get_children():
 		child.queue_free()
+		
+	active_planets.clear()
+	active_rubies.clear()
 		
 	# Spawn Starting Home Planet
 	var home_p = planet_scene.instantiate()
@@ -120,16 +127,16 @@ func _generate_initial_world() -> void:
 func _spawn_next_target_section() -> void:
 	var del_count = GameManager.endless_deliveries
 	
-	# Distance grows slightly with deliveries
-	var step_distance = randf_range(650.0, 950.0) + min(del_count * 20.0, 300.0)
+	# Distance & variation grows smoothly with progression
+	var step_distance = randf_range(650.0, 950.0) + min(del_count * 15.0, 400.0)
 	var spawn_y = randf_range(250.0, 650.0)
 	
 	# Spawn 1-2 intermediate gravity obstacle planets
-	var intermediate_count = randi_range(1, 2)
+	var intermediate_count = randi_range(1, 3)
 	for i in range(intermediate_count):
 		var inter_p = planet_scene.instantiate()
 		var inter_x = next_spawn_x + (step_distance / (intermediate_count + 1)) * (i + 1)
-		var inter_y = randf_range(200.0, 700.0)
+		var inter_y = randf_range(180.0, 720.0)
 		inter_p.global_position = Vector2(inter_x, inter_y)
 		inter_p.type = randi() % 4
 		planets_node.add_child(inter_p)
@@ -150,20 +157,11 @@ func _spawn_next_target_section() -> void:
 	active_planets.append(target_p)
 	current_target_planet = target_p
 	
-	# Spawn Delivery Box on Target Planet
-	var box = delivery_box_scene.instantiate()
-	box.global_position = Vector2(next_spawn_x, spawn_y - 120)
-	add_child(box)
-	current_target_box = box
-	
-	# Connect Delivery Trigger
-	if box.has_signal("delivered"):
-		box.delivered.connect(_on_package_delivered)
-	else:
-		box.body_entered.connect(func(body):
-			if body == player:
-				_on_package_delivered()
-		)
+	# Connect Delivery Trigger on Target Planet entry
+	target_p.body_entered.connect(func(body):
+		if body == player and target_p == current_target_planet:
+			_on_package_delivered()
+	)
 		
 	# Cleanup old planets far behind player to preserve 60 FPS
 	_cleanup_distant_objects()
@@ -190,7 +188,8 @@ func _on_package_delivered() -> void:
 	GameManager.health_changed.emit(GameManager.box_health)
 	
 	# Floating Score Indicator
-	_show_floating_popup("+%d DELIVERED!" % bonus_points, current_target_planet.global_position)
+	if is_instance_valid(current_target_planet):
+		_show_floating_popup("+%d DELIVERED!" % bonus_points, current_target_planet.global_position)
 	
 	# Check High Score
 	SaveSystem.save_endless_score(GameManager.endless_score)
@@ -219,7 +218,7 @@ func _show_floating_popup(msg: String, pos: Vector2) -> void:
 func _cleanup_distant_objects() -> void:
 	if not is_instance_valid(player):
 		return
-	var min_x = player.global_position.x - 1800.0
+	var min_x = player.global_position.x - 2200.0
 	
 	for i in range(active_planets.size() - 1, -1, -1):
 		var p = active_planets[i]
