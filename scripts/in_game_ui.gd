@@ -17,6 +17,7 @@ var level_max = Vector2.ZERO
 var ruby_label: Label
 var health_label: Label
 var view_map_btn: Button
+var pause_button: Button
 var hint_button: Button
 var hint_used: bool = false
 var map_timer = null
@@ -179,12 +180,12 @@ func _ready():
 	view_map_btn.pressed.connect(_on_view_map_pressed)
 	top_right_hbox.add_child(view_map_btn)
 	
-	var pause_btn = UIFactory.create_glass_button("pause", UIFactory.GOLD_COLOR)
-	pause_btn.focus_mode = Control.FOCUS_NONE
-	pause_btn.pressed.connect(func():
+	pause_button = UIFactory.create_glass_button("pause", UIFactory.GOLD_COLOR)
+	pause_button.focus_mode = Control.FOCUS_NONE
+	pause_button.pressed.connect(func():
 		toggle_pause()
 	)
-	top_right_hbox.add_child(pause_btn)
+	top_right_hbox.add_child(pause_button)
 	
 	var map_margin = MarginContainer.new()
 	map_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -463,14 +464,32 @@ func _on_player_speed_used():
 			speed_button.disabled = true
 			speed_button.modulate.a = 0.3
 
+func _is_pos_inside_control(pos: Vector2, ctrl: Control) -> bool:
+	if is_instance_valid(ctrl) and ctrl.is_visible_in_tree():
+		return ctrl.get_global_rect().has_point(pos)
+	return false
+
 func _on_jump_zone_gui_input(event: InputEvent):
 	if not is_instance_valid(player):
 		return
 	if not GameManager.is_gameplay_started:
 		return
+	var touch_pos = Vector2.ZERO
+	var is_press = false
 	if event is InputEventScreenTouch and event.pressed:
-		player._wants_to_jump = true
+		touch_pos = event.position
+		is_press = true
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		touch_pos = event.position
+		is_press = true
+		
+	if is_press:
+		if _is_pos_inside_control(touch_pos, view_map_btn) \
+		or _is_pos_inside_control(touch_pos, pause_button) \
+		or _is_pos_inside_control(touch_pos, hint_button) \
+		or _is_pos_inside_control(touch_pos, glide_button) \
+		or _is_pos_inside_control(touch_pos, speed_button):
+			return
 		player._wants_to_jump = true
 
 func _on_speed_zone_gui_input(event: InputEvent):
@@ -478,9 +497,22 @@ func _on_speed_zone_gui_input(event: InputEvent):
 		return
 	if not GameManager.is_gameplay_started:
 		return
+	var touch_pos = Vector2.ZERO
+	var is_press = false
 	if event is InputEventScreenTouch and event.pressed:
-		player._wants_to_speed = true
+		touch_pos = event.position
+		is_press = true
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		touch_pos = event.position
+		is_press = true
+		
+	if is_press:
+		if _is_pos_inside_control(touch_pos, view_map_btn) \
+		or _is_pos_inside_control(touch_pos, pause_button) \
+		or _is_pos_inside_control(touch_pos, hint_button) \
+		or _is_pos_inside_control(touch_pos, glide_button) \
+		or _is_pos_inside_control(touch_pos, speed_button):
+			return
 		player._wants_to_speed = true
 
 func _unhandled_input(event: InputEvent) -> void:
