@@ -137,8 +137,8 @@ func _ready() -> void:
 	detector.area_entered.connect(_on_gravity_area_entered)
 	detector.area_exited.connect(_on_gravity_area_exited)
 	
-	# Pre-fetch planets list once to avoid repeated scene tree lookups
-	_planets_list = get_tree().get_nodes_in_group("planets")
+	# Pre-fetch planets list once and sort spatially using QiSort 2D Morton Z-Curve Engine
+	_planets_list = QiSort.spatial_morton_sort_2d(get_tree().get_nodes_in_group("planets"))
 	# M9: Precompute world bounds once instead of every frame
 	_precompute_world_bounds()
 

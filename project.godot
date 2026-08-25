@@ -28,6 +28,7 @@ BgmManager="*res://scripts/bgm_manager.gd"
 SceneTransition="*res://scripts/scene_transition.gd"
 SoundManager="*res://scripts/sound_manager.gd"
 AchievementManager="*res://scripts/achievement_manager.gd"
+QiSort="*res://scripts/qi_sort.gd"
 
 [display]
 

@@ -369,18 +369,20 @@ func _show_next_toast() -> void:
 # ─── Achievements Screen Data ──────────────────────────────────────────
 
 func get_all_achievements() -> Array:
-	# Returns sorted array of {id, name, desc, icon, reward, target, category, unlocked, progress}
+	# Returns array of {id, name, desc, icon, reward, target, category, unlocked, progress}
 	var result = []
-	var category_order = ["progress", "rubies", "survival", "skill", "special"]
-	for cat in category_order:
-		for id in _defs:
-			if _defs[id].category == cat:
-				var entry = _defs[id].duplicate()
-				entry["id"] = id
-				entry["unlocked"] = is_unlocked(id)
-				entry["progress"] = get_progress(id)
-				result.append(entry)
-	return result
+	var cat_weights = {"progress": 1, "rubies": 2, "survival": 3, "skill": 4, "special": 5}
+	for id in _defs:
+		var entry = _defs[id].duplicate()
+		entry["id"] = id
+		entry["unlocked"] = is_unlocked(id)
+		entry["progress"] = get_progress(id)
+		# Assign numerical sort rank for QiSort (unlocked status + category weight)
+		entry["sort_rank"] = (100 if entry["unlocked"] else 0) + cat_weights.get(entry["category"], 9)
+		result.append(entry)
+		
+	# Use QiSort high-throughput key sorter
+	return QiSort.sort_objects_by_key(result, "sort_rank", true)
 
 func write_to_config(config: ConfigFile) -> void:
 	for id in _unlocked:
