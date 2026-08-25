@@ -542,7 +542,8 @@ func is_heading_towards_any_planet() -> bool:
 		return true # Too slow to judge — give benefit of the doubt
 	var v_dir = velocity.normalized()
 	var p_pos = global_position
-	for p in _planets_list:
+	var live_planets = get_tree().get_nodes_in_group("planets")
+	for p in live_planets:
 		if not is_instance_valid(p):
 			continue
 		var to_planet = p.global_position - p_pos
@@ -557,8 +558,8 @@ func is_heading_towards_any_planet() -> bool:
 		var grav_shape = p.get_node_or_null("GravityArea/CollisionShape2D")
 		if grav_shape and grav_shape.shape is CircleShape2D:
 			grav_radius = grav_shape.shape.radius * p.scale.x
-		# 100px generous buffer so we don't trigger too early on near-misses
-		if dist_to_line < grav_radius + 100.0:
+		# 200px generous buffer so we don't trigger too early on near-misses
+		if dist_to_line < grav_radius + 200.0:
 			return true
 	return false
 
@@ -580,11 +581,13 @@ func calculate_trajectory():
 	var sim_delta = 0.05
 	trajectory_points.append(sim_pos)
 	
+	var live_planets = get_tree().get_nodes_in_group("planets")
 	for i in range(120): # Simulate 6 seconds
 		var nearest_planet = null
 		var nearest_surface_dist = INF
 		
-		for p in _planets_list:
+		for p in live_planets:
+			if not is_instance_valid(p): continue
 			var dist_to_center = sim_pos.distance_to(p.global_position)
 			
 			# Check if we are within this planet's gravity field
