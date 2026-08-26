@@ -117,16 +117,17 @@ func _process(delta: float) -> void:
 			# Camera speed scales with distance (synchronized with player endless_scale)
 			var endless_scale = 1.0 + min(float(max_distance_reached) / 1000.0 * 0.25, 0.75)
 			var cam_speed = 135.0 * endless_scale
+			# Smooth camera movement: steadily auto-scrolls without revolving or wobbling with player
 			var target_cam_x = camera.global_position.x + cam_speed * delta
-			
-			# If player moves ahead, keep player in the right-center portion of the view
-			target_cam_x = max(target_cam_x, player.global_position.x - 180.0)
-			
-			# Smooth vertical tracking: lock to planet center while on planet, follow player in space
 			var target_cam_y: float
-			if is_instance_valid(player.current_planet):
+			
+			if is_instance_valid(player.current_planet) and player.on_ground:
+				# While riding a planet, lock Y to planet center and let camera scroll forward steadily.
+				# The camera NEVER wobbles or revolves with the orbiting scooter!
 				target_cam_y = player.current_planet.global_position.y
 			else:
+				# In outer space flight: follow player forward and vertically
+				target_cam_x = max(target_cam_x, player.global_position.x - 180.0)
 				target_cam_y = player.global_position.y
 				
 			var new_y = lerp(camera.global_position.y, target_cam_y, 4.0 * delta)
