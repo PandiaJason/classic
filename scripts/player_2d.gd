@@ -352,19 +352,19 @@ func _physics_process(delta: float) -> void:
 				# Override the vertical velocity entirely to launch upwards (scales with endless_scale for identical arc)
 				var actual_jump = jump_force * endless_scale * (1.25 if is_speed_buff_active else 1.0)
 				velocity = (surface_right * current_speed * forward_direction) + (surface_up * -actual_jump)
-				SoundManager.play_sfx("jump")
 		else:
 			# Add a tiny bit of air control / forward momentum
 			velocity += surface_right * current_speed * forward_direction * delta * 0.5
 			
 		up_direction = surface_up
-		floor_constant_speed = false
+		floor_max_angle = PI
+		floor_constant_speed = true
 		
 		# If we just jumped, we MUST disable snapping so we can leave the ground!
 		if not is_menu_demo and has_jumped:
 			floor_snap_length = 0.0
 		else:
-			floor_snap_length = (15.0 * endless_scale) if on_ground else 0.0
+			floor_snap_length = (30.0 * endless_scale) if on_ground else 0.0
 			
 		move_and_slide()
 		
