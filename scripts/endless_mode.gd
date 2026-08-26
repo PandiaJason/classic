@@ -113,8 +113,9 @@ func _process(delta: float) -> void:
 			var ui = get_tree().get_first_node_in_group("in_game_ui")
 			var is_map = (ui != null and "is_viewing_map" in ui and ui.is_viewing_map)
 			
-			# Camera speed scales with distance (smooth auto-scroll)
-			var cam_speed = 150.0 + min(float(max_distance_reached) * 0.12, 280.0)
+			# Camera speed scales with distance (synchronized with player endless_scale)
+			var endless_scale = 1.0 + min(float(max_distance_reached) / 1000.0 * 0.25, 0.75)
+			var cam_speed = 135.0 * endless_scale
 			var target_cam_x = camera.global_position.x + cam_speed * delta
 			
 			# If player moves ahead, keep player in the right-center portion of the view

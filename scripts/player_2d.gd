@@ -252,20 +252,24 @@ func _physics_process(delta: float) -> void:
 			if "gravity_area" in current_planet and current_planet.gravity_area:
 				gravity_strength = current_planet.gravity_area.gravity
 				
+			var cur_endless_scale = (1.0 + min(float(GameManager.endless_score) / 1000.0 * 0.25, 0.75)) if GameManager.is_endless_mode else 1.0
+			var planet_top_speed = max_speed * cur_endless_scale * (1.8 if is_speed_buff_active else 1.0)
+			
 			# Guarantee capture: kill outward velocity and cap tangent velocity
 			var outward_speed = velocity.dot(surface_up)
 			if outward_speed > 0:
 				velocity -= surface_up * outward_speed
 				
 			var tangent_speed = velocity.dot(surface_right)
-			if abs(tangent_speed) > current_speed:
-				velocity -= surface_right * (tangent_speed - (current_speed * sign(tangent_speed)))
+			if abs(tangent_speed) > planet_top_speed:
+				velocity -= surface_right * (tangent_speed - (planet_top_speed * sign(tangent_speed)))
 				
 		last_planet = current_planet
 		
-		# 4. Handle auto-drive (stable speed without artificial endless multiplier)
-		var actual_max_speed = max_speed * (1.8 if is_speed_buff_active else 1.0)
-		current_speed += brake_force * (1.0 if is_speed_buff_active else 0.5) * delta
+		# 4. Handle auto-drive with Option 2 (g ∝ v^2) zero-float scaling in Endless Mode
+		var endless_scale = (1.0 + min(float(GameManager.endless_score) / 1000.0 * 0.25, 0.75)) if GameManager.is_endless_mode else 1.0
+		var actual_max_speed = max_speed * endless_scale * (1.8 if is_speed_buff_active else 1.0)
+		current_speed += brake_force * endless_scale * (1.0 if is_speed_buff_active else 0.5) * delta
 		current_speed = clamp(current_speed, 0.0, actual_max_speed)
 		
 		# Re-evaluate on_ground using cached dist_to_center from above
@@ -290,12 +294,12 @@ func _physics_process(delta: float) -> void:
 			return
 
 		
-		# Create a falling-gravity well: gravity is much stronger when falling towards the planet
-		# This guarantees we get captured by the planet instead of slingshotting past it,
-		# while still allowing us to jump high when moving away from the planet.
-		var applied_gravity = gravity_strength
+		# Create a falling-gravity well: gravity is much stronger when falling towards the planet.
+		# Option 2: Gravity scales with endless_scale^2 (g ∝ v^2) so centrifugal force (v^2/r) is perfectly canceled!
+		var endless_grav_scale = endless_scale * endless_scale
+		var applied_gravity = gravity_strength * endless_grav_scale
 		if not on_ground and velocity.dot(gravity_dir) > 0:
-			applied_gravity = gravity_strength * 3.0
+			applied_gravity = gravity_strength * endless_grav_scale * 3.0
 		
 		# Always apply gravity to ensure we stay pushed against the floor
 		velocity += gravity_dir * applied_gravity * delta
@@ -340,8 +344,8 @@ func _physics_process(delta: float) -> void:
 				# Jump haptic vibration
 				GameManager.trigger_haptic(0.1, 0.15, 0.08)
 				
-				# Override the vertical velocity entirely to launch upwards
-				var actual_jump = jump_force * (1.25 if is_speed_buff_active else 1.0)
+				# Override the vertical velocity entirely to launch upwards (scales with endless_scale for identical arc)
+				var actual_jump = jump_force * endless_scale * (1.25 if is_speed_buff_active else 1.0)
 				velocity = (surface_right * current_speed * forward_direction) + (surface_up * -actual_jump)
 				SoundManager.play_sfx("jump")
 		else:
@@ -355,7 +359,7 @@ func _physics_process(delta: float) -> void:
 		if not is_menu_demo and has_jumped:
 			floor_snap_length = 0.0
 		else:
-			floor_snap_length = 15.0 if on_ground else 0.0
+			floor_snap_length = (15.0 * endless_scale) if on_ground else 0.0
 			
 		move_and_slide()
 		
@@ -574,7 +578,9 @@ func calculate_trajectory():
 	var surface_right = Vector2.RIGHT.rotated(target_rotation)
 	
 	# Simulate a jump: tangential speed + upward launch
-	var sim_vel = (surface_right * current_speed * forward_direction) + (surface_up * -jump_force)
+	var sim_endless_scale = (1.0 + min(float(GameManager.endless_score) / 1000.0 * 0.25, 0.75)) if GameManager.is_endless_mode else 1.0
+	var sim_jump = jump_force * sim_endless_scale * (1.25 if is_speed_buff_active else 1.0)
+	var sim_vel = (surface_right * current_speed * forward_direction) + (surface_up * -sim_jump)
 	
 	var sim_delta = 0.05
 	trajectory_points.append(sim_pos)
@@ -604,9 +610,9 @@ func calculate_trajectory():
 		if nearest_planet:
 			var p_diff = nearest_planet.global_position - sim_pos
 			var g_dir = p_diff.normalized()
-			var sim_gravity = gravity_strength
+			var sim_gravity = gravity_strength * (sim_endless_scale * sim_endless_scale)
 			if "gravity_area" in nearest_planet and nearest_planet.gravity_area:
-				sim_gravity = nearest_planet.gravity_area.gravity
+				sim_gravity = nearest_planet.gravity_area.gravity * (sim_endless_scale * sim_endless_scale)
 			# Apply stronger gravity when falling toward planet (matches physics_process)
 			var multiplier = 3.0 if sim_vel.dot(g_dir) > 0 else 1.0
 			sim_vel += g_dir * sim_gravity * multiplier * sim_delta
