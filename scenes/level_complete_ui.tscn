@@ -20,7 +20,7 @@ border_color = Color(0.1, 0.5, 0.1, 1)
 
 [node name="LevelCompleteUI" type="CanvasLayer"]
 process_mode = 3
-layer = 10
+layer = 100
 script = ExtResource("1_script")
 
 [node name="Overlay" type="ColorRect" parent="."]

@@ -263,10 +263,9 @@ func _physics_process(delta: float) -> void:
 				
 		last_planet = current_planet
 		
-		# 4. Handle auto-drive (speed scales with distance in Endless Mode)
-		var endless_speed_bonus = (1.0 + min(float(GameManager.endless_score) / 1000.0 * 0.4, 1.2)) if GameManager.is_endless_mode else 1.0
-		var actual_max_speed = max_speed * endless_speed_bonus * (1.8 if is_speed_buff_active else 1.0)
-		current_speed += brake_force * endless_speed_bonus * (1.0 if is_speed_buff_active else 0.5) * delta
+		# 4. Handle auto-drive (stable speed without artificial endless multiplier)
+		var actual_max_speed = max_speed * (1.8 if is_speed_buff_active else 1.0)
+		current_speed += brake_force * (1.0 if is_speed_buff_active else 0.5) * delta
 		current_speed = clamp(current_speed, 0.0, actual_max_speed)
 		
 		# Re-evaluate on_ground using cached dist_to_center from above
@@ -365,16 +364,15 @@ func _physics_process(delta: float) -> void:
 		# Player floats in a straight line with their current velocity
 		last_planet = null
 		
-		# Glide assist - pull toward nearest planet
-		if not is_menu_demo and (GameManager.is_endless_mode or SaveSystem.glide_count > 0):
+		# Glide assist - pull toward nearest planet (requires available glide charges)
+		if not is_menu_demo and SaveSystem.glide_count > 0:
 			var just_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or Input.is_action_just_pressed("jump") or _wants_to_jump or _joy_jump_just_pressed
 			if just_pressed:
 				var nearest = _find_nearest_planet()
 				if nearest:
 					_tether_planet = nearest
 					_glide_used_this_flight = true
-					if not GameManager.is_endless_mode:
-						SaveSystem.use_glide()
+					SaveSystem.use_glide()
 					glide_used.emit()
 					_doomed = false
 					_doom_timer = 0.0

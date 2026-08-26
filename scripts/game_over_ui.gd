@@ -104,11 +104,17 @@ func _ready():
 
 func _on_retry_pressed():
 	get_tree().paused = false
+	GameManager._game_ended = false
 	GameManager.reset_rubies()
 	queue_free()
-	SceneTransition.reload_current()
+	if GameManager.is_endless_mode:
+		SceneTransition.transition_to("res://scenes/level_endless.tscn")
+	else:
+		SceneTransition.reload_current()
 
 func _on_menu_pressed():
 	get_tree().paused = false
+	GameManager._game_ended = false
+	GameManager.is_endless_mode = false
 	queue_free()
 	SceneTransition.transition_to("res://scenes/menu.tscn")

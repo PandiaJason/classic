@@ -21,12 +21,18 @@ var best_label: Label
 func _ready() -> void:
 	GameManager.is_endless_mode = true
 	GameManager.is_gameplay_started = true
+	GameManager._game_ended = false
 	GameManager.endless_score = 0
 	GameManager.endless_deliveries = 0
 	GameManager.has_box = true
 	GameManager.box_health = 100.0
 	
-	BgmManager.play_menu_music()
+	# Stop menu music so in-game level music plays from $BGM via InGameUI
+	BgmManager.stop_menu_music()
+	
+	if is_instance_valid(camera):
+		camera.global_position = Vector2(400, 450)
+		camera.zoom = Vector2(0.5, 0.5)
 	
 	_setup_hud()
 	_generate_initial_world()
@@ -84,8 +90,8 @@ func _on_score_changed(score: int, _deliveries: int) -> void:
 			best_label.text = "BEST: %dm" % score
 			best_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
 
-func _process(_delta: float) -> void:
-	if is_instance_valid(player):
+func _process(delta: float) -> void:
+	if is_instance_valid(player) and not player.is_game_over and not GameManager._game_ended:
 		# Continuously track distance traveled in meters
 		var current_m = max(0, int((player.global_position.x - 200.0) / 10.0))
 		if current_m > max_distance_reached:
@@ -101,6 +107,42 @@ func _process(_delta: float) -> void:
 				_show_floating_popup("+%dm DISTANCE MILESTONE!" % milestone, player.global_position)
 				SoundManager.play_sfx("ruby")
 				GameManager.trigger_haptic(0.3, 0.6, 0.2)
+		
+		# --- Jetpack Joyride Camera Movement ---
+		if is_instance_valid(camera):
+			var ui = get_tree().get_first_node_in_group("in_game_ui")
+			var is_map = (ui != null and "is_viewing_map" in ui and ui.is_viewing_map)
+			
+			# Camera speed scales with distance (smooth auto-scroll)
+			var cam_speed = 150.0 + min(float(max_distance_reached) * 0.12, 280.0)
+			var target_cam_x = camera.global_position.x + cam_speed * delta
+			
+			# If player moves ahead, keep player in the right-center portion of the view
+			target_cam_x = max(target_cam_x, player.global_position.x - 180.0)
+			
+			# Smooth vertical tracking
+			var target_cam_y = player.global_position.y
+			if is_instance_valid(player.current_planet):
+				target_cam_y = player.current_planet.global_position.y
+				
+			var new_y = lerp(camera.global_position.y, target_cam_y, 4.0 * delta)
+			camera.global_position = Vector2(target_cam_x, new_y)
+			
+			# Camera Zoom: wide for map overview, normal for gameplay
+			var target_zoom = Vector2(0.35, 0.35) if is_map else Vector2(0.5, 0.5)
+			camera.zoom = camera.zoom.lerp(target_zoom, 5.0 * delta)
+			
+			# --- Jetpack Joyride Left-Screen Death Condition ---
+			var half_width = (get_viewport_rect().size.x / (2.0 * camera.zoom.x))
+			var left_kill_bound = camera.global_position.x - half_width - 70.0
+			if player.global_position.x < left_kill_bound:
+				GameManager.game_over("fell behind the void!")
+				return
+				
+			# Vertical Abyss Death
+			if player.global_position.y > 1600.0 or player.global_position.y < -800.0:
+				GameManager.game_over("lost in deep space!")
+				return
 		
 		# Infinite Procedural Planet Generation as player travels forward
 		if player.global_position.x + 2200.0 > next_spawn_x:
@@ -159,6 +201,14 @@ func _spawn_next_target_section() -> void:
 			_instantiate_planet(valid_pos, randi() % 3)
 			next_spawn_x = max(next_spawn_x, valid_pos.x)
 			
+		else:
+			# Fallback clean offset if all 30 random attempts were tight
+			next_spawn_x += randf_range(650.0, 800.0)
+			var fallback_pos = Vector2(next_spawn_x, randf_range(180.0, 640.0))
+			_instantiate_planet(fallback_pos, randi() % 3)
+
+	_cleanup_distant_objects()
+
 func _instantiate_planet(pos: Vector2, p_type: int) -> void:
 	var p = planet_scene.instantiate()
 	p.global_position = pos

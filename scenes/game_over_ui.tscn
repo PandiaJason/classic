@@ -32,7 +32,7 @@ border_color = Color(0.6, 0.1, 0.1, 1)
 
 [node name="GameOverUI" type="CanvasLayer"]
 process_mode = 3
-layer = 10
+layer = 100
 script = ExtResource("1_script")
 
 [node name="Overlay" type="ColorRect" parent="."]

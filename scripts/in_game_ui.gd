@@ -228,9 +228,9 @@ func _ready():
 		level_margin.add_child(level_panel)
 		add_child(level_margin)
 	
-	# Setup Glide Assist Button
-	if SaveSystem.glide_count > 0 or GameManager.is_endless_mode:
-		var glide_txt = "glide" if GameManager.is_endless_mode else ("glide x%d" % SaveSystem.glide_count)
+	# Setup Glide Assist Button (only if player has charges)
+	if SaveSystem.glide_count > 0:
+		var glide_txt = "glide x%d" % SaveSystem.glide_count
 		glide_button = UIFactory.create_glass_button(glide_txt, Color(0.2, 0.6, 1.0))
 		glide_button.focus_mode = Control.FOCUS_NONE
 		glide_button.pressed.connect(_on_glide_pressed)
@@ -371,11 +371,9 @@ func _process(delta: float):
 			speed_button.disabled = true
 			speed_button.modulate.a = 0.3
 	
-	if is_instance_valid(level_camera):
+	if is_instance_valid(level_camera) and not GameManager.is_endless_mode:
 		var base_pos = level_camera.global_position
 		if is_viewing_map:
-			if GameManager.is_endless_mode and is_instance_valid(player):
-				level_center_pos = player.global_position + Vector2(400, 0)
 			# Zoom out to show level overview
 			level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
 			base_pos = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
@@ -413,10 +411,10 @@ func _process(delta: float):
 			level_camera.global_position = base_pos
 
 func _on_hint_pressed():
-	if hint_used:
+	if hint_used or GameManager._game_ended:
 		return
 	# Only allow hint while riding a planet
-	if not is_instance_valid(player) or player.current_planet == null:
+	if not is_instance_valid(player) or player.current_planet == null or player.is_game_over:
 		return
 	hint_used = true
 	if is_instance_valid(player):
@@ -428,27 +426,26 @@ func _on_hint_pressed():
 	hint_button.disabled = true
 
 func _on_view_map_pressed():
+	if GameManager._game_ended or (is_instance_valid(player) and player.is_game_over):
+		return
 	is_viewing_map = !is_viewing_map
 
 func _on_glide_pressed():
+	if GameManager._game_ended or (is_instance_valid(player) and player.is_game_over):
+		return
 	if is_instance_valid(player) and player.current_planet == null:
-		if GameManager.is_endless_mode or SaveSystem.glide_count > 0:
+		if SaveSystem.glide_count > 0:
 			player._wants_to_jump = true
 
 func _on_player_glide_used():
 	if is_instance_valid(glide_button):
-		if GameManager.is_endless_mode:
-			glide_button.text = "glide"
+		glide_button.text = "glide x%d" % SaveSystem.glide_count
+		if SaveSystem.glide_count > 0:
 			glide_button.disabled = false
 			glide_button.modulate.a = 1.0
 		else:
-			glide_button.text = "glide x%d" % SaveSystem.glide_count
-			if SaveSystem.glide_count > 0:
-				glide_button.disabled = false
-				glide_button.modulate.a = 1.0
-			else:
-				glide_button.disabled = true
-				glide_button.modulate.a = 0.3
+			glide_button.disabled = true
+			glide_button.modulate.a = 0.3
 
 func _on_speed_pressed():
 	if is_instance_valid(player) and player.current_planet == null and SaveSystem.speed_count > 0:
@@ -544,7 +541,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_trigger_map_pressed = false
 
 func toggle_pause():
-	if is_instance_valid(player) and player.is_game_over:
+	if GameManager._game_ended or (is_instance_valid(player) and player.is_game_over):
 		return
 	is_paused = !is_paused
 	get_tree().paused = is_paused

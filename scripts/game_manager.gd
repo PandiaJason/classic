@@ -188,6 +188,10 @@ func game_over(reason: String) -> void:
 		player.is_game_over = true
 		player.hide()
 
+	var in_game_ui = get_tree().get_first_node_in_group("in_game_ui")
+	if is_instance_valid(in_game_ui):
+		in_game_ui.hide()
+
 	var ui_scene = ResourceManager.get_scene("res://scenes/game_over_ui.tscn")
 	if ui_scene:
 		var ui = ui_scene.instantiate()
@@ -200,6 +204,11 @@ func level_complete() -> void:
 	_game_ended = true
 	_flush_save()
 	await get_tree().process_frame
+	
+	var in_game_ui = get_tree().get_first_node_in_group("in_game_ui")
+	if is_instance_valid(in_game_ui):
+		in_game_ui.hide()
+		
 	var ui_scene = ResourceManager.get_scene("res://scenes/level_complete_ui.tscn")
 	if ui_scene:
 		var ui = ui_scene.instantiate()
