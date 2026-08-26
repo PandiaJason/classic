@@ -111,9 +111,15 @@ func _ready():
 			map_zoom = Vector2(min(zoom_x, zoom_y) * 0.85, min(zoom_x, zoom_y) * 0.85)
 			map_zoom = Vector2(clamp(map_zoom.x, 0.1, 0.4), clamp(map_zoom.y, 0.1, 0.4))
 		
-		# Start in MAP view (zoomed out)
-		level_camera.zoom = map_zoom
-		level_camera.global_position = level_center_pos
+		if GameManager.is_endless_mode:
+			is_viewing_map = false
+			level_camera.zoom = default_zoom
+			if is_instance_valid(player):
+				level_camera.global_position = player.global_position + Vector2(200, 0)
+		else:
+			# Start in MAP view (zoomed out)
+			level_camera.zoom = map_zoom
+			level_camera.global_position = level_center_pos
 	
 	# Setup Ruby Panel
 	var ruby_panel = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
@@ -377,7 +383,12 @@ func _process(delta: float):
 			# Zoom out to show level overview
 			if GameManager.is_endless_mode:
 				level_camera.zoom = level_camera.zoom.lerp(Vector2(0.25, 0.25), 5.0 * delta)
-				var center_pos = Vector2(player.global_position.x + 400.0, 450.0) if is_instance_valid(player) else level_center_pos
+				var center_x: float = player.global_position.x + 400.0 if is_instance_valid(player) else level_center_pos.x
+				var center_y: float = 450.0
+				if is_instance_valid(player) and is_instance_valid(player.current_planet):
+					center_x = player.current_planet.global_position.x + 400.0
+					center_y = player.current_planet.global_position.y
+				var center_pos = Vector2(center_x, center_y)
 				base_pos = level_camera.global_position.lerp(center_pos, 8.0 * delta)
 			else:
 				level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
