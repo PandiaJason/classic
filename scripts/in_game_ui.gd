@@ -277,10 +277,28 @@ func _ready():
 	
 	# Remove old UI
 	if has_node("MarginContainer"): $MarginContainer.queue_free()
-	
-
-	
-
+	# Left screen: Speed Zone
+	var speed_zone = Control.new()
+	speed_zone.name = "SpeedZone"
+	speed_zone.anchor_left = 0.0
+	speed_zone.anchor_top = 0.0
+	speed_zone.anchor_right = 0.5
+	speed_zone.anchor_bottom = 1.0
+	speed_zone.mouse_filter = Control.MOUSE_FILTER_STOP
+	speed_zone.gui_input.connect(_on_speed_zone_gui_input)
+	add_child(speed_zone)
+	move_child(speed_zone, 0)
+	# Right screen: Jump/Release Zone
+	var jump_zone = Control.new()
+	jump_zone.name = "JumpZone"
+	jump_zone.anchor_left = 0.5
+	jump_zone.anchor_top = 0.0
+	jump_zone.anchor_right = 1.0
+	jump_zone.anchor_bottom = 1.0
+	jump_zone.mouse_filter = Control.MOUSE_FILTER_STOP
+	jump_zone.gui_input.connect(_on_jump_zone_gui_input)
+	add_child(jump_zone)
+	move_child(jump_zone, 1)
 	
 	# Auto-start with Map View in Campaign mode, or immediate gameplay in Endless mode
 	if GameManager.is_endless_mode:
@@ -482,6 +500,59 @@ func _on_player_speed_used():
 			speed_button.disabled = true
 			speed_button.modulate.a = 0.3
 
+func _is_pos_inside_control(pos: Vector2, ctrl: Control) -> bool:
+	if is_instance_valid(ctrl) and ctrl.is_visible_in_tree():
+		return ctrl.get_global_rect().has_point(pos)
+	return false
+
+func _on_jump_zone_gui_input(event: InputEvent):
+	if not is_instance_valid(player):
+		player = get_tree().get_first_node_in_group("player")
+	if not is_instance_valid(player):
+		return
+	if not GameManager.is_gameplay_started or get_tree().paused or GameManager._game_ended:
+		return
+	var touch_pos = Vector2.ZERO
+	var is_press = false
+	if event is InputEventScreenTouch and event.pressed:
+		touch_pos = event.global_position if "global_position" in event else event.position
+		is_press = true
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		touch_pos = event.global_position if "global_position" in event else event.position
+		is_press = true
+	if is_press:
+		if _is_pos_inside_control(touch_pos, view_map_btn) \
+		or _is_pos_inside_control(touch_pos, pause_button) \
+		or _is_pos_inside_control(touch_pos, hint_button) \
+		or _is_pos_inside_control(touch_pos, glide_button) \
+		or _is_pos_inside_control(touch_pos, speed_button):
+			return
+		player._wants_to_jump = true
+
+func _on_speed_zone_gui_input(event: InputEvent):
+	if not is_instance_valid(player):
+		player = get_tree().get_first_node_in_group("player")
+	if not is_instance_valid(player):
+		return
+	if not GameManager.is_gameplay_started or get_tree().paused or GameManager._game_ended:
+		return
+	var touch_pos = Vector2.ZERO
+	var is_press = false
+	if event is InputEventScreenTouch and event.pressed:
+		touch_pos = event.global_position if "global_position" in event else event.position
+		is_press = true
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		touch_pos = event.global_position if "global_position" in event else event.position
+		is_press = true
+	if is_press:
+		if _is_pos_inside_control(touch_pos, view_map_btn) \
+		or _is_pos_inside_control(touch_pos, pause_button) \
+		or _is_pos_inside_control(touch_pos, hint_button) \
+		or _is_pos_inside_control(touch_pos, glide_button) \
+		or _is_pos_inside_control(touch_pos, speed_button):
+			return
+		player._wants_to_speed = true
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") or (event is InputEventJoypadButton and event.button_index == JOY_BUTTON_START and event.pressed):
 		toggle_pause()
@@ -509,17 +580,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				_on_view_map_pressed()
 		else:
 			_trigger_map_pressed = false
-	elif (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed):
-		if not GameManager.is_gameplay_started or get_tree().paused or GameManager._game_ended:
-			return
-		if not is_instance_valid(player):
-			player = get_tree().get_first_node_in_group("player")
-		if is_instance_valid(player) and not player.is_game_over:
-			var screen_w = get_viewport().get_visible_rect().size.x
-			if event.position.x < screen_w * 0.5:
-				player._wants_to_speed = true
-			else:
-				player._wants_to_jump = true
 
 func toggle_pause():
 	if GameManager._game_ended or (is_instance_valid(player) and player.is_game_over):
