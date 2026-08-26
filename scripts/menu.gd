@@ -889,22 +889,31 @@ func _show_daily_rewards_popup():
 
 func _set_main_menu_buttons_focusable(enabled: bool):
 	var mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
+	var m_filter = Control.MOUSE_FILTER_STOP if enabled else Control.MOUSE_FILTER_IGNORE
 	if is_instance_valid(start_btn):
 		start_btn.focus_mode = mode
+		start_btn.mouse_filter = m_filter
 	if is_instance_valid(tutorial_btn):
 		tutorial_btn.focus_mode = mode
+		tutorial_btn.mouse_filter = m_filter
 	if is_instance_valid(achievements_btn):
 		achievements_btn.focus_mode = mode
+		achievements_btn.mouse_filter = m_filter
 	if is_instance_valid(daily_btn):
 		daily_btn.focus_mode = mode
+		daily_btn.mouse_filter = m_filter
 	if is_instance_valid(music_slider):
 		music_slider.focus_mode = mode
+		music_slider.mouse_filter = m_filter
 	if is_instance_valid(sfx_slider):
 		sfx_slider.focus_mode = mode
+		sfx_slider.mouse_filter = m_filter
 	if is_instance_valid(reset_btn):
 		reset_btn.focus_mode = mode
+		reset_btn.mouse_filter = m_filter
 	if is_instance_valid(_ruby_btn):
 		_ruby_btn.focus_mode = mode
+		_ruby_btn.mouse_filter = m_filter
 
 func _on_achievements_pressed():
 	_set_main_menu_buttons_focusable(false)

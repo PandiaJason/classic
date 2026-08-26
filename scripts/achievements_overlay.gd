@@ -1,6 +1,7 @@
-extends ColorRect
+extends CanvasLayer
 
-# Self-contained Achievements Modal Overlay with Full Controller / Joystick / Keyboard Navigation
+# Full-screen Modal CanvasLayer for Achievements
+# Guarantees 100% input isolation, joystick scrolling, and no click-through to menu
 
 const GAME_FONT = preload("res://assets/game_font.ttf")
 
@@ -11,6 +12,7 @@ var tab_buttons: Array = []
 var selected_cat: String = "all"
 var current_tab_idx: int = 0
 var on_close_callback: Callable
+var _scroll_pos_float: float = 0.0
 
 var categories = [
 	{"id": "all", "label": "all (75)"},
@@ -23,24 +25,35 @@ var categories = [
 ]
 
 func _ready() -> void:
-	name = "AchievementsOverlay"
-	color = Color(0, 0, 0, 0.88)
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	mouse_filter = Control.MOUSE_FILTER_STOP
+	layer = 120
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	
 	_build_ui()
 	set_process(true)
 	set_process_unhandled_input(true)
 
 func _build_ui() -> void:
+	# Full-screen blocking background
+	var bg_overlay = ColorRect.new()
+	bg_overlay.name = "AchievementsBackdrop"
+	bg_overlay.color = Color(0, 0, 0, 0.88)
+	bg_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	# Clicking the backdrop outside the panel closes the modal
+	bg_overlay.gui_input.connect(func(event: InputEvent):
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			_close_modal()
+	)
+	add_child(bg_overlay)
+	
 	var center = CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	
 	var panel = PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.03, 0.09, 0.95)
+	style.bg_color = Color(0.04, 0.03, 0.09, 0.96)
 	style.corner_radius_top_left = 25
 	style.corner_radius_top_right = 25
 	style.corner_radius_bottom_right = 25
@@ -62,8 +75,9 @@ func _build_ui() -> void:
 	var outer_vbox = VBoxContainer.new()
 	outer_vbox.add_theme_constant_override("separation", 10)
 	outer_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	outer_vbox.mouse_filter = Control.MOUSE_FILTER_PASS
 	
-	# Header HBox: Title & Overall Progress
+	# Header: Title & Overall Progress
 	var header_vbox = VBoxContainer.new()
 	header_vbox.add_theme_constant_override("separation", 4)
 	header_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -116,6 +130,7 @@ func _build_ui() -> void:
 	scroll.custom_minimum_size = Vector2(760, 400)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	scroll.follow_focus = false
 	
 	grid = VBoxContainer.new()
 	grid.add_theme_constant_override("separation", 8)
@@ -148,7 +163,6 @@ func _build_ui() -> void:
 		active_style.border_color = Color(1.0, 0.85, 0.2)
 		
 		var tab_idx = i
-		var tab_id = tab_info.id
 		tab_btn.pressed.connect(func():
 			SoundManager.play_sfx("ui_click")
 			_switch_tab(tab_idx)
@@ -172,10 +186,7 @@ func _build_ui() -> void:
 	# Close button
 	close_btn = UIFactory.create_glass_button("close", UIFactory.RED_COLOR)
 	close_btn.pressed.connect(func():
-		SoundManager.play_sfx("ui_click")
-		if on_close_callback.is_valid():
-			on_close_callback.call()
-		queue_free()
+		_close_modal()
 	)
 	outer_vbox.add_child(close_btn)
 	
@@ -190,6 +201,12 @@ func _build_ui() -> void:
 	panel.add_child(outer_vbox)
 	_switch_tab(0)
 	close_btn.grab_focus()
+
+func _close_modal() -> void:
+	SoundManager.play_sfx("ui_click")
+	if on_close_callback.is_valid():
+		on_close_callback.call()
+	queue_free()
 
 func _switch_tab(idx: int) -> void:
 	current_tab_idx = idx
@@ -219,6 +236,7 @@ func _switch_tab(idx: int) -> void:
 			tab_buttons[i].add_theme_stylebox_override("normal", normal_style)
 			
 	_populate_list(selected_cat)
+	_scroll_pos_float = 0.0
 	if is_instance_valid(scroll):
 		scroll.scroll_vertical = 0
 
@@ -350,27 +368,42 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(scroll):
 		return
 		
-	# Smooth analog joystick & D-Pad scrolling
-	var joy_y = Input.get_joy_axis(0, JOY_AXIS_LEFT_Y)
-	var right_joy_y = Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)
-	var scroll_speed = 750.0 # px/s
+	# Check all joypad devices
 	var scroll_dir = 0.0
-	
-	if abs(joy_y) > 0.15:
-		scroll_dir = joy_y
-	elif abs(right_joy_y) > 0.15:
-		scroll_dir = right_joy_y
-	elif Input.is_key_pressed(KEY_UP) or Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_UP):
-		scroll_dir = -1.0
-	elif Input.is_key_pressed(KEY_DOWN) or Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_DOWN):
-		scroll_dir = 1.0
-	elif Input.is_key_pressed(KEY_PAGEUP):
-		scroll_dir = -3.0
-	elif Input.is_key_pressed(KEY_PAGEDOWN):
-		scroll_dir = 3.0
-		
+	for joy_id in Input.get_connected_joypads() + [0]:
+		var ly = Input.get_joy_axis(joy_id, JOY_AXIS_LEFT_Y)
+		var ry = Input.get_joy_axis(joy_id, JOY_AXIS_RIGHT_Y)
+		if abs(ly) > 0.12:
+			scroll_dir = ly
+			break
+		elif abs(ry) > 0.12:
+			scroll_dir = ry
+			break
+		elif Input.is_joy_button_pressed(joy_id, JOY_BUTTON_DPAD_UP):
+			scroll_dir = -1.0
+			break
+		elif Input.is_joy_button_pressed(joy_id, JOY_BUTTON_DPAD_DOWN):
+			scroll_dir = 1.0
+			break
+			
+	if scroll_dir == 0.0:
+		if Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
+			scroll_dir = -1.0
+		elif Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S):
+			scroll_dir = 1.0
+		elif Input.is_key_pressed(KEY_PAGEUP):
+			scroll_dir = -3.0
+		elif Input.is_key_pressed(KEY_PAGEDOWN):
+			scroll_dir = 3.0
+			
 	if scroll_dir != 0.0:
-		scroll.scroll_vertical += int(scroll_dir * scroll_speed * delta)
+		var scroll_speed = 850.0 # px/s
+		_scroll_pos_float += scroll_dir * scroll_speed * delta
+		var max_s = max(0, scroll.get_v_scroll_bar().max_value - scroll.size.y)
+		_scroll_pos_float = clamp(_scroll_pos_float, 0.0, float(max_s))
+		scroll.scroll_vertical = int(_scroll_pos_float)
+	else:
+		_scroll_pos_float = float(scroll.scroll_vertical)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed:
@@ -383,14 +416,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			_switch_tab(next_idx)
 			get_viewport().set_input_as_handled()
 		elif event.button_index == JOY_BUTTON_B:
-			if is_instance_valid(close_btn):
-				close_btn.pressed.emit()
-				get_viewport().set_input_as_handled()
+			_close_modal()
+			get_viewport().set_input_as_handled()
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
-			if is_instance_valid(close_btn):
-				close_btn.pressed.emit()
-				get_viewport().set_input_as_handled()
+			_close_modal()
+			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_Q:
 			var prev_idx = (current_tab_idx - 1 + categories.size()) % categories.size()
 			_switch_tab(prev_idx)
