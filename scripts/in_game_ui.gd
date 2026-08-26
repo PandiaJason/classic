@@ -306,11 +306,17 @@ func _ready():
 	
 
 	
-	# Auto-start with Map View and run countdown immediately
-	is_viewing_map = true
-	start_countdown()
+	# Auto-start with Map View in Campaign mode, or immediate gameplay in Endless mode
+	if GameManager.is_endless_mode:
+		is_viewing_map = false
+		GameManager.is_gameplay_started = true
+	else:
+		is_viewing_map = true
+		start_countdown()
 
 func _process(delta: float):
+	if get_tree().paused or GameManager._game_ended or (is_instance_valid(player) and player.is_game_over):
+		return
 	if is_instance_valid(health_label):
 		health_label.text = "box health: %d%%" % int(GameManager.box_health)
 	if is_instance_valid(ruby_label):
