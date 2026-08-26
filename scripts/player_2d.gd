@@ -331,40 +331,47 @@ func _physics_process(delta: float) -> void:
 
 		# 5. Handle movement
 		if on_ground:
-			# We are on the ground. Replace horizontal velocity but keep the vertical gravity push!
-			var current_vertical = velocity.dot(surface_up)
-			# Clamp vertical velocity to prevent basketball bouncing
-			if current_vertical > 0.0:
-				current_vertical = 0.0
-				
-			velocity = (surface_right * current_speed * forward_direction) + (surface_up * current_vertical)
-				
+			var surface_r = 100.0 * current_planet.scale.x
+			# Exact Analytical Orbit along circular planet surface
+			var current_diff = global_position - current_planet.global_position
+			var cur_angle = current_diff.angle()
+			
+			# Increment angle by exact angular speed: d_theta = (v / r) * forward_direction * delta
+			var d_angle = (current_speed / surface_r) * forward_direction * delta
+			var new_angle = cur_angle + d_angle
+			
+			var new_pos = current_planet.global_position + Vector2(cos(new_angle), sin(new_angle)) * surface_r
+			global_position = new_pos
+			
+			# Align orientation and directions
+			var new_surface_up = Vector2(cos(new_angle), sin(new_angle))
+			var new_surface_right = Vector2(-sin(new_angle), cos(new_angle))
+			
+			rotation = new_angle + PI/2
+			velocity = new_surface_right * current_speed * forward_direction
+			
+			# Check jump
 			var jump_pressed = Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") or Input.is_action_just_pressed("jump") or _wants_to_jump or _joy_jump_just_pressed
 			if not is_menu_demo and jump_pressed and GameManager.is_gameplay_started:
-				# Real Jump!
 				has_jumped = true
+				on_ground = false
+				_wants_to_jump = false
+				_joy_jump_just_pressed = false
 				
 				# Jump haptic vibration
 				GameManager.trigger_haptic(0.1, 0.15, 0.08)
 				
 				# Override the vertical velocity entirely to launch upwards (scales with endless_scale for identical arc)
 				var actual_jump = jump_force * endless_scale * (1.25 if is_speed_buff_active else 1.0)
-				velocity = (surface_right * current_speed * forward_direction) + (surface_up * -actual_jump)
+				velocity = (new_surface_right * current_speed * forward_direction) + (new_surface_up * actual_jump)
 				SoundManager.play_sfx("jump")
 		else:
-			# Add a tiny bit of air control / forward momentum
+			# Free Flight in gravity well
 			velocity += surface_right * current_speed * forward_direction * delta * 0.5
-			
-		up_direction = surface_up
-		floor_constant_speed = false
-		
-		# If we just jumped, we MUST disable snapping so we can leave the ground!
-		if not is_menu_demo and has_jumped:
+			up_direction = surface_up
+			floor_constant_speed = false
 			floor_snap_length = 0.0
-		else:
-			floor_snap_length = (15.0 * endless_scale) if on_ground else 0.0
-			
-		move_and_slide()
+			move_and_slide()
 		
 	else:
 		# ZERO GRAVITY STATE
