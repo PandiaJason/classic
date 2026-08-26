@@ -17,6 +17,7 @@ func transition_to(scene_path: String) -> void:
 	if is_transitioning:
 		return
 	is_transitioning = true
+	get_tree().paused = false
 	
 	color_rect.mouse_filter = Control.MOUSE_FILTER_STOP
 	
@@ -41,6 +42,7 @@ func transition_to(scene_path: String) -> void:
 	# Wait two frames to allow the tree to restructure and new scene to load
 	await get_tree().process_frame
 	await get_tree().process_frame
+	get_tree().paused = false
 	
 	var tween_in = create_tween()
 	tween_in.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
@@ -54,6 +56,7 @@ func reload_current() -> void:
 	if is_transitioning:
 		return
 	is_transitioning = true
+	get_tree().paused = false
 	
 	color_rect.mouse_filter = Control.MOUSE_FILTER_STOP
 	
@@ -62,6 +65,7 @@ func reload_current() -> void:
 	tween.tween_property(color_rect, "color:a", 1.0, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	await tween.finished
 	
+	get_tree().paused = false
 	var err = get_tree().reload_current_scene()
 	if err != OK:
 		push_error("SceneTransition: Failed to reload current scene (error %d)" % err)

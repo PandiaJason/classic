@@ -19,6 +19,7 @@ var score_label: Label
 var best_label: Label
 
 func _ready() -> void:
+	get_tree().paused = false
 	GameManager.is_endless_mode = true
 	GameManager.is_gameplay_started = true
 	GameManager._game_ended = false

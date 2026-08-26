@@ -284,6 +284,7 @@ func trigger_haptic(weak: float, strong: float, duration: float) -> void:
 		JavaScriptBridge.eval("window._ranotot_haptic(%s,%s,%s,%s)" % [adj_weak, adj_strong, duration_ms, gp_duration_ms])
 
 func start_endless_mode():
+	get_tree().paused = false
 	is_endless_mode = true
 	endless_score = 0
 	endless_deliveries = 0
@@ -292,7 +293,7 @@ func start_endless_mode():
 	has_box = true
 	box_health = 100.0
 	_game_ended = false
-	is_gameplay_started = false
+	is_gameplay_started = true
 	SceneTransition.transition_to("res://scenes/level_endless.tscn")
 
 func add_endless_score(pts: int):

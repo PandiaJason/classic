@@ -10,10 +10,14 @@ var achievements_btn: Button = null
 var reset_btn: Button = null
 var daily_btn: Button = null
 var start_btn: Button = null
+var top_endless_btn: Button = null
 var music_slider: HSlider = null
 var sfx_slider: HSlider = null
 
 func _ready():
+	get_tree().paused = false
+	GameManager._game_ended = false
+	GameManager.is_endless_mode = false
 	BgmManager.play_menu_music()
 	# Group buttons inside a VBox for tight vertical stacking
 	var button_vbox = VBoxContainer.new()
@@ -89,7 +93,7 @@ func _ready():
 	var top_endless_title = "endless mode"
 	if SaveSystem.endless_high_score > 0:
 		top_endless_title += " (%dm)" % SaveSystem.endless_high_score
-	var top_endless_btn = UIFactory.create_glass_button(top_endless_title, UIFactory.PURPLE_COLOR)
+	top_endless_btn = UIFactory.create_glass_button(top_endless_title, UIFactory.PURPLE_COLOR)
 	top_endless_btn.add_theme_font_size_override("font_size", 22)
 	top_endless_btn.pressed.connect(_on_endless_pressed)
 	
@@ -893,6 +897,9 @@ func _set_main_menu_buttons_focusable(enabled: bool):
 	if is_instance_valid(start_btn):
 		start_btn.focus_mode = mode
 		start_btn.mouse_filter = m_filter
+	if is_instance_valid(top_endless_btn):
+		top_endless_btn.focus_mode = mode
+		top_endless_btn.mouse_filter = m_filter
 	if is_instance_valid(tutorial_btn):
 		tutorial_btn.focus_mode = mode
 		tutorial_btn.mouse_filter = m_filter

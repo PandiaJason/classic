@@ -108,6 +108,7 @@ func _on_retry_pressed():
 	GameManager.reset_rubies()
 	queue_free()
 	if GameManager.is_endless_mode:
+		GameManager.is_gameplay_started = true
 		SceneTransition.transition_to("res://scenes/level_endless.tscn")
 	else:
 		SceneTransition.reload_current()
