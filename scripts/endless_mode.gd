@@ -122,8 +122,13 @@ func _process(delta: float) -> void:
 			# If player moves ahead, keep player in the right-center portion of the view
 			target_cam_x = max(target_cam_x, player.global_position.x - 180.0)
 			
-			# Smooth vertical tracking (tracks player directly)
-			var target_cam_y = player.global_position.y
+			# Smooth vertical tracking: lock to planet center while on planet, follow player in space
+			var target_cam_y: float
+			if is_instance_valid(player.current_planet):
+				target_cam_y = player.current_planet.global_position.y
+			else:
+				target_cam_y = player.global_position.y
+				
 			var new_y = lerp(camera.global_position.y, target_cam_y, 4.0 * delta)
 			camera.global_position = Vector2(target_cam_x, new_y)
 			
