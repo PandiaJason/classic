@@ -233,7 +233,10 @@ func _physics_process(delta: float) -> void:
 		
 		# 3. Rotate player to align with gravity
 		var target_rotation = gravity_dir.angle() - PI/2
-		rotation = lerp_angle(rotation, target_rotation, 25 * delta)
+		if on_ground:
+			rotation = target_rotation
+		else:
+			rotation = lerp_angle(rotation, target_rotation, 25.0 * delta)
 		
 		var surface_right = Vector2.RIGHT.rotated(target_rotation)
 		
@@ -353,7 +356,7 @@ func _physics_process(delta: float) -> void:
 			velocity += surface_right * current_speed * forward_direction * delta * 0.5
 			
 		up_direction = surface_up
-		floor_constant_speed = true
+		floor_constant_speed = false
 		
 		# If we just jumped, we MUST disable snapping so we can leave the ground!
 		if not is_menu_demo and has_jumped:
