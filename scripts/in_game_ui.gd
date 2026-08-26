@@ -394,27 +394,50 @@ func _process(delta: float):
 				level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
 				base_pos = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
 		else:
-			# Zoom in to follow player
+			# Zoom in for gameplay
 			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 8.0 * delta)
-			if is_instance_valid(player):
-				# Use a fixed world-space offset so the camera doesn't fly off at low zoom
-				var look_ahead := 200.0
+			
+			if GameManager.is_endless_mode:
+				# --- 2D Side-Scroller Auto-Scrolling Camera (Temple Run / Endless Runner) ---
+				var endless_scale = 1.0 + min(float(GameManager.endless_score) / 1000.0 * 0.25, 0.75)
+				var cam_speed = 135.0 * endless_scale
 				
-				var target_x: float
-				var target_y: float
-				
-				if is_instance_valid(player.current_planet):
-					# While riding a planet, lock the camera to the planet so the screen doesn't spin or rotate.
-					# Add a small horizontal offset so the planet sits left-of-center.
-					target_x = player.current_planet.global_position.x + look_ahead
-					target_y = player.current_planet.global_position.y
-				else:
-					# While jumping, follow the player through space with the same offset.
-					target_x = player.global_position.x + look_ahead
-					target_y = player.global_position.y
+				# Horizontal: Steady auto-scroll forward (never oscillates with revolving player)
+				var next_cam_x = level_camera.global_position.x + cam_speed * delta
+				if is_instance_valid(player) and player.current_planet == null:
+					# In outer space flight: keep fast-flying player in view
+					next_cam_x = max(next_cam_x, player.global_position.x - 180.0)
 					
-				var target = Vector2(target_x, target_y)
-				base_pos = level_camera.global_position.lerp(target, 8.0 * delta)
+				# Vertical: Smoothly track planet center or flying player
+				var target_y = player.global_position.y if is_instance_valid(player) else 450.0
+				if is_instance_valid(player) and is_instance_valid(player.current_planet):
+					target_y = player.current_planet.global_position.y
+					
+				var next_cam_y = lerp(level_camera.global_position.y, target_y, 4.0 * delta)
+				base_pos = Vector2(next_cam_x, next_cam_y)
+				
+				# Left-screen Void Death Check
+				if is_instance_valid(player) and not player.is_game_over and not GameManager._game_ended:
+					var half_width = (get_viewport_rect().size.x / (2.0 * level_camera.zoom.x))
+					var left_kill_bound = base_pos.x - half_width - 50.0
+					if player.global_position.x < left_kill_bound:
+						GameManager.game_over("fell behind the void!")
+			else:
+				# --- Campaign Levels 1-90 Camera Mode ---
+				if is_instance_valid(player):
+					var look_ahead := 200.0
+					var target_x: float
+					var target_y: float
+					
+					if is_instance_valid(player.current_planet):
+						target_x = player.current_planet.global_position.x + look_ahead
+						target_y = player.current_planet.global_position.y
+					else:
+						target_x = player.global_position.x + look_ahead
+						target_y = player.global_position.y
+						
+					var target = Vector2(target_x, target_y)
+					base_pos = level_camera.global_position.lerp(target, 8.0 * delta)
 				
 		if shake_duration > 0.0:
 			shake_duration -= delta
