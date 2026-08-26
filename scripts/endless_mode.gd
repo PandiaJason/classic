@@ -99,6 +99,7 @@ func _process(delta: float) -> void:
 			GameManager.endless_score = max_distance_reached
 			GameManager.endless_score_changed.emit(max_distance_reached, 0)
 			SaveSystem.save_endless_score(max_distance_reached)
+			AchievementManager.on_endless_distance(max_distance_reached)
 			
 			# Distance Milestone celebration popup every 500 meters!
 			var milestone = (max_distance_reached / 500) * 500
