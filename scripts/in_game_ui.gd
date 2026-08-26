@@ -371,12 +371,17 @@ func _process(delta: float):
 			speed_button.disabled = true
 			speed_button.modulate.a = 0.3
 	
-	if is_instance_valid(level_camera) and not GameManager.is_endless_mode:
+	if is_instance_valid(level_camera):
 		var base_pos = level_camera.global_position
 		if is_viewing_map:
 			# Zoom out to show level overview
-			level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
-			base_pos = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
+			if GameManager.is_endless_mode:
+				level_camera.zoom = level_camera.zoom.lerp(Vector2(0.25, 0.25), 5.0 * delta)
+				var center_pos = Vector2(player.global_position.x + 400.0, 450.0) if is_instance_valid(player) else level_center_pos
+				base_pos = level_camera.global_position.lerp(center_pos, 8.0 * delta)
+			else:
+				level_camera.zoom = level_camera.zoom.lerp(map_zoom, 5.0 * delta)
+				base_pos = level_camera.global_position.lerp(level_center_pos, 8.0 * delta)
 		else:
 			# Zoom in to follow player
 			level_camera.zoom = level_camera.zoom.lerp(default_zoom, 8.0 * delta)
@@ -388,7 +393,7 @@ func _process(delta: float):
 				var target_y: float
 				
 				if is_instance_valid(player.current_planet):
-					# While riding a planet, lock the camera to the planet so the screen doesn't spin.
+					# While riding a planet, lock the camera to the planet so the screen doesn't spin or rotate.
 					# Add a small horizontal offset so the planet sits left-of-center.
 					target_x = player.current_planet.global_position.x + look_ahead
 					target_y = player.current_planet.global_position.y

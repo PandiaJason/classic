@@ -109,41 +109,10 @@ func _process(delta: float) -> void:
 				SoundManager.play_sfx("ruby")
 				GameManager.trigger_haptic(0.3, 0.6, 0.2)
 		
-		# --- Camera Movement (Matching Levels / Campaign Mode) ---
-		if is_instance_valid(camera):
-			var ui = get_tree().get_first_node_in_group("in_game_ui")
-			var is_map = (ui != null and "is_viewing_map" in ui and ui.is_viewing_map)
-			
-			if is_map:
-				# Zoom out for map view
-				var map_zoom = Vector2(0.25, 0.25)
-				camera.zoom = camera.zoom.lerp(map_zoom, 5.0 * delta)
-				var center_pos = Vector2(player.global_position.x + 400.0, 450.0)
-				camera.global_position = camera.global_position.lerp(center_pos, 6.0 * delta)
-			else:
-				var default_zoom = Vector2(0.5, 0.5)
-				camera.zoom = camera.zoom.lerp(default_zoom, 5.0 * delta)
-				
-				var look_ahead := 200.0
-				var target_x: float
-				var target_y: float
-				
-				if is_instance_valid(player.current_planet) and player.on_ground:
-					# While riding a planet, lock the camera to the planet so the screen doesn't spin or drift (same as Levels Mode)
-					target_x = player.current_planet.global_position.x + look_ahead
-					target_y = player.current_planet.global_position.y
-				else:
-					# While jumping / flying, follow the player through space with the same offset
-					target_x = player.global_position.x + look_ahead
-					target_y = player.global_position.y
-					
-				var target = Vector2(target_x, target_y)
-				camera.global_position = camera.global_position.lerp(target, 6.0 * delta)
-				
-			# Vertical Abyss Death
-			if player.global_position.y > 1800.0 or player.global_position.y < -1000.0:
-				GameManager.game_over("lost in deep space!")
-				return
+		# Vertical Abyss Death
+		if player.global_position.y > 1800.0 or player.global_position.y < -1000.0:
+			GameManager.game_over("lost in deep space!")
+			return
 		
 		# Infinite Procedural Planet Generation as player travels forward
 		if player.global_position.x + 2200.0 > next_spawn_x:
