@@ -518,6 +518,13 @@ func _draw():
 func update_sprite_region():
 	# Flip sprite based on forward direction
 	sprite.flip_h = forward_direction < 0
+	if is_instance_valid(flight_trail_particles):
+		if forward_direction < 0:
+			flight_trail_particles.position = Vector2(35, -15)
+			flight_trail_particles.direction = Vector2.RIGHT
+		else:
+			flight_trail_particles.position = Vector2(-35, -15)
+			flight_trail_particles.direction = Vector2.LEFT
 
 func find_gravity_source(on_ground: bool) -> void:
 	# Core Logic: If we are safely on the ground, do not allow another planet's gravity to snatch us!
