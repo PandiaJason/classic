@@ -114,20 +114,18 @@ func _process(delta: float) -> void:
 			var ui = get_tree().get_first_node_in_group("in_game_ui")
 			var is_map = (ui != null and "is_viewing_map" in ui and ui.is_viewing_map)
 			
+			# Camera speed scales with distance (synchronized with player endless_scale)
 			var endless_scale = 1.0 + min(float(max_distance_reached) / 1000.0 * 0.25, 0.75)
 			var cam_speed = 135.0 * endless_scale
+			var target_cam_x = camera.global_position.x + cam_speed * delta
 			
-			var is_safely_docked = is_instance_valid(player.current_planet) and player.on_ground
-			if is_safely_docked:
-				# Smoothly lock/center on current planet: Clockwise and Anticlockwise rotation are 100% identical!
-				var target_cam = Vector2(player.current_planet.global_position.x, player.current_planet.global_position.y)
-				camera.global_position = camera.global_position.lerp(target_cam, 6.0 * delta)
-			else:
-				# In flight: auto-scroll camera forward and keep player in view
-				var target_cam_x = max(camera.global_position.x + cam_speed * delta, player.global_position.x - 180.0)
-				var target_cam_y = player.global_position.y
-				var new_y = lerp(camera.global_position.y, target_cam_y, 4.0 * delta)
-				camera.global_position = Vector2(target_cam_x, new_y)
+			# If player moves ahead, keep player in the right-center portion of the view
+			target_cam_x = max(target_cam_x, player.global_position.x - 180.0)
+			
+			# Smooth vertical tracking (tracks player directly)
+			var target_cam_y = player.global_position.y
+			var new_y = lerp(camera.global_position.y, target_cam_y, 4.0 * delta)
+			camera.global_position = Vector2(target_cam_x, new_y)
 			
 			# Camera Zoom: wide for map overview, normal for gameplay
 			var target_zoom = Vector2(0.35, 0.35) if is_map else Vector2(0.5, 0.5)
@@ -136,7 +134,7 @@ func _process(delta: float) -> void:
 			# --- Jetpack Joyride Left-Screen Death Condition ---
 			var half_width = (get_viewport_rect().size.x / (2.0 * camera.zoom.x))
 			var left_kill_bound = camera.global_position.x - half_width - 70.0
-			if not is_safely_docked and player.global_position.x < left_kill_bound:
+			if player.global_position.x < left_kill_bound:
 				GameManager.game_over("fell behind the void!")
 				return
 				
