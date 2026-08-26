@@ -418,7 +418,7 @@ func _process(delta: float):
 				
 				# Left-screen Void Death Check
 				if is_instance_valid(player) and not player.is_game_over and not GameManager._game_ended:
-					var half_width = (get_viewport_rect().size.x / (2.0 * level_camera.zoom.x))
+					var half_width = (get_viewport().get_visible_rect().size.x / (2.0 * level_camera.zoom.x))
 					var left_kill_bound = base_pos.x - half_width - 50.0
 					if player.global_position.x < left_kill_bound:
 						GameManager.game_over("fell behind the void!")
