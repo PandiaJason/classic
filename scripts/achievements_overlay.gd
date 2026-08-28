@@ -190,17 +190,20 @@ func _build_ui() -> void:
 	)
 	outer_vbox.add_child(close_btn)
 	
-	# Focus loop
-	close_btn.focus_neighbor_left = close_btn.get_path()
-	close_btn.focus_neighbor_right = close_btn.get_path()
-	close_btn.focus_neighbor_top = close_btn.get_path()
-	close_btn.focus_neighbor_bottom = close_btn.get_path()
-	close_btn.focus_next = close_btn.get_path()
-	close_btn.focus_previous = close_btn.get_path()
-	
 	panel.add_child(outer_vbox)
 	_switch_tab(0)
-	close_btn.grab_focus()
+	call_deferred("_setup_close_focus")
+
+func _setup_close_focus() -> void:
+	if is_instance_valid(close_btn) and close_btn.is_inside_tree():
+		var p = close_btn.get_path()
+		close_btn.focus_neighbor_left = p
+		close_btn.focus_neighbor_right = p
+		close_btn.focus_neighbor_top = p
+		close_btn.focus_neighbor_bottom = p
+		close_btn.focus_next = p
+		close_btn.focus_previous = p
+		close_btn.grab_focus()
 
 func _close_modal() -> void:
 	SoundManager.play_sfx("ui_click")

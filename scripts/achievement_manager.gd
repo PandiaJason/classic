@@ -545,7 +545,7 @@ func get_all_achievements(category_filter: String = "all") -> Array:
 		entry["sort_rank"] = (0 if entry["unlocked"] else 100) + cat_weights.get(entry["category"], 9)
 		result.append(entry)
 		
-	return QiSort.sort_objects_by_key(result, "sort_rank", true)
+	return QiApex.sort_objects_by_key(result, "sort_rank", true)
 
 func write_to_config(config: ConfigFile) -> void:
 	for id in _unlocked:
