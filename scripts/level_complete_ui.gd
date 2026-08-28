@@ -111,7 +111,7 @@ func _ready():
 	vbox.add_child(stats_vbox)
 	
 	var box_icon = TextureRect.new()
-	box_icon.texture = load("res://assets/level_complete_success.png")
+	box_icon.texture = load(SaveSystem.get_level_complete_texture_path())
 	box_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	box_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	box_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED

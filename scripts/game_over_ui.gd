@@ -53,7 +53,7 @@ func _ready():
 	vbox.add_child(title)
 	
 	var skeleton_icon = TextureRect.new()
-	skeleton_icon.texture = load("res://assets/game_over_skeleton.png")
+	skeleton_icon.texture = load(SaveSystem.get_game_over_texture_path())
 	skeleton_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	skeleton_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	skeleton_icon.custom_minimum_size = Vector2(250, 220)

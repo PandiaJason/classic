@@ -26,6 +26,8 @@ var streak_count: int = 0
 var last_claim_day: int = -1
 # Endless Mode High Score
 var endless_high_score: int = 0
+# Selected player character (0 = Player 1, 1 = Player 2)
+var selected_player: int = 0
 # H1: Cached total stars to avoid O(n²) recalculation
 var _total_stars_cache: int = 0
 
@@ -54,6 +56,7 @@ func load_data():
 		streak_count = config.get_value("Progress", "streak_count", 0)
 		last_claim_day = config.get_value("Progress", "last_claim_day", -1)
 		endless_high_score = config.get_value("Progress", "endless_high_score", 0)
+		selected_player = config.get_value("Progress", "selected_player", 0)
 		# Load stars for all 90 possible levels
 		for i in range(1, 91):
 			level_stars[i] = config.get_value("Stars", str(i), 0)
@@ -71,6 +74,7 @@ func load_data():
 		tutorial_complete = false
 		streak_count = 0
 		last_claim_day = -1
+		selected_player = 0
 		for i in range(1, 91):
 			level_stars[i] = 0
 		_total_stars_cache = 0
@@ -90,6 +94,7 @@ func save_data():
 	config.set_value("Progress", "streak_count", streak_count)
 	config.set_value("Progress", "last_claim_day", last_claim_day)
 	config.set_value("Progress", "endless_high_score", endless_high_score)
+	config.set_value("Progress", "selected_player", selected_player)
 	for i in level_stars.keys():
 		config.set_value("Stars", str(i), level_stars[i])
 		
@@ -248,3 +253,18 @@ func claim_daily_reward() -> Dictionary:
 	AchievementManager.on_daily_streak(streak_count)
 	
 	return {"success": true, "amount": amount, "streak": streak_count}
+
+func get_player_texture_path() -> String:
+	if selected_player == 1:
+		return "res://assets/custom_player2.png"
+	return "res://assets/custom_player.png"
+
+func get_game_over_texture_path() -> String:
+	if selected_player == 1:
+		return "res://assets/game_over_skeleton2.png"
+	return "res://assets/game_over_skeleton.png"
+
+func get_level_complete_texture_path() -> String:
+	if selected_player == 1:
+		return "res://assets/level_complete_success2.png"
+	return "res://assets/level_complete_success.png"

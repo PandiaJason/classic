@@ -62,6 +62,9 @@ func _input(event: InputEvent) -> void:
 func _ready() -> void:
 	add_to_group("player")
 	
+	# Load selected player texture
+	sprite.texture = load(SaveSystem.get_player_texture_path())
+	
 	# Setup controller inputs dynamically
 	if not InputMap.has_action("speed"):
 		InputMap.add_action("speed")

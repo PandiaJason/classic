@@ -14,6 +14,10 @@ var shop_btn: Button = null
 var top_endless_btn: Button = null
 var music_slider: HSlider = null
 var sfx_slider: HSlider = null
+var _player_preview: TextureRect = null
+var _player_name_label: Label = null
+var _player_select_left: Button = null
+var _player_select_right: Button = null
 
 func _ready():
 	get_tree().paused = false
@@ -24,6 +28,74 @@ func _ready():
 	var button_vbox = VBoxContainer.new()
 	button_vbox.add_theme_constant_override("separation", 12)
 	button_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	# --- Player Selection Row ---
+	var player_select_row = HBoxContainer.new()
+	player_select_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	player_select_row.add_theme_constant_override("separation", 16)
+	player_select_row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	
+	_player_select_left = Button.new()
+	_player_select_left.text = "◀"
+	_player_select_left.add_theme_font_override("font", GAME_FONT)
+	_player_select_left.add_theme_font_size_override("font_size", 30)
+	_player_select_left.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
+	var left_style = StyleBoxFlat.new()
+	left_style.bg_color = Color(0.15, 0.15, 0.25, 0.7)
+	left_style.corner_radius_top_left = 12
+	left_style.corner_radius_top_right = 12
+	left_style.corner_radius_bottom_left = 12
+	left_style.corner_radius_bottom_right = 12
+	left_style.content_margin_left = 12
+	left_style.content_margin_right = 12
+	left_style.content_margin_top = 6
+	left_style.content_margin_bottom = 6
+	_player_select_left.add_theme_stylebox_override("normal", left_style)
+	var left_hover = left_style.duplicate()
+	left_hover.bg_color = Color(0.25, 0.25, 0.4, 0.9)
+	_player_select_left.add_theme_stylebox_override("hover", left_hover)
+	_player_select_left.add_theme_stylebox_override("pressed", left_hover)
+	_player_select_left.pressed.connect(_on_player_select_change.bind(-1))
+	
+	var preview_vbox = VBoxContainer.new()
+	preview_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	preview_vbox.add_theme_constant_override("separation", 4)
+	
+	_player_preview = TextureRect.new()
+	_player_preview.texture = load(SaveSystem.get_player_texture_path())
+	_player_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_player_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_player_preview.custom_minimum_size = Vector2(100, 100)
+	_player_preview.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_player_preview.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	preview_vbox.add_child(_player_preview)
+	
+	_player_name_label = Label.new()
+	_player_name_label.text = "player %d" % (SaveSystem.selected_player + 1)
+	_player_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_player_name_label.add_theme_font_override("font", GAME_FONT)
+	_player_name_label.add_theme_font_size_override("font_size", 20)
+	_player_name_label.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
+	_player_name_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_player_name_label.add_theme_constant_override("outline_size", 6)
+	preview_vbox.add_child(_player_name_label)
+	
+	_player_select_right = Button.new()
+	_player_select_right.text = "▶"
+	_player_select_right.add_theme_font_override("font", GAME_FONT)
+	_player_select_right.add_theme_font_size_override("font_size", 30)
+	_player_select_right.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
+	var right_style = left_style.duplicate()
+	_player_select_right.add_theme_stylebox_override("normal", right_style)
+	var right_hover = left_hover.duplicate()
+	_player_select_right.add_theme_stylebox_override("hover", right_hover)
+	_player_select_right.add_theme_stylebox_override("pressed", right_hover)
+	_player_select_right.pressed.connect(_on_player_select_change.bind(1))
+	
+	player_select_row.add_child(_player_select_left)
+	player_select_row.add_child(preview_vbox)
+	player_select_row.add_child(_player_select_right)
+	button_vbox.add_child(player_select_row)
 	
 	start_btn = $VBoxContainer/StartButton
 	$VBoxContainer.remove_child(start_btn)
@@ -277,12 +349,22 @@ func _ready():
 	add_child(shop_margin)
 	
 	# Focus Networking for controllers
-	start_btn.focus_neighbor_top = daily_btn.get_path()
+	_player_select_left.focus_neighbor_right = _player_select_right.get_path()
+	_player_select_left.focus_neighbor_bottom = start_btn.get_path()
+	_player_select_left.focus_neighbor_top = daily_btn.get_path()
+	_player_select_left.focus_neighbor_left = daily_btn.get_path()
+	
+	_player_select_right.focus_neighbor_left = _player_select_left.get_path()
+	_player_select_right.focus_neighbor_bottom = start_btn.get_path()
+	_player_select_right.focus_neighbor_top = shop_btn.get_path()
+	_player_select_right.focus_neighbor_right = shop_btn.get_path()
+	
+	start_btn.focus_neighbor_top = _player_select_left.get_path()
 	start_btn.focus_neighbor_bottom = tutorial_btn.get_path()
 	start_btn.focus_neighbor_left = daily_btn.get_path()
 	start_btn.focus_neighbor_right = shop_btn.get_path()
 	
-	shop_btn.focus_neighbor_left = start_btn.get_path()
+	shop_btn.focus_neighbor_left = _player_select_right.get_path()
 	shop_btn.focus_neighbor_bottom = start_btn.get_path()
 	
 	tutorial_btn.focus_neighbor_top = start_btn.get_path()
@@ -292,8 +374,8 @@ func _ready():
 	achievements_btn.focus_neighbor_top = tutorial_btn.get_path()
 	achievements_btn.focus_neighbor_bottom = music_slider.get_path()
 	
-	daily_btn.focus_neighbor_right = start_btn.get_path()
-	daily_btn.focus_neighbor_bottom = start_btn.get_path()
+	daily_btn.focus_neighbor_right = _player_select_left.get_path()
+	daily_btn.focus_neighbor_bottom = _player_select_left.get_path()
 	
 	music_slider.focus_neighbor_top = achievements_btn.get_path()
 	music_slider.focus_neighbor_bottom = sfx_slider.get_path()
@@ -933,6 +1015,12 @@ func _set_main_menu_buttons_focusable(enabled: bool):
 	if is_instance_valid(shop_btn):
 		shop_btn.focus_mode = mode
 		shop_btn.mouse_filter = m_filter
+	if is_instance_valid(_player_select_left):
+		_player_select_left.focus_mode = mode
+		_player_select_left.mouse_filter = m_filter
+	if is_instance_valid(_player_select_right):
+		_player_select_right.focus_mode = mode
+		_player_select_right.mouse_filter = m_filter
 	if is_instance_valid(music_slider):
 		music_slider.focus_mode = mode
 		music_slider.mouse_filter = m_filter
@@ -1155,3 +1243,25 @@ func _on_achievements_pressed():
 	add_child(overlay)
 
 
+func _on_player_select_change(direction: int) -> void:
+	SoundManager.play_sfx("ui_click")
+	# Cycle between 0 and 1
+	SaveSystem.selected_player = (SaveSystem.selected_player + direction) % 2
+	if SaveSystem.selected_player < 0:
+		SaveSystem.selected_player = 1
+	SaveSystem.save_data()
+	
+	# Update preview
+	if is_instance_valid(_player_preview):
+		_player_preview.texture = load(SaveSystem.get_player_texture_path())
+	if is_instance_valid(_player_name_label):
+		_player_name_label.text = "player %d" % (SaveSystem.selected_player + 1)
+	
+	# Update background demo player sprite if present
+	var bg_action = get_node_or_null("BackgroundAction")
+	if bg_action:
+		var demo_player = bg_action.get_node_or_null("Player2D")
+		if demo_player:
+			var demo_sprite = demo_player.get_node_or_null("Visuals/Sprite2D")
+			if demo_sprite:
+				demo_sprite.texture = load(SaveSystem.get_player_texture_path())
