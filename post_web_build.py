@@ -195,112 +195,130 @@ self.addEventListener('fetch', (event) => {
     with open(os.path.join(web_dir, "sw.js"), "w") as f:
         f.write(sw_content)
 
-    # index.html modification (Ensure PWA heads and SW registration exist)
+    # Guarantee index.html is the responsive auto-rotating fullscreen iframe wrapper
     index_path = os.path.join(web_dir, "index.html")
-    if os.path.exists(index_path):
-        with open(index_path, "r") as f:
-            html = f.read()
-
-        # Add manifest link if not exists
-        if 'rel="manifest"' not in html:
-            html = re.sub(r'\s*<head>', '<head>\n    <link rel="manifest" href="manifest.json">\n    <meta name="apple-mobile-web-app-capable" content="yes">\n    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n    <link rel="apple-touch-icon" href="game.apple-touch-icon.png">', html, flags=re.IGNORECASE)
-
-        # Clean up any previously injected service worker registration scripts
-        html = re.sub(r'<script>\s*if\s*\(\s*\'serviceWorker\'\s*in\s*navigator\s*\)[\s\S]*?</script>\s*', '', html, flags=re.IGNORECASE)
-
-        # Add service worker registration script if not exists (checked via sw.js)
-        if 'sw.js' not in html:
-            sw_register = """    <script>
+    index_html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ranotot - Space Courier</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0d0d1a">
+    <link rel="apple-touch-icon" href="game.apple-touch-icon.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #gameFrame {
+            border: none;
+            position: absolute;
+            background-color: black;
+            display: block;
+        }
+    </style>
+    <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
                     .then((reg) => {
-                        console.log('Service Worker registered successfully:', reg.scope);
+                        console.log('Service Worker registered:', reg.scope);
                         reg.update();
-                        reg.addEventListener('updatefound', () => {
-                            const newWorker = reg.installing;
-                            if (newWorker) {
-                                newWorker.addEventListener('statechange', () => {
-                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                        console.log('New update installed. Auto-reloading page...');
-                                        window.location.reload();
-                                    }
-                                });
-                            }
-                        });
                     })
                     .catch((err) => console.error('Service Worker registration failed:', err));
-                    
-                let refreshing = false;
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    if (!refreshing) {
-                        refreshing = true;
-                        console.log('Controller changed. Auto-reloading live application...');
-                        window.location.reload();
-                    }
-                });
             });
         }
-    </script>\n</head>"""
-            html = re.sub(r'\s*</head>', '\n' + sw_register, html, flags=re.IGNORECASE)
-
-        # Clean up any previously injected parent window focus helper scripts in index.html to prevent duplicate/stale tags
-        html = re.sub(r'// Focus the game frame whenever the user clicks/touches the parent window[\s\S]*?resizeIframe\(\);', 'resizeIframe();', html)
-        html = re.sub(r'window\.addEventListener\(\'DOMContentLoaded\',\s*\(\)\s*=>\s*\{\s*var\s+frame\s*=\s*document\.getElementById\(\'gameFrame\'\);[\s\S]*?\}\);\s*', '', html)
-
-        # Focus the game frame whenever the user clicks/touches the parent window (for gamepads/controllers)
-        if 'gameFrame' in html:
-            focus_helper = """        // Focus the game frame whenever the user clicks/touches the parent window
-        window.addEventListener('click', () => {
+    </script>
+</head>
+<body>
+    <iframe id="gameFrame" src="game.html" scrolling="no" allowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking; gamepad; vibrate"></iframe>
+    <script>
+        function resizeIframe() {
             var frame = document.getElementById('gameFrame');
-            if (frame) { 
-                frame.focus(); 
-                if (navigator.vibrate) { navigator.vibrate(20); }
+            if (!frame) return;
+            var winW = window.innerWidth;
+            var winH = window.innerHeight;
+
+            if (winH > winW) {
+                // Portrait mode on mobile: Rotate 90deg clockwise to force fullscreen landscape
+                frame.style.width = winH + 'px';
+                frame.style.height = winW + 'px';
+                frame.style.transform = 'rotate(90deg)';
+                frame.style.transformOrigin = 'top left';
+                frame.style.left = winW + 'px';
+                frame.style.top = '0px';
+            } else {
+                // Landscape mode: Fill standard 100% viewport
+                frame.style.width = winW + 'px';
+                frame.style.height = winH + 'px';
+                frame.style.transform = 'none';
+                frame.style.transformOrigin = 'center center';
+                frame.style.left = '0px';
+                frame.style.top = '0px';
+            }
+        }
+        
+        window.addEventListener('resize', resizeIframe);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeIframe, 50);
+            setTimeout(resizeIframe, 150);
+            setTimeout(resizeIframe, 300);
+        });
+
+        // Request Fullscreen and activate audio on user interaction
+        function activateGame() {
+            var frame = document.getElementById('gameFrame');
+            if (frame) {
+                frame.focus();
+                if (navigator.vibrate) { navigator.vibrate(15); }
                 try {
                     if (frame.contentWindow && frame.contentWindow.resumeAudioContexts) {
                         frame.contentWindow.resumeAudioContexts();
                     }
                 } catch(e) {}
             }
-        });
-        window.addEventListener('touchstart', () => {
-            var frame = document.getElementById('gameFrame');
-            if (frame) { 
-                frame.focus(); 
-                if (navigator.vibrate) { navigator.vibrate(20); }
-                try {
-                    if (frame.contentWindow && frame.contentWindow.resumeAudioContexts) {
-                        frame.contentWindow.resumeAudioContexts();
-                    }
-                } catch(e) {}
-            }
-        });
+        }
+        window.addEventListener('click', activateGame);
+        window.addEventListener('touchstart', activateGame);
         window.addEventListener('DOMContentLoaded', () => {
             var frame = document.getElementById('gameFrame');
             if (frame) {
                 frame.focus();
-                frame.addEventListener('load', () => { frame.focus(); });
+                frame.addEventListener('load', () => { 
+                    frame.focus(); 
+                    resizeIframe();
+                });
             }
             if (navigator.storage && navigator.storage.persist) {
-                navigator.storage.persist().then((persisted) => {
-                    console.log('Persistent storage status:', persisted);
-                });
+                navigator.storage.persist().catch(() => {});
             }
         });
         
         // Initial setup
-        resizeIframe();"""
-            if "// Initial setup\n        resizeIframe();" in html:
-                html = html.replace("// Initial setup\n        resizeIframe();", focus_helper)
-            elif "resizeIframe();" in html:
-                html = html.replace("resizeIframe();", focus_helper)
-
-        # Allow vibrate inside the iframe
-        if 'gameFrame' in html and 'vibrate' not in html:
-            html = html.replace('allow="autoplay; fullscreen; xr-spatial-tracking; gamepad"', 'allow="autoplay; fullscreen; xr-spatial-tracking; gamepad; vibrate"')
-
-        with open(index_path, "w") as f:
-            f.write(html)
+        resizeIframe();
+    </script>
+</body>
+</html>"""
+    with open(index_path, "w") as f:
+        f.write(index_html_content)
 
     # game.html scaling and loading screen background modification
     game_path = os.path.join(web_dir, "game.html")
