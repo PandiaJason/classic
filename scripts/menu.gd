@@ -22,9 +22,14 @@ func _ready():
 	GameManager._game_ended = false
 	GameManager.is_endless_mode = false
 	BgmManager.play_menu_music()
+	# Tighten vertical separation and move container up to match original position
+	$VBoxContainer.add_theme_constant_override("separation", 25)
+	$VBoxContainer.offset_top = -120.0
+	$VBoxContainer.offset_bottom = 200.0
+	
 	# Group buttons inside a VBox for tight vertical stacking
 	var button_vbox = VBoxContainer.new()
-	button_vbox.add_theme_constant_override("separation", 12)
+	button_vbox.add_theme_constant_override("separation", 10)
 	button_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
 	start_btn = $VBoxContainer/StartButton
