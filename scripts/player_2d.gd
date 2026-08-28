@@ -62,8 +62,8 @@ func _input(event: InputEvent) -> void:
 func _ready() -> void:
 	add_to_group("player")
 	
-	# Load selected player texture
-	sprite.texture = load(SaveSystem.get_player_texture_path())
+	# Load selected player texture and normalize size to match custom_player base
+	update_player_skin()
 	
 	# Setup controller inputs dynamically
 	if not InputMap.has_action("speed"):
@@ -519,6 +519,16 @@ func _draw():
 			
 	# Maneuvering thrusters are pure rocket thrust (no magical ropes drawn)
 	pass
+
+func update_player_skin() -> void:
+	if is_instance_valid(sprite):
+		var tex = load(SaveSystem.get_player_texture_path())
+		sprite.texture = tex
+		if tex:
+			var tex_size = tex.get_size()
+			if tex_size.x > 0 and tex_size.y > 0:
+				var target_size = 87.0
+				sprite.scale = Vector2(target_size / tex_size.x, target_size / tex_size.y)
 
 func update_sprite_region():
 	# Flip sprite based on forward direction

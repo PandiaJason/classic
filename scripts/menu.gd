@@ -14,8 +14,6 @@ var shop_btn: Button = null
 var top_endless_btn: Button = null
 var music_slider: HSlider = null
 var sfx_slider: HSlider = null
-var _player_preview: TextureRect = null
-var _player_name_label: Label = null
 var _player_select_left: Button = null
 var _player_select_right: Button = null
 
@@ -28,74 +26,6 @@ func _ready():
 	var button_vbox = VBoxContainer.new()
 	button_vbox.add_theme_constant_override("separation", 12)
 	button_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	
-	# --- Player Selection Row ---
-	var player_select_row = HBoxContainer.new()
-	player_select_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	player_select_row.add_theme_constant_override("separation", 16)
-	player_select_row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	
-	_player_select_left = Button.new()
-	_player_select_left.text = "◀"
-	_player_select_left.add_theme_font_override("font", GAME_FONT)
-	_player_select_left.add_theme_font_size_override("font_size", 30)
-	_player_select_left.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
-	var left_style = StyleBoxFlat.new()
-	left_style.bg_color = Color(0.15, 0.15, 0.25, 0.7)
-	left_style.corner_radius_top_left = 12
-	left_style.corner_radius_top_right = 12
-	left_style.corner_radius_bottom_left = 12
-	left_style.corner_radius_bottom_right = 12
-	left_style.content_margin_left = 12
-	left_style.content_margin_right = 12
-	left_style.content_margin_top = 6
-	left_style.content_margin_bottom = 6
-	_player_select_left.add_theme_stylebox_override("normal", left_style)
-	var left_hover = left_style.duplicate()
-	left_hover.bg_color = Color(0.25, 0.25, 0.4, 0.9)
-	_player_select_left.add_theme_stylebox_override("hover", left_hover)
-	_player_select_left.add_theme_stylebox_override("pressed", left_hover)
-	_player_select_left.pressed.connect(_on_player_select_change.bind(-1))
-	
-	var preview_vbox = VBoxContainer.new()
-	preview_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	preview_vbox.add_theme_constant_override("separation", 4)
-	
-	_player_preview = TextureRect.new()
-	_player_preview.texture = load(SaveSystem.get_player_texture_path())
-	_player_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_player_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_player_preview.custom_minimum_size = Vector2(100, 100)
-	_player_preview.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	_player_preview.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	preview_vbox.add_child(_player_preview)
-	
-	_player_name_label = Label.new()
-	_player_name_label.text = "player %d" % (SaveSystem.selected_player + 1)
-	_player_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_player_name_label.add_theme_font_override("font", GAME_FONT)
-	_player_name_label.add_theme_font_size_override("font_size", 20)
-	_player_name_label.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
-	_player_name_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	_player_name_label.add_theme_constant_override("outline_size", 6)
-	preview_vbox.add_child(_player_name_label)
-	
-	_player_select_right = Button.new()
-	_player_select_right.text = "▶"
-	_player_select_right.add_theme_font_override("font", GAME_FONT)
-	_player_select_right.add_theme_font_size_override("font_size", 30)
-	_player_select_right.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
-	var right_style = left_style.duplicate()
-	_player_select_right.add_theme_stylebox_override("normal", right_style)
-	var right_hover = left_hover.duplicate()
-	_player_select_right.add_theme_stylebox_override("hover", right_hover)
-	_player_select_right.add_theme_stylebox_override("pressed", right_hover)
-	_player_select_right.pressed.connect(_on_player_select_change.bind(1))
-	
-	player_select_row.add_child(_player_select_left)
-	player_select_row.add_child(preview_vbox)
-	player_select_row.add_child(_player_select_right)
-	button_vbox.add_child(player_select_row)
 	
 	start_btn = $VBoxContainer/StartButton
 	$VBoxContainer.remove_child(start_btn)
@@ -113,6 +43,31 @@ func _ready():
 	achievements_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	achievements_btn.pressed.connect(_on_achievements_pressed)
 	button_vbox.add_child(achievements_btn)
+	
+	# --- Player Select Left Arrow (far left edge) ---
+	_player_select_left = UIFactory.create_glass_button("<", UIFactory.GOLD_COLOR)
+	_player_select_left.add_theme_font_size_override("font_size", 32)
+	_player_select_left.custom_minimum_size = Vector2(50, 60)
+	_player_select_left.pressed.connect(_on_player_select_change.bind(-1))
+	
+	var left_margin = MarginContainer.new()
+	left_margin.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
+	left_margin.add_theme_constant_override("margin_left", 30)
+	left_margin.add_child(_player_select_left)
+	add_child(left_margin)
+	
+	# --- Player Select Right Arrow (far right edge) ---
+	_player_select_right = UIFactory.create_glass_button(">", UIFactory.GOLD_COLOR)
+	_player_select_right.add_theme_font_size_override("font_size", 32)
+	_player_select_right.custom_minimum_size = Vector2(50, 60)
+	_player_select_right.pressed.connect(_on_player_select_change.bind(1))
+	
+	var right_margin = MarginContainer.new()
+	right_margin.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+	right_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	right_margin.add_theme_constant_override("margin_right", 30)
+	right_margin.add_child(_player_select_right)
+	add_child(right_margin)
 	
 	if SaveSystem.unlocked_levels > 90:
 		var ruby_btn = TextureButton.new()
@@ -1251,17 +1206,18 @@ func _on_player_select_change(direction: int) -> void:
 		SaveSystem.selected_player = 1
 	SaveSystem.save_data()
 	
-	# Update preview
-	if is_instance_valid(_player_preview):
-		_player_preview.texture = load(SaveSystem.get_player_texture_path())
-	if is_instance_valid(_player_name_label):
-		_player_name_label.text = "player %d" % (SaveSystem.selected_player + 1)
-	
-	# Update background demo player sprite if present
+	# Update background demo player sprite on the planet
 	var bg_action = get_node_or_null("BackgroundAction")
 	if bg_action:
 		var demo_player = bg_action.get_node_or_null("Player2D")
-		if demo_player:
+		if demo_player and demo_player.has_method("update_player_skin"):
+			demo_player.update_player_skin()
+		elif demo_player:
 			var demo_sprite = demo_player.get_node_or_null("Visuals/Sprite2D")
 			if demo_sprite:
-				demo_sprite.texture = load(SaveSystem.get_player_texture_path())
+				var tex = load(SaveSystem.get_player_texture_path())
+				demo_sprite.texture = tex
+				if tex:
+					var tex_size = tex.get_size()
+					if tex_size.x > 0 and tex_size.y > 0:
+						demo_sprite.scale = Vector2(87.0 / tex_size.x, 87.0 / tex_size.y)
