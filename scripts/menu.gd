@@ -10,6 +10,7 @@ var achievements_btn: Button = null
 var reset_btn: Button = null
 var daily_btn: Button = null
 var start_btn: Button = null
+var shop_btn: Button = null
 var top_endless_btn: Button = null
 var music_slider: HSlider = null
 var sfx_slider: HSlider = null
@@ -260,13 +261,33 @@ func _ready():
 	daily_margin.add_child(daily_btn)
 	add_child(daily_margin)
 	
+	# Setup Shop button on the top/center right, below ruby panel
+	shop_btn = UIFactory.create_glass_button("shop", UIFactory.GOLD_COLOR)
+	shop_btn.add_theme_font_size_override("font_size", 20)
+	shop_btn.pressed.connect(func():
+		_show_shop_popup()
+	)
+	
+	var shop_margin = MarginContainer.new()
+	shop_margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	shop_margin.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	shop_margin.add_theme_constant_override("margin_top", 110)
+	shop_margin.add_theme_constant_override("margin_right", 30)
+	shop_margin.add_child(shop_btn)
+	add_child(shop_margin)
+	
 	# Focus Networking for controllers
 	start_btn.focus_neighbor_top = daily_btn.get_path()
 	start_btn.focus_neighbor_bottom = tutorial_btn.get_path()
 	start_btn.focus_neighbor_left = daily_btn.get_path()
+	start_btn.focus_neighbor_right = shop_btn.get_path()
+	
+	shop_btn.focus_neighbor_left = start_btn.get_path()
+	shop_btn.focus_neighbor_bottom = start_btn.get_path()
 	
 	tutorial_btn.focus_neighbor_top = start_btn.get_path()
 	tutorial_btn.focus_neighbor_bottom = achievements_btn.get_path()
+	tutorial_btn.focus_neighbor_right = shop_btn.get_path()
 	
 	achievements_btn.focus_neighbor_top = tutorial_btn.get_path()
 	achievements_btn.focus_neighbor_bottom = music_slider.get_path()
@@ -283,9 +304,9 @@ func _ready():
 	
 	if reset_btn:
 		reset_btn.focus_neighbor_left = sfx_slider.get_path()
-		reset_btn.focus_neighbor_top = achievements_btn.get_path()
+		reset_btn.focus_neighbor_top = shop_btn.get_path()
 		achievements_btn.focus_neighbor_right = reset_btn.get_path()
-		start_btn.focus_neighbor_right = reset_btn.get_path()
+		start_btn.focus_neighbor_right = shop_btn.get_path()
 		
 	if is_instance_valid(_ruby_btn):
 		_ruby_btn.focus_mode = Control.FOCUS_ALL
@@ -909,6 +930,9 @@ func _set_main_menu_buttons_focusable(enabled: bool):
 	if is_instance_valid(daily_btn):
 		daily_btn.focus_mode = mode
 		daily_btn.mouse_filter = m_filter
+	if is_instance_valid(shop_btn):
+		shop_btn.focus_mode = mode
+		shop_btn.mouse_filter = m_filter
 	if is_instance_valid(music_slider):
 		music_slider.focus_mode = mode
 		music_slider.mouse_filter = m_filter
@@ -921,6 +945,202 @@ func _set_main_menu_buttons_focusable(enabled: bool):
 	if is_instance_valid(_ruby_btn):
 		_ruby_btn.focus_mode = mode
 		_ruby_btn.mouse_filter = m_filter
+
+func _show_shop_popup() -> void:
+	_set_main_menu_buttons_focusable(false)
+	SoundManager.play_sfx("ui_click")
+	
+	var overlay = ColorRect.new()
+	overlay.name = "ShopOverlay"
+	overlay.color = Color(0, 0, 0, 0.8)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+	
+	var dialog = UIFactory.create_glass_panel(UIFactory.GOLD_COLOR)
+	dialog.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	dialog.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	dialog.grow_vertical = Control.GROW_DIRECTION_BOTH
+	dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+	overlay.add_child(dialog)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 16)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	# Header: Title
+	var title = Label.new()
+	title.text = "shop"
+	title.add_theme_font_override("font", GAME_FONT)
+	title.add_theme_font_size_override("font_size", 38)
+	title.add_theme_color_override("font_color", Color(1, 0.8, 0.2))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+	
+	# Header: Ruby balance indicator
+	var ruby_row = HBoxContainer.new()
+	ruby_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	ruby_row.add_theme_constant_override("separation", 8)
+	
+	var ruby_ico = TextureRect.new()
+	ruby_ico.texture = ResourceManager.get_texture("res://assets/ruby.png")
+	ruby_ico.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ruby_ico.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ruby_ico.custom_minimum_size = Vector2(30, 30)
+	
+	var popup_ruby_lbl = Label.new()
+	popup_ruby_lbl.text = "ruby: %d" % SaveSystem.global_rubies
+	popup_ruby_lbl.add_theme_font_override("font", GAME_FONT)
+	popup_ruby_lbl.add_theme_font_size_override("font_size", 24)
+	popup_ruby_lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.3))
+	
+	ruby_row.add_child(ruby_ico)
+	ruby_row.add_child(popup_ruby_lbl)
+	vbox.add_child(ruby_row)
+	
+	# Cards Container
+	var cards_hbox = HBoxContainer.new()
+	cards_hbox.add_theme_constant_override("separation", 24)
+	cards_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	# --- Card 1: Glide Assist ---
+	var glide_card = UIFactory.create_glass_panel(Color(0.2, 0.6, 1.0))
+	var glide_vbox = VBoxContainer.new()
+	glide_vbox.add_theme_constant_override("separation", 10)
+	glide_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	glide_vbox.custom_minimum_size = Vector2(240, 0)
+	
+	var glide_title = Label.new()
+	glide_title.text = "glide assist"
+	glide_title.add_theme_font_override("font", GAME_FONT)
+	glide_title.add_theme_font_size_override("font_size", 24)
+	glide_title.add_theme_color_override("font_color", Color(0.3, 0.7, 1.0))
+	glide_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	glide_vbox.add_child(glide_title)
+	
+	var glide_desc = Label.new()
+	glide_desc.text = "redirects flight\nin outer space"
+	glide_desc.add_theme_font_override("font", GAME_FONT)
+	glide_desc.add_theme_font_size_override("font_size", 16)
+	glide_desc.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	glide_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	glide_vbox.add_child(glide_desc)
+	
+	var glide_owned = Label.new()
+	glide_owned.text = "glides: %d" % SaveSystem.glide_count
+	glide_owned.add_theme_font_override("font", GAME_FONT)
+	glide_owned.add_theme_font_size_override("font_size", 22)
+	glide_owned.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
+	glide_owned.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	glide_vbox.add_child(glide_owned)
+	
+	var buy_glide_btn = UIFactory.create_glass_button("buy glide (10)", Color(0.2, 0.6, 1.0))
+	buy_glide_btn.add_theme_font_size_override("font_size", 18)
+	glide_vbox.add_child(buy_glide_btn)
+	glide_card.add_child(glide_vbox)
+	cards_hbox.add_child(glide_card)
+	
+	# --- Card 2: Speed Boost ---
+	var speed_card = UIFactory.create_glass_panel(Color(1.0, 0.4, 0.2))
+	var speed_vbox = VBoxContainer.new()
+	speed_vbox.add_theme_constant_override("separation", 10)
+	speed_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	speed_vbox.custom_minimum_size = Vector2(240, 0)
+	
+	var speed_title = Label.new()
+	speed_title.text = "speed boost"
+	speed_title.add_theme_font_override("font", GAME_FONT)
+	speed_title.add_theme_font_size_override("font_size", 24)
+	speed_title.add_theme_color_override("font_color", Color(1.0, 0.5, 0.3))
+	speed_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	speed_vbox.add_child(speed_title)
+	
+	var speed_desc = Label.new()
+	speed_desc.text = "accelerates velocity\nin outer space"
+	speed_desc.add_theme_font_override("font", GAME_FONT)
+	speed_desc.add_theme_font_size_override("font_size", 16)
+	speed_desc.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	speed_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	speed_vbox.add_child(speed_desc)
+	
+	var speed_owned = Label.new()
+	speed_owned.text = "speeds: %d" % SaveSystem.speed_count
+	speed_owned.add_theme_font_override("font", GAME_FONT)
+	speed_owned.add_theme_font_size_override("font_size", 22)
+	speed_owned.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
+	speed_owned.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	speed_vbox.add_child(speed_owned)
+	
+	var buy_speed_btn = UIFactory.create_glass_button("buy speed (10)", Color(1.0, 0.4, 0.2))
+	buy_speed_btn.add_theme_font_size_override("font_size", 18)
+	speed_vbox.add_child(buy_speed_btn)
+	speed_card.add_child(speed_vbox)
+	cards_hbox.add_child(speed_card)
+	
+	vbox.add_child(cards_hbox)
+	
+	# Feedback Label (for "purchased!" or "not enough rubies!")
+	var feedback_lbl = Label.new()
+	feedback_lbl.text = ""
+	feedback_lbl.add_theme_font_override("font", GAME_FONT)
+	feedback_lbl.add_theme_font_size_override("font_size", 18)
+	feedback_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(feedback_lbl)
+	
+	# Connect purchase actions
+	buy_glide_btn.pressed.connect(func():
+		if SaveSystem.purchase_glide():
+			SoundManager.play_sfx("ruby")
+			GameManager.trigger_haptic(0.1, 0.15, 0.08)
+			glide_owned.text = "glides: %d" % SaveSystem.glide_count
+			popup_ruby_lbl.text = "ruby: %d" % SaveSystem.global_rubies
+			if is_instance_valid(_ruby_label):
+				_ruby_label.text = "ruby: %d" % SaveSystem.global_rubies
+			feedback_lbl.text = "+1 glide purchased!"
+			feedback_lbl.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4))
+		else:
+			SoundManager.play_sfx("damage")
+			feedback_lbl.text = "not enough rubies!"
+			feedback_lbl.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+	)
+	
+	buy_speed_btn.pressed.connect(func():
+		if SaveSystem.purchase_speed():
+			SoundManager.play_sfx("ruby")
+			GameManager.trigger_haptic(0.1, 0.15, 0.08)
+			speed_owned.text = "speeds: %d" % SaveSystem.speed_count
+			popup_ruby_lbl.text = "ruby: %d" % SaveSystem.global_rubies
+			if is_instance_valid(_ruby_label):
+				_ruby_label.text = "ruby: %d" % SaveSystem.global_rubies
+			feedback_lbl.text = "+1 speed purchased!"
+			feedback_lbl.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4))
+		else:
+			SoundManager.play_sfx("damage")
+			feedback_lbl.text = "not enough rubies!"
+			feedback_lbl.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+	)
+	
+	# Close Button
+	var close_btn = UIFactory.create_glass_button("close", UIFactory.RED_COLOR)
+	close_btn.add_theme_font_size_override("font_size", 20)
+	close_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	close_btn.pressed.connect(func():
+		_set_main_menu_buttons_focusable(true)
+		overlay.queue_free()
+		if is_instance_valid(shop_btn):
+			shop_btn.grab_focus()
+	)
+	vbox.add_child(close_btn)
+	dialog.add_child(vbox)
+	
+	# Focus Trapping
+	buy_glide_btn.focus_neighbor_right = buy_speed_btn.get_path()
+	buy_glide_btn.focus_neighbor_bottom = close_btn.get_path()
+	buy_speed_btn.focus_neighbor_left = buy_glide_btn.get_path()
+	buy_speed_btn.focus_neighbor_bottom = close_btn.get_path()
+	close_btn.focus_neighbor_top = buy_glide_btn.get_path()
+	
+	buy_glide_btn.grab_focus()
 
 func _on_achievements_pressed():
 	_set_main_menu_buttons_focusable(false)
