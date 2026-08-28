@@ -6,9 +6,9 @@ extends Node
 
 var _is_native_available: bool = false
 
-func _ready():
+func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	print("⚡ [QiSort Engine] Initialized in Ranotot.")
+	print("[QiSort Engine] Initialized in Ranotot.")
 
 # ─── 1. Core Radix-16 Zero-Memcpy Sort for Numeric Arrays ────────────────
 

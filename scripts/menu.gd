@@ -490,7 +490,7 @@ func _on_reset_pressed():
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 
 	var warn_title = Label.new()
-	warn_title.text = "⚠ reset game?"
+	warn_title.text = "reset game?"
 	warn_title.add_theme_font_override("font", load("res://assets/game_font.ttf"))
 	warn_title.add_theme_font_size_override("font_size", 44)
 	warn_title.add_theme_color_override("font_color", Color(1, 0.3, 0.3))

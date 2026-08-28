@@ -15,7 +15,7 @@ extends Node
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	print("⚡ [QiApex Engine] Initialized in Ranotot.")
+	print("[QiApex Engine] Initialized in Ranotot.")
 
 # ─── 1. Universal Type Encoding (IEEE 754 & Signed Integers) ──────────────
 
