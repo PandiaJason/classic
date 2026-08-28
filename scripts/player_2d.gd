@@ -597,7 +597,7 @@ func calculate_trajectory():
 	var sim_delta = 0.05
 	trajectory_points.append(sim_pos)
 	
-	var live_planets = get_tree().get_nodes_in_group("planets")
+	var live_planets = QiApex.spatial_morton_sort_2d(get_tree().get_nodes_in_group("planets"))
 	for i in range(120): # Simulate 6 seconds
 		var nearest_planet = null
 		var nearest_surface_dist = INF
