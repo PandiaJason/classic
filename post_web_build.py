@@ -122,8 +122,6 @@ const ASSETS = [
   './index.html',
   './game.html',
   './game.js',
-  './game.wasm',
-  './game.pck',
   './game.audio.worklet.js',
   './game.audio.position.worklet.js',
   './game.icon.png',
@@ -166,6 +164,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+
+  // Large binary assets (.pck & .wasm): Native direct streaming with byte-range support
+  if (url.pathname.endsWith('.pck') || url.pathname.endsWith('.wasm')) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
@@ -516,8 +520,6 @@ const ASSETS = [
   './',
   './index.html',
   './index.js',
-  './index.wasm',
-  './index.pck',
   './index.audio.worklet.js',
   './index.audio.position.worklet.js',
   './index.icon.png',
@@ -560,6 +562,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+
+  // Large binary assets (.pck & .wasm): Native direct streaming with byte-range support
+  if (url.pathname.endsWith('.pck') || url.pathname.endsWith('.wasm')) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {

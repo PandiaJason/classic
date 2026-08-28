@@ -357,14 +357,14 @@ func _physics_process(delta: float) -> void:
 			velocity += surface_right * current_speed * forward_direction * delta * 0.5
 			
 		up_direction = surface_up
-		floor_max_angle = PI
-		floor_constant_speed = true
+		floor_constant_speed = false
+		floor_max_angle = deg_to_rad(45.0)
 		
 		# If we just jumped, we MUST disable snapping so we can leave the ground!
 		if not is_menu_demo and has_jumped:
 			floor_snap_length = 0.0
 		else:
-			floor_snap_length = (30.0 * endless_scale) if on_ground else 0.0
+			floor_snap_length = (15.0 * endless_scale) if on_ground else 0.0
 			
 		move_and_slide()
 		
