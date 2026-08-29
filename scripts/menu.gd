@@ -24,12 +24,12 @@ func _ready():
 	BgmManager.play_menu_music()
 	# Tighten vertical separation and move container up to match original position
 	$VBoxContainer.add_theme_constant_override("separation", 25)
-	$VBoxContainer.offset_top = -120.0
+	$VBoxContainer.offset_top = -125.0
 	$VBoxContainer.offset_bottom = 200.0
 	
-	# Group buttons inside a VBox for tight vertical stacking
+	# Group buttons inside a VBox for clean vertical spacing
 	var button_vbox = VBoxContainer.new()
-	button_vbox.add_theme_constant_override("separation", 10)
+	button_vbox.add_theme_constant_override("separation", 22)
 	button_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
 	start_btn = $VBoxContainer/StartButton
