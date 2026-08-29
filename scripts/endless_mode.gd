@@ -33,7 +33,7 @@ func _ready() -> void:
 	
 	if is_instance_valid(camera):
 		camera.global_position = Vector2(400, 450)
-		camera.zoom = Vector2(0.5, 0.5)
+		camera.zoom = Vector2(0.65, 0.65)
 	
 	_setup_hud()
 	_generate_initial_world()

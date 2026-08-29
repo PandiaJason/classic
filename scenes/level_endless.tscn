@@ -31,7 +31,7 @@ position = Vector2(200, 260)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(400, 450)
-zoom = Vector2(0.6, 0.6)
+zoom = Vector2(0.65, 0.65)
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_bgm")

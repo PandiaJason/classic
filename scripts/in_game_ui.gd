@@ -5,8 +5,8 @@ extends CanvasLayer
 
 var is_viewing_map: bool = true
 @onready var level_camera = $"../Camera2D"
-# Fixed zoom - same size for ALL levels (matches level 1 look)
-var default_zoom = Vector2(0.5, 0.5)
+# Fixed zoom - scaled and zoomed in for optimal clarity across all levels & endless mode
+var default_zoom = Vector2(0.65, 0.65)
 var level_center_pos = Vector2.ZERO
 var map_zoom = Vector2(0.25, 0.25)
 
